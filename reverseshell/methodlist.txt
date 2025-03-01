@@ -1,3 +1,6 @@
 bash1
 bash2
 bash3
+ksh
+zsh
+pwsh
