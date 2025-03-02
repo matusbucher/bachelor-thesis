@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Default values
+DEFAULT_SHELL="/bin/bash"
+DEFAULT_HOST="127.0.0.1"
+DEFAULT_PORT="4444"
+DEFAULT_PORT2="4445"
+
+# Use user-provided values or fall back to defaults
+SHELL_PATH=${1:-$DEFAULT_SHELL}
+HOST_ADDR=${2:-$DEFAULT_HOST}
+PORT_NUM=${3:-$DEFAULT_PORT}
+PORT2_NUM=${4:-$DEFAULT_PORT2}
+
+# Update Makefile safely, preserving tabs
+awk -v shell="$SHELL_PATH" -v host="$HOST_ADDR" -v port="$PORT_NUM" -v port2="$PORT2_NUM" '
+    /^SHELL[[:space:]]*:=/ { print "SHELL\t:= " shell; next }
+    /^HOST[[:space:]]*:=/  { print "HOST\t:= " host; next }
+    /^PORT[[:space:]]*:=/  { print "PORT\t:= " port; next }
+    /^PORT2[[:space:]]*:=/  { print "PORT2\t:= " port2; next }
+    { print }
+' Makefile > Makefile.tmp && mv Makefile.tmp Makefile
+
+# Confirmation message
+echo "Makefile updated with:"
+echo "  SHELL = $SHELL_PATH"
+echo "  HOST  = $HOST_ADDR"
+echo "  PORT  = $PORT_NUM"
+echo "  PORT2  = $PORT2_NUM"
