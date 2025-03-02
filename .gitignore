@@ -1,2 +1,4 @@
 build/
-tstex_modules/
+
+# Key files
+*.pem
