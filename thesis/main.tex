@@ -56,7 +56,8 @@
 \newcommand{\tmp}{\textcolor{placeholder}{\texttt{$\langle$TMP$\rangle$}}}
 
 \newenvironment{cmdframe}
-	{\begin{mdframed}[
+{\begin{mdframed}[
+	nobreak=true,
 	backgroundcolor=background,
 	linecolor=black,
 	roundcorner=10pt,
@@ -64,12 +65,14 @@
 	innerrightmargin=10pt,
 	innertopmargin=5pt,
 	innerbottommargin=5pt
-	]}
-	{\end{mdframed}}
-    
-\newenvironment{cmdline}[4]
-{\begingroup\lstset{
-	language={#1},
+]}
+{\end{mdframed}}
+
+\newcommand{\cmdline}[5]
+{\begingroup
+\begin{samepage}
+\lstset{
+	language=bash,
 	otherkeywords={#3},
 	morekeywords=[1]{#3},
 	morekeywords=[2]{#4},
@@ -84,8 +87,12 @@
 	columns=fullflexible,
 	breaklines=true,
 	escapechar={#2}
-}\VerbatimOut{tmp.txt}}
-{\endVerbatimOut\begin{cmdframe}\lstinputlisting{tmp.txt}\end{cmdframe}\endgroup}
+}
+\begin{cmdframe}
+\lstinputlisting{#1}
+\end{cmdframe}
+\end{samepage}
+\endgroup}
 
 \newcommand{\dpd}[1]{\textbf{Dependencies:} #1}
 
@@ -272,13 +279,13 @@ Supervisor: & \mfskolitel \\
 
 \input intro.tex 
 
-\input chapters/chapter00.tex
+\input chapters/chapter0/chapter0.tex
 
-\input chapters/chapter01.tex
+\input chapters/chapter1/chapter1.tex
 
-\input chapters/chapter02.tex
+\input chapters/chapter2/chapter2.tex
 
-\input chapters/chapter03.tex
+\input chapters/chapter3/chapter3.tex
 
 \input conclusion.tex
 

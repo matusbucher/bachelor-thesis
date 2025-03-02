@@ -1,0 +1,177 @@
+\newcommand{\commandpath}[1]{chapters/chapter1/commands/#1}
+
+\chapter{Methods of establishing a reverse shell}
+
+\label{chap:methods}
+
+In this chapter, we go through known methods and techniques of initializing a reverse shell from a remote server. Each method is characterized by a system tool, software, or a programming language with its interpreter/compiler (meaning they are not characterized by a concrete vulnerability in the security of the target). For each method, we show an actual example of how to run the tool/software, taking into account the testing environment described at the beginning of this chapter. Furthermore, we list all dependencies of the shown example, which are effectively minimal system requirements needed for a given method.
+
+\section{Commands syntax and glossary}
+
+\TODO{here should be explained what do keywords \shell, \host, \port\ mean and so on}
+
+
+\section{Command-line interpreters}
+
+
+\subsection{Bash (\texttt{bash})}
+
+\cmdline{\commandpath{bash1.txt}}{*}{bash}{}
+
+\cmdline{\commandpath{bash2.txt}}{*}{bash}{}
+
+\cmdline{\commandpath{bash3.txt}}{*}{bash}{}
+
+\dpd{\texttt{cat}}
+
+\subsection{KornShell (\texttt{ksh}/\texttt{ksh93})}
+
+\cmdline{\commandpath{ksh.txt}}{*}{ksh}{}
+
+\notte{Support for network communication is a feature of the \texttt{ksh93} version of KornShell. The command won't work on \texttt{pdksh} shell.}
+
+
+\subsection{Z shell (\texttt{zsh})}
+
+\cmdline{\commandpath{zsh.txt}}{*}{}{}
+
+\dpd{\texttt{zsh/net/tcp.so} \footnote{usually located somewhere in \texttt{/usr/lib/}}}
+
+
+\subsection{Scheme shell (\texttt{scsh})}
+
+
+\subsection{PowerShell (\texttt{pwsh}/\texttt{powershell})}
+
+\cmdline{\commandpath{pwsh.txt}}{*}{pwsh}{}
+
+\dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
+
+
+\subsection{Shells without native network support}
+
+%\textit{Bourne shell} (\texttt{sh}) was a standard shell for the Version 7 Unix system but has been replaced by its advanced variants. On most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell. However, the POSIX specification for \texttt{sh} \cite{posix_sh} does not include built-in support for creating network connections; therefore, \texttt{sh} alone shouldn't be capable of spawning a reverse shell. Similarly, standard implementations of the \textit{Almquist shell} (\texttt{ash}) and the \textit{Debian Almquist shell} (\texttt{dash}) can also not use the network.
+
+\begin{itemize}
+\item Bourne shell (\texttt{sh}) -- standard shell for the Version 7 Unix system but has been replaced by its advanced variants; on most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell
+\item Almquist shell (\texttt{ash}) and Debian Almquist shell (\texttt{dash})
+\item C shell (\texttt{csh}) and TENEX C shell (\texttt{tcsh})
+\item Friendly interactive shell (\texttt{fish})
+\item rc shell (\texttt{rc})
+\item Stand-alone shell (\texttt{sash})
+\item Command Prompt (\texttt{cmd})
+\end{itemize}
+
+
+\section{Network tools}
+
+\subsection{NetCat (\texttt{ncat}/\texttt{nc})}
+
+\TODO{explain difference between \texttt{ncat} and \texttt{nc} and why one of them may not work on some systems}
+
+\cmdline{\commandpath{ncat1.txt}}{*}{ncat}{}
+
+\notte{Standard error output of executed commands is not redirected to the socket. Option \texttt{-c} (\texttt{-{}-sh-exec}) can be used instead of \texttt{-e} with the same syntax, but \texttt{/bin/sh} is needed in that case.}
+
+\cmdline{\commandpath{ncat2.txt}}{*}{mkfifo,ncat,rm}{}
+
+\dpd{\texttt{mkfifo}}
+
+\subsection{Telnet (\texttt{telnet})}
+
+\cmdline{\commandpath{telnet1.txt}}{*}{telnet}{}
+
+\notte{The socket with port number \port\ serves as standard input while the socket with port number \portt\ serves as standard output and standard error output.}
+
+\cmdline{\commandpath{telnet2.txt}}{*}{mkfifo,telnet,rm}{}
+
+\dpd{\texttt{mkfifo}}
+
+\subsection{Socket (\texttt{socket})}
+
+\cmdline{\commandpath{socket.txt}}{*}{socket}{}
+
+\TODO{dependencies}
+
+\subsection{OpenSSL (\texttt{openssl})}
+
+\cmdline{\commandpath{openssl.txt}}{*}{mkfifo,openssl,rm}{}
+
+\TODO{dependencies}
+
+\cmdline{\commandpath{opensslattacker.txt}}{*}{openssl}{}
+
+\TODO{dependencies, describe/explain commands that need to be run on attacker machine}
+
+
+\section{Programming languages interpreters}
+
+\subsection{Python (\texttt{python/python3})}
+
+\cmdline{\commandpath{python.txt}}{*}{python}{}
+
+\TODO{dependencies}
+
+\subsection{Perl (\texttt{perl})}
+
+\cmdline{\commandpath{perl.txt}}{*}{perl}{}
+
+\TODO{dependencies}
+
+\subsection{PHP (\texttt{php})}
+
+\cmdline{\commandpath{php.txt}}{*}{php}{}
+
+\TODO{dependencies}
+
+\subsection{Ruby (\texttt{ruby})}
+
+\cmdline{\commandpath{ruby.txt}}{*}{ruby}{}
+
+\TODO{dependencies}
+
+\subsubsection{Interactive Ruby Shell (\texttt{irb})}
+
+\cmdline{\commandpath{irb.txt}}{*}{echo,irb}{}
+
+\TODO{dependencies}
+
+\subsection{JavaScript runtime environments}
+
+\subsubsection{Node.js (\texttt{node})}
+
+\cmdline{\commandpath{node.txt}}{*}{node}{}
+
+\TODO{dependencies}
+
+\subsubsection{Generic scripting engine (\texttt{jrunscript})}
+
+\cmdline{\commandpath{jrunscript.txt}}{*}{jrunscript}{}
+
+\TODO{dependencies}
+
+\subsubsection{Nashorn engine (\texttt{jjs})}
+
+\cmdline{\commandpath{jjs.txt}}{*}{echo,jjs}{}
+
+\TODO{dependencies}
+
+\subsection{Julia (\texttt{julia})}
+
+\cmdline{\commandpath{julia.txt}}{*}{julia}{}
+
+\TODO{dependencies}
+
+\section{Other tools}
+
+\subsection{Socat (\texttt{socat})}
+
+\cmdline{\commandpath{socat.txt}}{*}{socat}{}
+
+\TODO{dependencies, explain "optional" settings (pty,stderr,...)}
+
+\subsection{PIP (\texttt{pip})}
+
+\cmdline{\commandpath{pip.txt}}{*}{mkdir,echo,pip,rm}{}
+
+\TODO{dependencies}

