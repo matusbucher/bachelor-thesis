@@ -4,3 +4,7 @@ bash3
 ksh
 zsh
 pwsh
+ncat1
+ncat2
+telnet1
+telnet2

