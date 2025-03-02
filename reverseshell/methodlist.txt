@@ -16,5 +16,7 @@ php
 ruby
 irb
 node
+jrunscript
+jjs
 julia
 socat

