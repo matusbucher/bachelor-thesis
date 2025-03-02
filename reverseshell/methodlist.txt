@@ -8,3 +8,7 @@ ncat1
 ncat2
 telnet1
 telnet2
+socket
+openssl
+node
+socat
