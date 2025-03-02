@@ -10,9 +10,11 @@ telnet1
 telnet2
 socket
 openssl
+python
 perl
 php
 ruby
 irb
 node
+julia
 socat
