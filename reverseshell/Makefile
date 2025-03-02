@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 FILE	:= $(or $(file), /tmp/f)
 
-LIST	:= "methodlist.txt"
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perlphp ruby irb node jrunscript jjs julia socat
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -28,9 +28,7 @@ show:
 	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> [<port2>] [<file>]$(RESET).\n"
 	@printf "\n"
 	@printf "Available methods:\n"
-	@while IFS= read -r cmd; do \
-		printf "   $(BOLD)$(BLUE)%s$(RESET)\n" "$$cmd"; \
-	done < $(LIST)
+	@$(foreach cmd, $(METHODS), printf "   $(BOLD)$(BLUE)$(cmd)$(RESET)\n";)
 	@printf "\n"
 	@printf "Run $(UNDERLINE)make <method>$(RESET) to use a specific method from the list.\n"
 	@printf "Run $(UNDERLINE)make <method>-show$(RESET) to just see the command(s) for a specific method (without running it).\n"
