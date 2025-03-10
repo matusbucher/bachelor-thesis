@@ -6,34 +6,77 @@
 
 In this chapter, we go through known methods and techniques of initializing a reverse shell from a remote server. Each method is characterized by a system tool, software, or a programming language with its interpreter/compiler (meaning they are not characterized by a concrete vulnerability in the security of the target). For each method, we show an actual example of how to run the tool/software, taking into account the testing environment described at the beginning of this chapter. Furthermore, we list all dependencies of the shown example, which are effectively minimal system requirements needed for a given method.
 
+\section{Testing environment}
+
+In our analysis, the victim machine (on which techniques for establishing a reverse shell are tested) is simulated with a \texttt{chroot} environment for simplicity. The \texttt{chroot} command allows running a command or interactive shell with a specified directory as the apparent root directory \cite{chroot-man}. Therefore, the system simulated in the \texttt{chroot} environment has only access to files in the new 'root directory', which is convenient for determining requirements for a given method. If the method does not work, the environment may lack some library, system tools, devices, etc.
+
+The host system distribution (from which the \texttt{chroot} command is executed) is Ubuntu 24.04 LTS with a Linux 5.15 kernel and 64-bit x86 architecture. However, commands and tools tested in this thesis should work on all GNU/Linux-based systems (if all dependencies are present).
+
+Specifications for the attacker machine do not matter; some methods require a little more complex listening setup than just opening a port, which we will discuss later.
+
 \section{Commands syntax and glossary}
 
-\TODO{here should be explained what do keywords \shell, \host, \port\ mean and so on}
+\TODO{add explanation about version}
 
+For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input and output to the connected socket.
+
+The attacker must have an opened port (can be any available) and listen for any connection on that port. For most cases, a simple netcat command should be sufficient for that:
+
+\begin{cmdline}{*}{nc}{}
+nc -l -p *\port*
+\end{cmdline}
+
+The nonobligatory option \texttt{-v} can be added for more verbose output. If the given method requires a more complex setup on the attacker's side, we will provide the necessary commands for the setup with an explanation.
+
+The commands in this thesis use placeholders instead of specific values for generalization. They ensure clarity and adaptability across different scenarios, whether the actual value depends on the execution environment -- such as IP address -- or multiple equivalent values can be chosen -- such as the name of a temporary file. When implementing or testing, these placeholders should be replaced accordingly:
+
+\setlength{\leftmargini}{5em}
+\begin{itemize}
+\item[\host] The attacker's IP address or domain.
+\item[\port] The port number on which the attacker is listening.
+\item[\shell] The shell to be spawned (e.g. \texttt{/bin/sh}, \texttt{/bin/bash}).
+\item[\portt] The second port number on which the attacker is listening; must be different from \port.
+\item[\tmp] A temporary file or directory used in specific methods (e.g., pipeline creation).
+\end{itemize}
+\setlength{\leftmargini}{2.5em}
+
+\host\ and \port\ are naturally required in every method. \shell\ is also usually required and can be substituted with any available shell interpreter on the target system, even with a self-made interactive script or any other command. The standard input, output, and error output are all redirected to the socket. Therefore, the attacker can interact remotely with the shell (or another command).
+
+\portt\ and \tmp\ are used only in several methods. \portt\ is, for instance, needed in telnet reverse shell (see \ref{telnet}), where the socket on port number \port\ serves as input for shell and socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline or a temporary directory for generated files.
+
+After each command, it may follow a list of dependencies and occasional notes if additional information is appropriate. The implicit dependency for each command is that all shared objects (libraries) the binary requires are in the system. Of course, this is not an issue when using a statically linked binary. To identify all shared objects of the tool, use the \texttt{ldd} command:
+\begin{cmdline}{*}{ldd}{}
+ldd *\textcolor{placeholder}{\texttt{$\langle$path-to-binary$\rangle$}}*
+\end{cmdline}
 
 \section{Command-line interpreters}
 
-
 \subsection{Bash (\texttt{bash})}
 
-\cmdline{\commandpath{bash1.txt}}{*}{bash}{}
+\version{5.2.21 (GNU)}
 
-\cmdline{\commandpath{bash2.txt}}{*}{bash}{}
+\getcmdline{\commandpath{bash1.txt}}{*}{bash}{}
 
-\cmdline{\commandpath{bash3.txt}}{*}{bash}{}
+\getcmdline{\commandpath{bash2.txt}}{*}{bash}{}
+
+\getcmdline{\commandpath{bash3.txt}}{*}{bash}{}
 
 \dpd{\texttt{cat}}
 
 \subsection{KornShell (\texttt{ksh}/\texttt{ksh93})}
 
-\cmdline{\commandpath{ksh.txt}}{*}{ksh}{}
+\version{93u+m/1.0.8 (ATT)}
+
+\getcmdline{\commandpath{ksh.txt}}{*}{ksh}{}
 
 \notte{Support for network communication is a feature of the \texttt{ksh93} version of KornShell. The command won't work on \texttt{pdksh} shell.}
 
 
 \subsection{Z shell (\texttt{zsh})}
 
-\cmdline{\commandpath{zsh.txt}}{*}{}{}
+\version{5.9}
+
+\getcmdline{\commandpath{zsh.txt}}{*}{}{}
 
 \dpd{\texttt{zsh/net/tcp.so} \footnote{usually located somewhere in \texttt{/usr/lib/}}}
 
@@ -43,14 +86,14 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \subsection{PowerShell (\texttt{pwsh}/\texttt{powershell})}
 
-\cmdline{\commandpath{pwsh.txt}}{*}{pwsh}{}
+\version{7.5.0}
+
+\getcmdline{\commandpath{pwsh.txt}}{*}{pwsh}{}
 
 \dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
 
 
 \subsection{Shells without native network support}
-
-%\textit{Bourne shell} (\texttt{sh}) was a standard shell for the Version 7 Unix system but has been replaced by its advanced variants. On most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell. However, the POSIX specification for \texttt{sh} \cite{posix_sh} does not include built-in support for creating network connections; therefore, \texttt{sh} alone shouldn't be capable of spawning a reverse shell. Similarly, standard implementations of the \textit{Almquist shell} (\texttt{ash}) and the \textit{Debian Almquist shell} (\texttt{dash}) can also not use the network.
 
 \begin{itemize}
 \item Bourne shell (\texttt{sh}) -- standard shell for the Version 7 Unix system but has been replaced by its advanced variants; on most modern Unix-like distributions, the original binary \texttt{/bin/sh} is just a link to another compatible shell
@@ -65,41 +108,45 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \section{Network tools}
 
-\subsection{NetCat (\texttt{ncat}/\texttt{nc})}
+\subsection{NetCat (\texttt{nc}/\texttt{ncat})}
 
-\TODO{explain difference between \texttt{ncat} and \texttt{nc} and why one of them may not work on some systems}
+There are multiple implementations of NetCat -- GNU's traditional implementation, OpenBSD, or Nmap project version of NetCat called \texttt{ncat}. Not every implementation supports the \texttt{-e} or \texttt{-c} option, which causes the program to execute the given command. Option \texttt{-e} runs \texttt{exec <command>}, while \texttt{-c} executes via \texttt{/bin/sh} (\texttt{sh-exec <command>}) \cite{ncat-man}. While the traditional implementation should have this option, the OpenBSD implementation has removed it for security reasons \cite{nc-man}. However, redirecting file descriptors can easily bypass this restriction, as shown in the second command.
 
-\cmdline{\commandpath{ncat1.txt}}{*}{ncat}{}
+\version{7.94SVN (Nmap Project)}
+
+\getcmdline{\commandpath{ncat1.txt}}{*}{ncat}{}
 
 \notte{Standard error output of executed commands is not redirected to the socket. Option \texttt{-c} (\texttt{-{}-sh-exec}) can be used instead of \texttt{-e} with the same syntax, but \texttt{/bin/sh} is needed in that case.}
 
-\cmdline{\commandpath{ncat2.txt}}{*}{mkfifo,ncat,rm}{}
+\getcmdline{\commandpath{ncat2.txt}}{*}{mkfifo,ncat,rm}{}
 
-\dpd{\texttt{mkfifo}}
+\dpd{\texttt{mkfifo}, \texttt{rm}}
 
-\subsection{Telnet (\texttt{telnet})}
+\subsection{Telnet (\texttt{telnet})} \label{telnet}
 
-\cmdline{\commandpath{telnet1.txt}}{*}{telnet}{}
+\version{2.5 (GNU inetutils)}
+
+\getcmdline{\commandpath{telnet1.txt}}{*}{telnet}{}
 
 \notte{The socket with port number \port\ serves as standard input while the socket with port number \portt\ serves as standard output and standard error output.}
 
-\cmdline{\commandpath{telnet2.txt}}{*}{mkfifo,telnet,rm}{}
+\getcmdline{\commandpath{telnet2.txt}}{*}{mkfifo,telnet,rm}{}
 
 \dpd{\texttt{mkfifo}}
 
 \subsection{Socket (\texttt{socket})}
 
-\cmdline{\commandpath{socket.txt}}{*}{socket}{}
+\getcmdline{\commandpath{socket.txt}}{*}{socket}{}
 
 \TODO{dependencies}
 
 \subsection{OpenSSL (\texttt{openssl})}
 
-\cmdline{\commandpath{openssl.txt}}{*}{mkfifo,openssl,rm}{}
+\getcmdline{\commandpath{openssl.txt}}{*}{mkfifo,openssl,rm}{}
 
 \TODO{dependencies}
 
-\cmdline{\commandpath{opensslattacker.txt}}{*}{openssl}{}
+\getcmdline{\commandpath{opensslattacker.txt}}{*}{openssl}{}
 
 \TODO{dependencies, describe/explain commands that need to be run on attacker machine}
 
@@ -108,49 +155,55 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \subsection{Python (\texttt{python/python3})}
 
-\cmdline{\commandpath{python.txt}}{*}{python}{}
+\version{3.12.3}
 
-\TODO{dependencies}
+\getcmdline{\commandpath{python.txt}}{*}{python}{}
+
+\dpd{python modules\footnote{usually located in \texttt{/usr/lib/python<version>/}}: \{\texttt{encodings}, \texttt{socket}, \texttt{selectors}, \texttt{collections}, \texttt{keyword}, \texttt{operator}, \texttt{reprlib}, \texttt{enum}, \texttt{types}, \texttt{functools}, \texttt{subprocess}, \texttt{locale}, \texttt{re}, \texttt{copyreg}, \texttt{signal}, \texttt{threading}, \texttt{\_weakrefset}, \texttt{warnings}, \texttt{contextlib}\}}
 
 \subsection{Perl (\texttt{perl})}
 
-\cmdline{\commandpath{perl.txt}}{*}{perl}{}
+\version{5.38.2}
 
-\TODO{dependencies}
+\getcmdline{\commandpath{perl.txt}}{*}{perl}{}
+
+\dpd{\texttt{/dev/null}, perl modules\footnote{should be located in one of directories from \texttt{@INC} array that \texttt{perl} uses to search for module files}: \{\texttt{Socket}, \texttt{strict}, \texttt{Carp}, \texttt{warnings}, \texttt{warnings/register}, \texttt{Exporter}, \texttt{XSLoader}, \texttt{DynaLoader}, \texttt{vars}, \texttt{Config}\}}, and loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket.pm})
 
 \subsubsection{Comprehensive Perl Archive Network (\texttt{cpan})}
 
-\cmdline{\commandpath{cpan.txt}}{*}{echo,cpan}{}
+\version{Perl 5.38.2}
 
-\TODO{dependencies}
+\getcmdline{\commandpath{cpan.txt}}{*}{echo,cpan}{}
+
+\dpd{all \texttt{perl} dependencies except \texttt{/dev/null}, perl modules: \{\texttt{App/Cpan}, \texttt{B}, \texttt{CPAN}, \texttt{CPAN/Author}, \texttt{CPAN/Bundle}, \texttt{CPAN/CacheMgr}, \texttt{CPAN/Complete}, \texttt{CPAN/Debug}, \texttt{CPAN/DeferredCode}, \texttt{CPAN/Distribution}, \texttt{CPAN/Distroprefs}, \texttt{CPAN/Distrostatus}, \texttt{CPAN/Exception/RecursiveDependency}, \texttt{CPAN/Exception/yaml\_not\_installed}, \texttt{CPAN/Exception/yaml\_process\_error}, \texttt{CPAN/FTP}, \texttt{CPAN/FTP/netrc}, \texttt{CPAN/FirstTime}, \texttt{CPAN/HTTP/Credentials}, \texttt{CPAN/HandleConfig}, \texttt{CPAN/Index}, \texttt{CPAN/InfoObj}, \texttt{CPAN/LWP/UserAgent}, \texttt{CPAN/Mirrors}, \texttt{CPAN/Module}, \texttt{CPAN/Prompt}, \texttt{CPAN/Queue}, \texttt{CPAN/Shell}, \texttt{CPAN/Tarzip}, \texttt{CPAN/URL}, \texttt{CPAN/Version}, \texttt{Config\_git}, \texttt{Config\_heavy}, \texttt{Cwd}, \texttt{DirHandle}, \texttt{Errno}, \texttt{Exporter/Heavy}, \texttt{ExtUtils/Liblist}, \texttt{ExtUtils/Liblist/Kid}, \texttt{ExtUtils/MM}, \texttt{ExtUtils/MM\_Any}, \texttt{ExtUtils/MM\_Unix}, \texttt{ExtUtils/MY}, \texttt{ExtUtils/MakeMaker}, \texttt{ExtUtils/MakeMaker/Config}, \texttt{ExtUtils/MakeMaker/version}, \texttt{Fcntl}, \texttt{File/Basename}, \texttt{File/Copy}, \texttt{File/Find}, \texttt{File/Path}, \texttt{File/Path}, \texttt{File/Spec}, \texttt{File/Spec/Functions}, \texttt{File/Spec/Unix}, \texttt{FileHandle}, \texttt{Getopt/Std}, \texttt{IO}, \texttt{IO/File}, \texttt{IO/Handle}, \texttt{IO/Seekable}, \texttt{Net/Ping}, \texttt{Opcode}, \texttt{POSIX}, \texttt{Safe}, \texttt{Scalar/Util}, \texttt{SelectSaver}, \texttt{Symbol}, \texttt{Sys/Hostname}, \texttt{Term/ReadLine}, \texttt{Text/ParseWords}, \texttt{Text/Tabs}, \texttt{Text/Wrap}, \texttt{Tie/Hash}, \texttt{Time/HiRes}, \texttt{autouse}, \texttt{builtin}, \texttt{constant}, \texttt{if}, \texttt{lib}, \texttt{overload}, \texttt{overloading}, \texttt{re}, \texttt{subs}, \texttt{utf8}, \texttt{version}\}, loadable objects: \{\texttt{auto/B/B}, \texttt{auto/Cwd/Cwd}, \texttt{auto/Fcntl/Fcntl}, \texttt{auto/IO/IO}, \texttt{auto/Opcode/Opcode}, \texttt{auto/POSIX/POSIX}, \texttt{auto/Sys/Hostname/Hostname}, \texttt{auto/re/re}\}}
 
 \subsection{PHP (\texttt{php})}
 
-\cmdline{\commandpath{php1.txt}}{*}{php}{}
+\getcmdline{\commandpath{php1.txt}}{*}{php}{}
 
 \TODO{dependencies, exec call can be substituted with system or passthru call}
 
-\cmdline{\commandpath{php4.txt}}{*}{php}{}
+\getcmdline{\commandpath{php4.txt}}{*}{php}{}
 
 \TODO{dependencies}
 
-\cmdline{\commandpath{php5.txt}}{*}{php}{}
+\getcmdline{\commandpath{php5.txt}}{*}{php}{}
 
 \TODO{dependencies}
 
-\cmdline{\commandpath{php6.txt}}{*}{php}{}
+\getcmdline{\commandpath{php6.txt}}{*}{php}{}
 
 \TODO{dependencies}
 
 \subsection{Ruby (\texttt{ruby})}
 
-\cmdline{\commandpath{ruby.txt}}{*}{ruby}{}
+\getcmdline{\commandpath{ruby.txt}}{*}{ruby}{}
 
 \TODO{dependencies}
 
 \subsubsection{Interactive Ruby Shell (\texttt{irb})}
 
-\cmdline{\commandpath{irb.txt}}{*}{echo,irb}{}
+\getcmdline{\commandpath{irb.txt}}{*}{echo,irb}{}
 
 \TODO{dependencies}
 
@@ -158,25 +211,25 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \subsubsection{Node.js (\texttt{node})}
 
-\cmdline{\commandpath{node.txt}}{*}{node}{}
+\getcmdline{\commandpath{node.txt}}{*}{node}{}
 
 \TODO{dependencies}
 
 \subsubsection{Generic scripting engine (\texttt{jrunscript})}
 
-\cmdline{\commandpath{jrunscript.txt}}{*}{jrunscript}{}
+\getcmdline{\commandpath{jrunscript.txt}}{*}{jrunscript}{}
 
 \TODO{dependencies}
 
 \subsubsection{Nashorn engine (\texttt{jjs})}
 
-\cmdline{\commandpath{jjs.txt}}{*}{echo,jjs}{}
+\getcmdline{\commandpath{jjs.txt}}{*}{echo,jjs}{}
 
 \TODO{dependencies}
 
 \subsection{Julia (\texttt{julia})}
 
-\cmdline{\commandpath{julia.txt}}{*}{julia}{}
+\getcmdline{\commandpath{julia.txt}}{*}{julia}{}
 
 \TODO{dependencies}
 
@@ -184,13 +237,24 @@ In this chapter, we go through known methods and techniques of initializing a re
 
 \subsection{Socat (\texttt{socat})}
 
-\cmdline{\commandpath{socat.txt}}{*}{socat}{}
+\getcmdline{\commandpath{socat.txt}}{*}{socat}{}
 
-\TODO{dependencies, explain "optional" settings (pty,stderr,...)}
+\notte{
+\texttt{stderr} option redirects standard error output to the socket. Additional options can be added at the end of the command (separated by a single comma) \cite{socat-man}:
+
+\setlength{\leftmargini}{5em}
+\begin{itemize}
+\item[\texttt{pty}] -- Establishes communication with the sub-process using a pseudo-terminal instead of a socket pair. For this to function, \texttt{openpty} or \texttt{ptmx} device is necessary.
+\item[\texttt{setsid}] -- Runs the command (shell) in the new session, preventing it from being affected by controlling terminal issues. Effectively, the shell stays alive even if the parent process dies.
+\item[\texttt{sigint}] -- Forwards \texttt{SIGINT} from the remote connection to the shell. Otherwise, sending \texttt{SIGINT} on the remote device can kill the shell session.
+\item[\texttt{sane}] -- With the \texttt{pty} option, it applies ``sane'' terminal settings to the \texttt{pty}.
+\end{itemize}
+\setlength{\leftmargini}{2.5em}
+}
 
 \subsection{PIP (\texttt{pip})}
 
-\cmdline{\commandpath{pip.txt}}{*}{mkdir,echo,pip,rm}{}
+\getcmdline{\commandpath{pip.txt}}{*}{mkdir,echo,pip,rm}{}
 
 \TODO{dependencies}
 
