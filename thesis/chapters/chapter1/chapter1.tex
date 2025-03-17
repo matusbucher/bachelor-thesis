@@ -16,8 +16,6 @@ Specifications for the attacker machine do not matter; some methods require a li
 
 \section{Commands syntax and glossary}
 
-\TODO{add explanation about version}
-
 For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input and output to the connected socket.
 
 The attacker must have an opened port (can be any available) and listen for any connection on that port. For most cases, a simple netcat command should be sufficient for that:
@@ -43,6 +41,8 @@ The commands in this thesis use placeholders instead of specific values for gene
 \host\ and \port\ are naturally required in every method. \shell\ is also usually required and can be substituted with any available shell interpreter on the target system, even with a self-made interactive script or any other command. The standard input, output, and error output are all redirected to the socket. Therefore, the attacker can interact remotely with the shell (or another command).
 
 \portt\ and \tmp\ are used only in several methods. \portt\ is, for instance, needed in telnet reverse shell (see \ref{telnet}), where the socket on port number \port\ serves as input for shell and socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline or a temporary directory for generated files.
+
+If you would like to fork the reverse shell to run in the background (while the parent process -- e.g., shell -- will be running), add ampersand (\texttt{\&}) at the end of a command. A similar effect can be achieved if the command spawns \shell\ via shell interpreter (which most of the methods do, e.g. bash methods), in which case you can append ampersand at the end of this ``nested'' command.
 
 After each command, it may follow a list of dependencies and occasional notes if additional information is appropriate. The implicit dependency for each command is that all shared objects (libraries) the binary requires are in the system. Of course, this is not an issue when using a statically linked binary. To identify all shared objects of the tool, use the \texttt{ldd} command:
 \begin{cmdline}{*}{ldd}{}
@@ -159,7 +159,16 @@ There are multiple implementations of NetCat -- GNU's traditional implementation
 
 \getcmdline{\commandpath{python.txt}}{*}{python}{}
 
-\dpd{python modules\footnote{usually located in \texttt{/usr/lib/python<version>/}}: \{\texttt{encodings}, \texttt{socket}, \texttt{selectors}, \texttt{collections}, \texttt{keyword}, \texttt{operator}, \texttt{reprlib}, \texttt{enum}, \texttt{types}, \texttt{functools}, \texttt{subprocess}, \texttt{locale}, \texttt{re}, \texttt{copyreg}, \texttt{signal}, \texttt{threading}, \texttt{\_weakrefset}, \texttt{warnings}, \texttt{contextlib}\}}
+\dpd{python modules\footnote{usually located in \texttt{/usr/lib/python<version>/}}:
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l l l}
+\texttt{\_weakrefset} & \texttt{enum} & \texttt{reprlib} & \texttt{subprocess} \\
+\texttt{collections} & \texttt{functools} & \texttt{re} & \texttt{threading} \\
+\texttt{contextlib} & \texttt{keyword} & \texttt{selectors} & \texttt{types} \\
+\texttt{copyreg} & \texttt{locale} & \texttt{signal} & \texttt{warnings} \\
+\texttt{encodings} & \texttt{operator} & \texttt{socket} \\
+\end{longtable}
+}
 
 \subsection{Perl (\texttt{perl})}
 
@@ -167,7 +176,15 @@ There are multiple implementations of NetCat -- GNU's traditional implementation
 
 \getcmdline{\commandpath{perl.txt}}{*}{perl}{}
 
-\dpd{\texttt{/dev/null}, perl modules\footnote{should be located in one of directories from \texttt{@INC} array that \texttt{perl} uses to search for module files}: \{\texttt{Socket}, \texttt{strict}, \texttt{Carp}, \texttt{warnings}, \texttt{warnings/register}, \texttt{Exporter}, \texttt{XSLoader}, \texttt{DynaLoader}, \texttt{vars}, \texttt{Config}\}}, and loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket.pm})
+\dpd{\texttt{/dev/null}, perl modules\footnote{should be located in one of directories from \texttt{@INC} array that \texttt{perl} uses to search for module files}:
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l l l}
+\texttt{Carp} & \texttt{Exporter} & \texttt{strict} & \texttt{warnings} \\
+\texttt{Config} & \texttt{Socket} & \texttt{vars} \\
+\texttt{DynaLoader} & \texttt{XSLoader} & \texttt{warnings/register} \\
+\end{longtable}
+and loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket})
+}
 
 \subsubsection{Comprehensive Perl Archive Network (\texttt{cpan})}
 
@@ -175,35 +192,104 @@ There are multiple implementations of NetCat -- GNU's traditional implementation
 
 \getcmdline{\commandpath{cpan.txt}}{*}{echo,cpan}{}
 
-\dpd{all \texttt{perl} dependencies except \texttt{/dev/null}, perl modules: \{\texttt{App/Cpan}, \texttt{B}, \texttt{CPAN}, \texttt{CPAN/Author}, \texttt{CPAN/Bundle}, \texttt{CPAN/CacheMgr}, \texttt{CPAN/Complete}, \texttt{CPAN/Debug}, \texttt{CPAN/DeferredCode}, \texttt{CPAN/Distribution}, \texttt{CPAN/Distroprefs}, \texttt{CPAN/Distrostatus}, \texttt{CPAN/Exception/RecursiveDependency}, \texttt{CPAN/Exception/yaml\_not\_installed}, \texttt{CPAN/Exception/yaml\_process\_error}, \texttt{CPAN/FTP}, \texttt{CPAN/FTP/netrc}, \texttt{CPAN/FirstTime}, \texttt{CPAN/HTTP/Credentials}, \texttt{CPAN/HandleConfig}, \texttt{CPAN/Index}, \texttt{CPAN/InfoObj}, \texttt{CPAN/LWP/UserAgent}, \texttt{CPAN/Mirrors}, \texttt{CPAN/Module}, \texttt{CPAN/Prompt}, \texttt{CPAN/Queue}, \texttt{CPAN/Shell}, \texttt{CPAN/Tarzip}, \texttt{CPAN/URL}, \texttt{CPAN/Version}, \texttt{Config\_git}, \texttt{Config\_heavy}, \texttt{Cwd}, \texttt{DirHandle}, \texttt{Errno}, \texttt{Exporter/Heavy}, \texttt{ExtUtils/Liblist}, \texttt{ExtUtils/Liblist/Kid}, \texttt{ExtUtils/MM}, \texttt{ExtUtils/MM\_Any}, \texttt{ExtUtils/MM\_Unix}, \texttt{ExtUtils/MY}, \texttt{ExtUtils/MakeMaker}, \texttt{ExtUtils/MakeMaker/Config}, \texttt{ExtUtils/MakeMaker/version}, \texttt{Fcntl}, \texttt{File/Basename}, \texttt{File/Copy}, \texttt{File/Find}, \texttt{File/Path}, \texttt{File/Path}, \texttt{File/Spec}, \texttt{File/Spec/Functions}, \texttt{File/Spec/Unix}, \texttt{FileHandle}, \texttt{Getopt/Std}, \texttt{IO}, \texttt{IO/File}, \texttt{IO/Handle}, \texttt{IO/Seekable}, \texttt{Net/Ping}, \texttt{Opcode}, \texttt{POSIX}, \texttt{Safe}, \texttt{Scalar/Util}, \texttt{SelectSaver}, \texttt{Symbol}, \texttt{Sys/Hostname}, \texttt{Term/ReadLine}, \texttt{Text/ParseWords}, \texttt{Text/Tabs}, \texttt{Text/Wrap}, \texttt{Tie/Hash}, \texttt{Time/HiRes}, \texttt{autouse}, \texttt{builtin}, \texttt{constant}, \texttt{if}, \texttt{lib}, \texttt{overload}, \texttt{overloading}, \texttt{re}, \texttt{subs}, \texttt{utf8}, \texttt{version}\}, loadable objects: \{\texttt{auto/B/B}, \texttt{auto/Cwd/Cwd}, \texttt{auto/Fcntl/Fcntl}, \texttt{auto/IO/IO}, \texttt{auto/Opcode/Opcode}, \texttt{auto/POSIX/POSIX}, \texttt{auto/Sys/Hostname/Hostname}, \texttt{auto/re/re}\}}
+\dpd{\texttt{perl} and its dependencies (except \texttt{/dev/null}), perl modules:
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l}
+\texttt{App/Cpan} & \texttt{ExtUtils/MakeMaker/Config} \\
+\texttt{B} & \texttt{ExtUtils/MakeMaker/version} \\
+\texttt{CPAN/Author} & \texttt{ExtUtils/MakeMaker} \\
+\texttt{CPAN/Bundle} & \texttt{Fcntl} \\
+\texttt{CPAN/CacheMgr} & \texttt{File/Basename} \\
+\texttt{CPAN/Complete} & \texttt{File/Copy} \\
+\texttt{CPAN/Debug} & \texttt{File/Find} \\
+\texttt{CPAN/DeferredCode} & \texttt{File/Path} \\
+\texttt{CPAN/Distribution} & \texttt{File/Path} \\
+\texttt{CPAN/Distroprefs} & \texttt{File/Spec/Functions} \\
+\texttt{CPAN/Distrostatus} & \texttt{File/Spec/Unix} \\
+\texttt{CPAN/Exception/RecursiveDependency} & \texttt{File/Spec} \\
+\texttt{CPAN/Exception/yaml\_not\_installed} & \texttt{FileHandle} \\
+\texttt{CPAN/Exception/yaml\_process\_error} & \texttt{Getopt/Std} \\
+\texttt{CPAN/FTP/netrc} & \texttt{IO/File} \\
+\texttt{CPAN/FTP} & \texttt{IO/Handle} \\
+\texttt{CPAN/FirstTime} & \texttt{IO/Seekable} \\
+\texttt{CPAN/HTTP/Credentials} & \texttt{IO} \\
+\texttt{CPAN/HandleConfig} & \texttt{Net/Ping} \\
+\texttt{CPAN/Index} & \texttt{Opcode} \\
+\texttt{CPAN/InfoObj} & \texttt{POSIX} \\
+\texttt{CPAN/LWP/UserAgent} & \texttt{Safe} \\
+\texttt{CPAN/Mirrors} & \texttt{Scalar/Util} \\
+\texttt{CPAN/Module} & \texttt{SelectSaver} \\
+\texttt{CPAN/Prompt} & \texttt{Symbol} \\
+\texttt{CPAN/Queue} & \texttt{Sys/Hostname} \\
+\texttt{CPAN/Shell} & \texttt{Term/ReadLine} \\
+\texttt{CPAN/Tarzip} & \texttt{Text/ParseWords} \\
+\texttt{CPAN/URL} & \texttt{Text/Tabs} \\
+\texttt{CPAN/Version} & \texttt{Text/Wrap} \\
+\texttt{CPAN} & \texttt{Tie/Hash} \\
+\texttt{Config\_git} & \texttt{Time/HiRes} \\
+\texttt{Config\_heavy} & \texttt{autouse} \\
+\texttt{Cwd} & \texttt{builtin} \\
+\texttt{DirHandle} & \texttt{constant} \\
+\texttt{Errno} & \texttt{if} \\
+\texttt{Exporter/Heavy} & \texttt{lib} \\
+\texttt{ExtUtils/Liblist/Kid} & \texttt{overloading} \\
+\texttt{ExtUtils/Liblist} & \texttt{overload} \\
+\texttt{ExtUtils/MM\_Any} & \texttt{re} \\
+\texttt{ExtUtils/MM\_Unix} & \texttt{subs} \\
+\texttt{ExtUtils/MM} & \texttt{utf8} \\
+\texttt{ExtUtils/MY} & \texttt{version} \\
+\end{longtable}
+loadable objects:
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l l}
+\texttt{auto/B/B.so} & \texttt{auto/Opcode/Opcode.so} \\
+\texttt{auto/Cwd/Cwd.so} & \texttt{auto/POSIX/POSIX.so} \\
+\texttt{auto/Fcntl/Fcntl.so} & \texttt{auto/Sys/Hostname/Hostname.so} \\
+\texttt{auto/IO/IO.so} & \texttt{auto/re/re.so} \\
+\end{longtable}
+}
 
 \subsection{PHP (\texttt{php})}
 
+\version{8.3.6}
+
+\dpd{\texttt{UTC} file\footnote{usually located in \texttt{/usr/share/zoneinfo/}; without it, the \texttt{php} tool does not work at all}, \texttt{sh} shell (\texttt{php} uses it to execute commands in all following methods)}
+
 \getcmdline{\commandpath{php1.txt}}{*}{php}{}
 
-\TODO{dependencies, exec call can be substituted with system or passthru call}
+\notte{\texttt{exec} function can be substituted with \texttt{shell\_exec}, \texttt{system} or \texttt{passthru} functions (they have the same argument).}
 
 \getcmdline{\commandpath{php4.txt}}{*}{php}{}
 
-\TODO{dependencies}
+\notte{This is equivalent to calling the \texttt{shell\_exec} function as in the first method.}
 
 \getcmdline{\commandpath{php5.txt}}{*}{php}{}
 
-\TODO{dependencies}
-
 \getcmdline{\commandpath{php6.txt}}{*}{php}{}
 
-\TODO{dependencies}
+\notte{This will fork the shell session without the need to use \texttt{\&}.}
 
 \subsection{Ruby (\texttt{ruby})}
 
-\getcmdline{\commandpath{ruby.txt}}{*}{ruby}{}
+\version{3.2.3}
 
-\TODO{dependencies}
+\getcmdline{\commandpath{ruby1.txt}}{*}{ruby}{}
+
+\dpd{ruby module \texttt{socket}\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}} and loadable object \texttt{socket.so}\footnote{usually located somewhere in \texttt{/usr/lib/}}}
+
+\getcmdline{\commandpath{ruby2.txt}}{*}{ruby}{}
+
+\dpd{same dependencies as the first method, \texttt{sh} shell (\texttt{popen} function uses it to execute the command)}
 
 \subsubsection{Interactive Ruby Shell (\texttt{irb})}
 
-\getcmdline{\commandpath{irb.txt}}{*}{echo,irb}{}
+\version{1.6.2}
+
+\getcmdline{\commandpath{irb1.txt}}{*}{echo,irb}{}
+
+\TODO{dependencies}
+
+\getcmdline{\commandpath{irb2.txt}}{*}{echo,irb}{}
 
 \TODO{dependencies}
 
@@ -229,7 +315,7 @@ There are multiple implementations of NetCat -- GNU's traditional implementation
 
 \subsection{Julia (\texttt{julia})}
 
-\getcmdline{\commandpath{julia.txt}}{*}{julia}{}
+\getcmdline{\commandpath{julia.txt}}{^}{julia}{}
 
 \TODO{dependencies}
 

