@@ -2,3 +2,7 @@ build/
 
 # Key files
 *.pem
+
+# Special files
+input.txt
+tab_format.py
