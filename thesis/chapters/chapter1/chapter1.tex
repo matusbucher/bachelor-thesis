@@ -287,11 +287,72 @@ loadable objects:
 
 \getcmdline{\commandpath{irb1.txt}}{*}{echo,irb}{}
 
-\TODO{dependencies}
+\dpd{\texttt{ruby} binary\footnote{or binary \texttt{ruby<version>}, since some modules explicitly call this binary}, \texttt{/dev/null}, ruby modules:
+
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l}
+\texttt{delegate} & \texttt{reline/unicode/east\_asian\_width} \\
+\texttt{fileutils} & \texttt{reline/unicode} \\
+\texttt{forwardable/impl} & \texttt{reline/version} \\
+\texttt{forwardable} & \texttt{reline} \\
+\texttt{irb/color\_printer} & \texttt{ripper/core} \\
+\texttt{irb/color} & \texttt{ripper/filter} \\
+\texttt{irb/completion} & \texttt{ripper/lexer} \\
+\texttt{irb/context} & \texttt{ripper/sexp} \\
+\texttt{irb/easter-egg} & \texttt{ripper} \\
+\texttt{irb/ext/save-history} & \texttt{rubygems/basic\_specification} \\
+\texttt{irb/extend-command} & \texttt{rubygems/compatibility} \\
+\texttt{irb/init} & \texttt{rubygems/core\_ext/kernel\_gem} \\
+\texttt{irb/input-method} & \texttt{rubygems/core\_ext/kernel\_require} \\
+\texttt{irb/inspector} & \texttt{rubygems/defaults} \\
+\texttt{irb/lc/error} & \texttt{rubygems/dependency} \\
+\texttt{irb/locale} & \texttt{rubygems/deprecate} \\
+\texttt{irb/magic-file} & \texttt{rubygems/errors} \\
+\texttt{irb/output-method} & \texttt{rubygems/exceptions} \\
+\texttt{irb/ruby-lex} & \texttt{rubygems/path\_support} \\
+\texttt{irb/src\_encoding} & \texttt{rubygems/platform} \\
+\texttt{irb/version} & \texttt{rubygems/request\_set} \\
+\texttt{irb/workspace} & \texttt{rubygems/requirement} \\
+\texttt{irb} & \texttt{rubygems/resolver} \\
+\texttt{pp} & \texttt{rubygems/source} \\
+\texttt{prettyprint} & \texttt{rubygems/specification} \\
+\texttt{rbconfig} & \texttt{rubygems/stub\_specification} \\
+\texttt{reline/ansi} & \texttt{rubygems/text} \\
+\texttt{reline/config} & \texttt{rubygems/tsort/lib/tsort} \\
+\texttt{reline/general\_io} & \texttt{rubygems/tsort} \\
+\texttt{reline/history} & \texttt{rubygems/unknown\_command\_spell\_checker} \\
+\texttt{reline/key\_actor/base} & \texttt{rubygems/util/list} \\
+\texttt{reline/key\_actor/emacs} & \texttt{rubygems/util} \\
+\texttt{reline/key\_actor/vi\_command} & \texttt{rubygems/version} \\
+\texttt{reline/key\_actor/vi\_insert} & \texttt{rubygems} \\
+\texttt{reline/key\_actor} & \texttt{set} \\
+\texttt{reline/key\_stroke} & \texttt{tempfile} \\
+\texttt{reline/kill\_ring} & \texttt{timeout} \\
+\texttt{reline/line\_editor} & \texttt{tmpdir} \\
+\texttt{reline/terminfo} &  \\
+\end{longtable}
+
+loadable objects:
+
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l l}
+\texttt{enc/encdb.so} & \texttt{io/wait.so} & \texttt{ripper.so} \\
+\texttt{io/console.so} & \texttt{monitor.so} & \texttt{socket.so} \\
+\end{longtable}
+
+and special \texttt{gemspec} files\footnote{usually located in \texttt{/usr/lib/ruby/gems/<version>/}}:
+\setlength{\tabcolsep}{15pt}
+
+\begin{longtable}{l}
+\texttt{gems/irb-1.6.2} \\
+\texttt{specifications/default/irb-1.6.2.gemspec} \\
+\texttt{specifications/default/io-console-0.6.0.gemspec} \\ \texttt{specifications/default/reline-0.3.2.gemspec} \\
+\end{longtable}
+}
 
 \getcmdline{\commandpath{irb2.txt}}{*}{echo,irb}{}
 
-\TODO{dependencies}
+\dpd{same dependencies as the first method, \texttt{sh} shell (the same reason as with the \texttt{ruby} second method)}
 
 \subsection{JavaScript runtime environments}
 
