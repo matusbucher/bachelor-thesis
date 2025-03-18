@@ -2,7 +2,7 @@
 
 ROOT_DIR="/home/matus/testroot"
 
-LIB_DIR1="/usr/lib/x86_64-linux-gnu/perl-base/"
+MOD_DIR1="/usr/lib/x86_64-linux-gnu/perl-base/"
 
 declare -a MODULES1=(
 	"File/Spec.pm"
@@ -41,25 +41,25 @@ declare -a MODULES1=(
 )
 
 for MOD in ${MODULES1[@]}; do
-    DEP="$LIB_DIR1$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
+	DEP="$MOD_DIR1$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ -f "$DEP_DEST" ] || [ -d "$DEP_DEST" ]; then
-        continue
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    if [ -f "$DEP" ] || [ -d "$DEP" ]; then
-        mkdir -p "$(dirname "$DEP_DEST")"
-        cp -r "$DEP" "$DEP_DEST"
-        echo "Copied module $MOD."
-        continue
-    fi
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
 
-    echo "Cannot find $DEP."
+	echo "Copied dependency $MOD."
 done
 
 
-LIB_DIR2="/usr/share/perl/5.38/"
+MOD_DIR2="/usr/share/perl/5.38/"
 
 declare -a MODULES2=(
 	"App/Cpan.pm"
@@ -120,25 +120,25 @@ declare -a MODULES2=(
 )
 
 for MOD in ${MODULES2[@]}; do
-    DEP="$LIB_DIR2$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
+	DEP="$MOD_DIR2$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ -f "$DEP_DEST" ] || [ -d "$DEP_DEST" ]; then
-	continue
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    if [ -f "$DEP" ] || [ -d "$DEP" ]; then
-        mkdir -p "$(dirname "$DEP_DEST")"
-        cp -r "$DEP" "$DEP_DEST"
-        echo "Copied module $MOD."
-        continue
-    fi
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
 
-    echo "Cannot find $DEP."
+	echo "Copied dependency $MOD."
 done
 
 
-LIB_DIR3="/usr/lib/x86_64-linux-gnu/perl/5.38/"
+MOD_DIR3="/usr/lib/x86_64-linux-gnu/perl/5.38/"
 
 declare -a MODULES3=(
 	"B.pm"
@@ -152,21 +152,21 @@ declare -a MODULES3=(
 )
 
 for MOD in ${MODULES3[@]}; do
-    DEP="$LIB_DIR3$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
+	DEP="$MOD_DIR3$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ -f "$DEP_DEST" ] || [ -d "$DEP_DEST" ]; then
-        continue
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    if [ -f "$DEP" ] || [ -d "$DEP" ]; then
-        mkdir -p "$(dirname "$DEP_DEST")"
-        cp -r "$DEP" "$DEP_DEST"
-        echo "Copied module $MOD."
-        continue
-    fi
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
 
-    echo "Cannot find $DEP."
+	echo "Copied dependency $MOD."
 done
 
 echo "Successfully added dependencies to '$ROOT_DIR'."

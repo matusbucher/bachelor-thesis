@@ -9,17 +9,21 @@ declare -a MODULES1=(
 )
 
 for MOD in ${MODULES1[@]}; do
-    DEP="$MOD_DIR1$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
-    mkdir -p "$(dirname "$DEP_DEST")"
+	DEP="$MOD_DIR1$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ -d "$DEP" ]; then
-	cp -r "$DEP" "$DEP_DEST"
-    else
-	cp "$DEP" "$DEP_DEST"
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    echo "Copied module $MOD."
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
+
+	echo "Copied dependency $MOD."
 done
 
 
@@ -30,17 +34,21 @@ declare -a MODULES2=(
 )
 
 for MOD in ${MODULES2[@]}; do
-    DEP="$MOD_DIR2$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
-    mkdir -p "$(dirname "$DEP_DEST")"
+	DEP="$MOD_DIR2$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ -d "$DEP" ]; then
-        cp -r "$DEP" "$DEP_DEST"
-    else
-        cp "$DEP" "$DEP_DEST"
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    echo "Copied module $MOD."
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
+
+	echo "Copied dependency $MOD."
 done
 
 echo "Successfully copied dependencies to '$ROOT_DIR'."

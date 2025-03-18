@@ -27,19 +27,21 @@ declare -a MODULES=(
 )
 
 for MOD in ${MODULES[@]}; do
-    DEP="$MOD_DIR$MOD"
+	DEP="$MOD_DIR$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    DEP_DEST="$ROOT_DIR$DEP"
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    mkdir -p "$(dirname "$DEP_DEST")"
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
 
-    if [ -d "$DEP" ]; then
-	cp -r "$DEP" "$DEP_DEST"
-    else
-	cp "$DEP" "$DEP_DEST"
-    fi
-
-    echo "Copied module $MOD."
+	echo "Copied dependency $MOD."
 done
 
 echo "Successfully copied dependencies of to '$ROOT_DIR'."

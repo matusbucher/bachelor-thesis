@@ -19,17 +19,21 @@ declare -a MODULES=(
 )
 
 for MOD in ${MODULES[@]}; do
-    DEP="$PERL_DIR$MOD"
-    DEP_DEST="$ROOT_DIR$DEP"
+	DEP="$MOD_DIR$MOD"
+	DEP_DEST="$ROOT_DIR$DEP"
 
-    if [ ! -f "$DEP" ]; then
-        echo "Cannot find $DEP."
-        continue
-    fi
+	mkdir -p "$(dirname "$DEP_DEST")"
 
-    mkdir -p "$(dirname "$DEP_DEST")"
-    cp -r "$DEP" "$DEP_DEST"
-    echo "Copied module $MOD."
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -r "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
+
+	echo "Copied dependency $MOD."
 done
 
 echo "Successfully copied dependencies to '$ROOT_DIR'."
