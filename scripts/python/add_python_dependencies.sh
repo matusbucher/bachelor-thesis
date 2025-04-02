@@ -44,4 +44,4 @@ for MOD in ${MODULES[@]}; do
 	echo "Copied dependency $MOD."
 done
 
-echo "Successfully copied dependencies of to '$ROOT_DIR'."
+echo "Successfully copied dependencies to '$ROOT_DIR'."
