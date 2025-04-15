@@ -4,21 +4,21 @@
 
 \label{chap:methods}
 
-In this chapter, we explore established methods and techniques for initializing a reverse shell from a remote server. Each method is characterized by a system tool, software, or a programming language with its interpreter/compiler (meaning they are not characterized by a concrete vulnerability in the security of the target). For each method, we show an actual example of how to run the tool/software, taking into account the testing environment described at the beginning of this chapter. Furthermore, we list all dependencies of the shown example, which are effectively minimal system requirements needed for a given method.
+This chapter explores established methods and techniques for initializing a reverse shell from a remote server. Each method is characterized by a system tool, software, or a programming language with its interpreter/compiler (meaning a concrete vulnerability in the target's security does not characterize them). For each method, we show an actual example of how to run the tool/software, taking into account the testing environment described at the beginning of this chapter. Furthermore, we list all dependencies of the shown example, which are effectively minimal system requirements needed for a given method.
 
 \section{Testing environment}
 
-In our analysis, the victim machine (on which techniques for establishing a reverse shell are tested) is simulated with a \texttt{chroot} environment for simplicity. The \texttt{chroot} command allows running a command or interactive shell with a specified directory as the apparent root directory \cite{chroot-man}. Therefore, the system simulated in the \texttt{chroot} environment has only access to files in the new 'root directory', which is convenient for determining requirements for a given method. If the method does not work, the environment may lack some library, system tools, devices, etc.
+In our analysis, the victim machine (on which techniques for establishing a reverse shell are tested) is simulated with a \texttt{chroot} environment for simplicity. The \texttt{chroot} command allows running a command or interactive shell with a specified directory as the apparent root directory \cite{chroot-man}. Therefore, the system simulated in the \texttt{chroot} environment has only access to files in the new 'root directory', which is convenient for determining requirements for a given method. If the method does not work, the environment may lack some libraries, system tools, devices, etc.
 
-The host system distribution (from which the \texttt{chroot} command is executed) is Ubuntu 24.04 LTS with a Linux 5.15 kernel and 64-bit x86 architecture. However, commands and tools tested in this thesis should work on all GNU/Linux-based systems (if all dependencies are present).
+The host system distribution (from which the \texttt{chroot} command is executed) is Ubuntu 24.04 LTS with a Linux 5.15 kernel and 64-bit x86 architecture. However, the commands and tools tested in this thesis should work on all GNU/Linux-based systems (if all dependencies are present).
 
-Specifications for the attacker machine do not matter; some methods require a little more complex listening setup than just opening a port, which we will discuss later.
+The specifications for the attacker machine do not matter; some methods require a slightly more complex listening setup than just opening a port, which we will discuss later.
 
 \section{Commands syntax and glossary}
 
 For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input and output to the connected socket.
 
-The attacker must have an opened port (can be any available) and listen for any connection on that port. For most cases, a simple netcat command should be sufficient for that:
+The attacker must have an open port (can be any available) and listen for any connection on that port. In most cases, a simple netcat command should be sufficient for that:
 
 \begin{cmdline}{*}{nc}{}
 nc -l -p *\port*
@@ -40,9 +40,9 @@ The commands in this thesis use placeholders instead of specific values for gene
 
 \host\ and \port\ are naturally required in every method. \shell\ is also usually required and can be substituted with any available shell interpreter on the target system, even with a self-made interactive script or any other command. The standard input, output, and error output are all redirected to the socket. Therefore, the attacker can interact remotely with the shell (or another command).
 
-\portt\ and \tmp\ are used only in several methods. \portt\ is, for instance, needed in telnet reverse shell (see \ref{telnet}), where the socket on port number \port\ serves as input for shell and socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline or a temporary directory for generated files.
+\portt\ and \tmp\ are used only in several methods. \portt\ is, for instance, needed in telnet reverse shell (see \ref{telnet}), where the socket on port number \port\ serves as input for shell and the socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline or a temporary directory for generated files.
 
-If you would like to fork the reverse shell to run in the background (while the parent process -- e.g., shell -- will be running), add ampersand (\texttt{\&}) at the end of a command. A similar effect can be achieved if the command spawns \shell\ via shell interpreter (which most of the methods do, e.g. bash methods), in which case you can append ampersand at the end of this ``nested'' command.
+If you would like to fork the reverse shell to run in the background (while the parent process -- e.g., shell -- will be running), add ampersand (\texttt{\&}) at the end of a command. A similar effect can be achieved if the command spawns \shell\ via shell interpreter (which most methods do, e.g., bash methods), in which case you can append ampersand at the end of this ``nested'' command.
 
 After each command, it may follow a list of dependencies and occasional notes if additional information is appropriate. The implicit dependency for each command is that all shared objects (libraries) the binary requires are in the system. Of course, this is not an issue when using a statically linked binary. To identify all shared objects of the tool, use the \texttt{ldd} command:
 \begin{cmdline}{*}{ldd}{}
@@ -112,7 +112,7 @@ In contrast to command-line interpreters that can independently establish networ
 
 \subsection{NetCat (\texttt{nc}/\texttt{ncat})}
 
-There are multiple implementations of NetCat -- GNU's traditional implementation, OpenBSD, or Nmap project version of NetCat called \texttt{ncat}. Not every implementation supports the \texttt{-e} or \texttt{-c} option, which causes the program to execute the given command. Option \texttt{-e} runs \texttt{exec <command>}, while \texttt{-c} executes via \texttt{/bin/sh} (\texttt{sh-exec <command>}) \cite{ncat-man}. While the traditional implementation should have this option, the OpenBSD implementation has removed it for security reasons \cite{nc-man}. However, redirecting file descriptors can easily bypass this restriction, as shown in the second command.
+There are multiple implementations of NetCat -- GNU's traditional implementation, OpenBSD, or the Nmap project version of NetCat called \texttt{ncat}. Not every implementation supports the \texttt{-e} or \texttt{-c} option, which causes the program to execute the given command. Option \texttt{-e} runs \texttt{exec <command>}, while \texttt{-c} executes via \texttt{/bin/sh} (\texttt{sh-exec <command>}) \cite{ncat-man}. While the traditional implementation should have this option, the OpenBSD implementation has removed it for security reasons \cite{nc-man}. However, redirecting file descriptors can easily bypass this restriction, as shown in the second command.
 
 \version{7.94SVN (Nmap Project)}
 
@@ -150,9 +150,9 @@ There are multiple implementations of NetCat -- GNU's traditional implementation
 
 In this case, we need to set up an OpenSSL server to receive the reverse shell on the attacker's side. This is done using the following commands:
 
-\getcmdline{\commandpath{opensslattacker.txt}}{*}{openssl}{}
+\getcmdline{\commandpath{openssl-listener.txt}}{*}{openssl}{}
 
-The first command generates a self-signed X.509 certificate and a new RSA 4096-bit key. Then, it saves the key and the certificate to specified \texttt{.pem} files. The \texttt{-noenc} option just makes the private key not encrypted (no password is required to access it later).
+The first command generates a self-signed X.509 certificate and a new RSA 4096-bit key. Then, it saves the key and the certificate to specified \texttt{.pem} files. The \texttt{-noenc} option makes the private key not encrypted (no password is required to access it later).
 
 The second command runs \texttt{openssl} in server mode for listening on a specified port. The certificate and key are loaded from the \texttt{.pem} files created with the first command, and the \texttt{-quiet} option will suppress the printing of session and certificate information. \cite{openssl-doc}
 
@@ -161,6 +161,21 @@ With the running OpenSSL server, the reverse shell is initialized on the victim'
 \getcmdline{\commandpath{openssl.txt}}{*}{mkfifo,openssl,rm}{}
 
 \dpd{\texttt{mkfifo}, \texttt{rm}}
+
+
+\subsection{Curl (\texttt{curl})}
+
+\version{8.5.0}
+
+Similar to OpenSSL, we need to set up a special listener. It is an HTTP server since the victim will receive commands and send back the outputs through HTTP requests. In the following, we provide a Python script for a simple HTTP server:
+
+\getcmdline{\commandpath{curl-listener.txt}}{*}{from,import,class,def,self}{ShellHandler,do_GET,do_POST}
+
+The server handles two types of incoming HTTP requests -- GET and POST. The GET request serves for getting the command to be executed (the handler gets the command from command line input), while the POST request serves for sending back the output of the executed command.
+
+With the \texttt{curl} command, we can send GET and POST requests in a loop:
+
+\getcmdline{\commandpath{curl.txt}}{*}{curl}{}
 
 
 \section{Programming languages interpreters}
@@ -353,8 +368,8 @@ loadable objects:
 \end{longtable}
 
 and special \texttt{gemspec} files\footnote{usually located in \texttt{/usr/lib/ruby/gems/<version>/}}:
-\setlength{\tabcolsep}{15pt}
 
+\setlength{\tabcolsep}{15pt}
 \begin{longtable}{l}
 \texttt{gems/irb-1.6.2} \\
 \texttt{specifications/default/irb-1.6.2.gemspec} \\
@@ -370,9 +385,19 @@ and special \texttt{gemspec} files\footnote{usually located in \texttt{/usr/lib/
 
 \subsubsection{Node.js (\texttt{node})}
 
+\version{18.19.1}
+
 \getcmdline{\commandpath{node.txt}}{*}{node}{}
 
-\TODO{dependencies}
+\dpd{JavaScript modules:
+
+\setlength{\tabcolsep}{15pt}
+\begin{longtable}{l l}
+\texttt{/acorn-walk/dist/walk.js} & \texttt{/cjs-module-lexer/lexer.js} \\
+\texttt{/acorn/dist/acorn.js} & \texttt{/undici/undici-fetch.js} \\
+\texttt{/cjs-module-lexer/dist/lexer.js} & \\
+\end{longtable}
+}
 
 \subsubsection{Generic scripting engine (\texttt{jrunscript})}
 
@@ -381,6 +406,8 @@ and special \texttt{gemspec} files\footnote{usually located in \texttt{/usr/lib/
 \TODO{dependencies}
 
 \subsubsection{Nashorn engine (\texttt{jjs})}
+
+\version{11.0.26}
 
 \getcmdline{\commandpath{jjs.txt}}{*}{echo,jjs}{}
 
