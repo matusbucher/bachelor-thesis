@@ -3,4 +3,4 @@
 SCRIPT_DIR=/home/matus/scripts
 
 $SCRIPT_DIR/copy_command.sh ruby
-$SCRIPT_DIR/ruby/add_ruby_dependencies.sh
+$SCRIPT_DIR/ruby/add_dependencies.sh

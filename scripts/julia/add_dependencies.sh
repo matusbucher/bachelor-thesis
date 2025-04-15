@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ROOT_DIR="/home/matus/testroot"
+NOT_FOUND=0
 
 JULIA_DIR="/opt/julia"
 
@@ -27,6 +28,13 @@ declare -a LIBS=(
 
 for LIB in ${LIBS[@]}; do
 	DEP="$JULIA_DIR$LIB"
+
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
+
 	DEP_DEST="$ROOT_DIR/usr/local$LIB"
 
 	mkdir -p "$(dirname "$DEP_DEST")"
@@ -48,25 +56,32 @@ JULIA_MOD_DIR="$JULIA_DIR$MOD_DIR"
 
 declare -a MODS=(
 	"/Sockets/src/Sockets.jl"
-    "/Sockets/Project.toml"
+        "/Sockets/Project.toml"
 )
 
 for MOD in ${MODS[@]}; do
-        DEP="$JULIA_MOD_DIR$MOD"
-        DEP_DEST="$ROOT_DIR/usr/local$MOD_DIR$MOD"
+	DEP="$JULIA_MOD_DIR$MOD"
 
-        mkdir -p "$(dirname "$DEP_DEST")"
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
 
-        if [ -d "$DEP" ]; then
-                if [ ! -d "$DEP_DEST" ]; then
-                        mkdir "$DEP_DEST"
-                fi
-                cp -r "$DEP/"* "$DEP_DEST/"
-        else
-                cp "$DEP" "$DEP_DEST"
-        fi
+	DEP_DEST="$ROOT_DIR/usr/local$MOD_DIR$MOD"
 
-        echo "Copied dependency $MOD."
+	mkdir -p "$(dirname "$DEP_DEST")"
+
+	if [ -d "$DEP" ]; then
+			if [ ! -d "$DEP_DEST" ]; then
+					mkdir "$DEP_DEST"
+			fi
+			cp -r "$DEP/"* "$DEP_DEST/"
+	else
+			cp "$DEP" "$DEP_DEST"
+	fi
+
+	echo "Copied dependency $MOD."
 done
 
 
@@ -76,6 +91,12 @@ declare -a DEPS2=(
 )
 
 for DEP in ${DEPS2[@]}; do
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
+	
 	DEP_DEST="$ROOT_DIR$DEP"
 
 	mkdir -p "$(dirname "$DEP_DEST")"
@@ -91,5 +112,11 @@ for DEP in ${DEPS2[@]}; do
 
         echo "Copied dependency $DEP."
 done
+
+
+if [ $NOT_FOUND -gt 0 ]; then
+	echo "Some dependencies were not found ($NOT_FOUND). Check the output above."
+	exit 1
+fi
 
 echo "Successfully copied dependencies to '$ROOT_DIR'."

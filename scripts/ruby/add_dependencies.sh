@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ROOT_DIR="/home/matus/testroot"
+NOT_FOUND=0
 
 MOD_DIR1="/usr/lib/ruby/3.2.0/"
 
@@ -10,6 +11,13 @@ declare -a MODULES1=(
 
 for MOD in ${MODULES1[@]}; do
 	DEP="$MOD_DIR1$MOD"
+
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
+
 	DEP_DEST="$ROOT_DIR$DEP"
 
 	mkdir -p "$(dirname "$DEP_DEST")"
@@ -35,6 +43,13 @@ declare -a MODULES2=(
 
 for MOD in ${MODULES2[@]}; do
 	DEP="$MOD_DIR2$MOD"
+
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
+	
 	DEP_DEST="$ROOT_DIR$DEP"
 
 	mkdir -p "$(dirname "$DEP_DEST")"
@@ -50,5 +65,11 @@ for MOD in ${MODULES2[@]}; do
 
 	echo "Copied dependency $MOD."
 done
+
+
+if [ $NOT_FOUND -gt 0 ]; then
+	echo "Some dependencies were not found ($NOT_FOUND). Check the output above."
+	exit 1
+fi
 
 echo "Successfully copied dependencies to '$ROOT_DIR'."
