@@ -1,55 +1,62 @@
 \documentclass[12pt, twoside]{book}
-%\documentclass[12pt, oneside]{book}  % jednostranna tlac
+%\documentclass[12pt, oneside]{book}  % single-sided printing
 
-% spravne nastavenie okrajov
+% correct margin setting
 \usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3.5cm,right=2cm]{geometry}
-% zapnutie fontov pre UTF8 kodovanie
+% enabling fonts for UTF8 encoding
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
-% nastavenie riadkovania podla smernice
-\linespread{1.25} % hodnota 1.25 by mala zodpovedat 1.5 riadkovaniu
+% setting line spacing according to the directive
+\linespread{1.25} % a value of 1.25 should correspond to 1.5 line spacing
 
-% balicek pre lepsie zobrazovanie referencii
+% package for better display of references
 \usepackage[backend=biber]{biblatex}
 \addbibresource{references.bib}
 
-% pridanie balicku pre pokrocile pouzivanie farieb
+% package for advanced color usage
 \usepackage{xcolor}
 
-% definovanie farby pozadia pre command-line
 \definecolor{background}{rgb}{0.95,0.95,0.95}
 \definecolor{placeholder}{rgb}{0.07,0.04,0.56}
 \definecolor{string}{rgb}{0.0,0.5,0.0}
 \definecolor{highlight}{rgb}{0.8,0.0,0.0}
 \definecolor{comment}{rgb}{0.66, 0.66, 0.66}
 
-% balicek na vkladanie obrazkov
+% package for inserting images
 \usepackage{graphicx}
 
-% balicek na vkladanie celych pdf dokumentov, tu zadanie
+% package for inserting entire pdf documents (thesis assignment)
 \usepackage{pdfpages}
 
-% balicek na spravne formatovanie URL
+% package for properly formatting URLs
 \usepackage{url}
-% balicek na hyperlinky v ramci dokumentu
-% zrusime farebne ramiky okolo liniek aby pdf
-% vyzeralo rovnako ako tlacena verzia
+% package for hyperlinks within the document (we will remove the colored frames around the lines so that the pdf looks the same as the printed version)
 \usepackage[hidelinks,breaklinks]{hyperref}
 
-% balicek pre oramovanie command-line-u
-\usepackage{mdframed}
+\usepackage{cleveref}
+\crefname{lstlisting}{command}{commands}
+\crefname{table}{list}{lists}
+
+\usepackage{tikz}
+
+% package for adjustwidth environment
+\usepackage{changepage}
 
 % idk
 \usepackage{fancyvrb}
 
-% balicek na vkladanie zdrojoveho kodu
+% package for importing source code
 \usepackage{listings}
 
-% balicek pre velke tabulky
+\usepackage{caption}
+
+% package for proper functioning of the figure [H] environment
+\usepackage{float}
+
+% package for large tables
 \usepackage{longtable}
 
-% definovanie prikazu pre TODO poznamku
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO -- #1}}
 
 \newcommand{\shell}{\textcolor{placeholder}{\texttt{$\langle$SHELL$\rangle$}}}
@@ -58,25 +65,12 @@
 \newcommand{\portt}{\textcolor{placeholder}{\texttt{$\langle$PORT2$\rangle$}}}
 \newcommand{\tmp}{\textcolor{placeholder}{\texttt{$\langle$TMP$\rangle$}}}
 
-\newenvironment{cmdframe}
-{\begin{mdframed}[
-	nobreak=true,
-	backgroundcolor=background,
-	linecolor=black,
-	roundcorner=10pt,
-	innerleftmargin=10pt,
-	innerrightmargin=10pt,
-	innertopmargin=5pt,
-	innerbottommargin=5pt
-]}
-{\end{mdframed}}
-
-\newcommand{\cmdlstsettings}[3]
+\newcommand{\cmdlstsettings}[4]
 {\lstset{
-	language=bash,
-	otherkeywords={#2},
-	morekeywords=[1]{#2},
-	morekeywords=[2]{#3},
+	language={#1},
+	otherkeywords={#3},
+	morekeywords=[1]{#3},
+	morekeywords=[2]{#4},
 	basicstyle={\ttfamily\footnotesize},
 	backgroundcolor={\color{background}},
 	commentstyle={\color{comment}},
@@ -87,40 +81,32 @@
 	showstringspaces=false,
 	columns=fullflexible,
 	breaklines=true,
-	escapechar={#1}
+	escapechar={#2},
+	frame=single,
+	rulecolor={\color{black}},
+	framesep=5pt,
+	framerule=0.8pt
 }}
 
-\newenvironment{cmdline}[3]
+\newenvironment{cmdline}[4]
 {\begingroup
-\cmdlstsettings{#1}{#2}{#3}
+\cmdlstsettings{#1}{#2}{#3}{#4}
 \VerbatimOut{tmp.txt}}
 {\endVerbatimOut
-\begin{cmdframe}
 \lstinputlisting{tmp.txt}
-\end{cmdframe}
 \endgroup}
 
-\newcommand{\getcmdline}[4]
-{\begingroup
-\cmdlstsettings{#2}{#3}{#4}
-\begin{cmdframe}
-\lstinputlisting{#1}
-\end{cmdframe}
+\newcommand{\getcmdline}[7]{\begingroup
+\cmdlstsettings{#2}{#3}{#4}{#5}
+\lstinputlisting[label={lst:#7},caption={#6}]{#1}
 \endgroup}
 
-\newcommand{\dpd}[1]{\noindent \textbf{Dependencies:} #1}
-
-\newcommand{\notte}[1]{\noindent \textbf{Note:} #1}
-
-\newcommand{\version}[1]{\noindent \textbf{Version:} #1}
+\renewcommand{\lstlistingname}{Command}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
 
-% -------------------
-% --- Definicia zakladnych pojmov
-% --- Vyplnte podla vasho zadania, rok ma byt rok odovzdania
-% -------------------
+
 \def\mfrok{2024}
 \def\mfnazov{Analysis of reverse shell techniques and possible countermeasures}
 \def\mftyp{Bachelor Thesis}
@@ -134,7 +120,7 @@
 
 \def\mfpracovisko{ Department of Computer Science }
 
-\begin{document}     
+\begin{document}
 \frontmatter
 \pagestyle{empty}
 
@@ -332,8 +318,6 @@ Supervisor: & \mfskolitel \\
 %--- Prilohy---
 % -------------------
 
-%\input appendixA.tex
-
-%\input appendixB.tex
+\input appendix.tex
 
 \end{document}

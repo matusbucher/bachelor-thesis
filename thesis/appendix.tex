@@ -1,0 +1,196 @@
+\newcommand{\references}[1]{\noindent \textbf{References:} \cref{#1}}
+
+\renewcommand{\tablename}{List}
+\setlength{\tabcolsep}{15pt}
+
+
+\chapter*{Appendix: Lists of dependencies for reverse shell methods}
+\addcontentsline{toc}{chapter}{Appendix: Lists of dependencies for reverse shell methods}
+
+\section*{Programming languages interpreters}
+
+\subsection*{Python}
+
+\references{lst:python}
+
+List of python modules (\texttt{.py} files or whole directories)\footnote{usually located in \texttt{/usr/lib/python<version>/}}:
+
+\begin{longtable}{l l l l}
+\caption{Python modules used in Python reverse shell}\label{tab:python-dpd} \\
+\texttt{\_weakrefset} & \texttt{enum} & \texttt{reprlib} & \texttt{subprocess} \\
+\texttt{collections} & \texttt{functools} & \texttt{re} & \texttt{threading} \\
+\texttt{contextlib} & \texttt{keyword} & \texttt{selectors} & \texttt{types} \\
+\texttt{copyreg} & \texttt{locale} & \texttt{signal} & \texttt{warnings} \\
+\texttt{encodings} & \texttt{operator} & \texttt{socket} \\
+\end{longtable}
+
+
+\subsection*{Perl}
+
+\references{lst:perl}
+
+List of Perl modules (\texttt{.pm} files)\footnote{should be located in one of directories from \texttt{@INC} array that \texttt{perl} uses to search for module files}:
+
+\begin{longtable}{l l l l}
+\caption{Perl modules used in Perl reverse shell}\label{tab:perl-dpd} \\
+\texttt{Carp} & \texttt{Exporter} & \texttt{strict} & \texttt{warnings} \\
+\texttt{Config} & \texttt{Socket} & \texttt{vars} \\
+\texttt{DynaLoader} & \texttt{XSLoader} & \texttt{warnings/register} \\
+\end{longtable}
+
+
+\subsection*{Cpan}
+
+\references{lst:cpan}
+
+Lists of Perl modules (\texttt{.pm} and \texttt{.pl} files) and loadable objects for some modules \footnote{should be located in one of directories from \texttt{@INC} array that \texttt{perl} uses to search for module files}:
+
+\begin{longtable}{l l}
+\caption{Perl modules used in Cpan reverse shell}\label{tab:cpan-dpd-mod} \\
+\texttt{App/Cpan} & \texttt{ExtUtils/MakeMaker/Config} \\
+\texttt{B} & \texttt{ExtUtils/MakeMaker/version} \\
+\texttt{CPAN/Author} & \texttt{ExtUtils/MakeMaker} \\
+\texttt{CPAN/Bundle} & \texttt{Fcntl} \\
+\texttt{CPAN/CacheMgr} & \texttt{File/Basename} \\
+\texttt{CPAN/Complete} & \texttt{File/Copy} \\
+\texttt{CPAN/Debug} & \texttt{File/Find} \\
+\texttt{CPAN/DeferredCode} & \texttt{File/Path} \\
+\texttt{CPAN/Distribution} & \texttt{File/Path} \\
+\texttt{CPAN/Distroprefs} & \texttt{File/Spec/Functions} \\
+\texttt{CPAN/Distrostatus} & \texttt{File/Spec/Unix} \\
+\texttt{CPAN/Exception/RecursiveDependency} & \texttt{File/Spec} \\
+\texttt{CPAN/Exception/yaml\_not\_installed} & \texttt{FileHandle} \\
+\texttt{CPAN/Exception/yaml\_process\_error} & \texttt{Getopt/Std} \\
+\texttt{CPAN/FTP/netrc} & \texttt{IO/File} \\
+\texttt{CPAN/FTP} & \texttt{IO/Handle} \\
+\texttt{CPAN/FirstTime} & \texttt{IO/Seekable} \\
+\texttt{CPAN/HTTP/Credentials} & \texttt{IO} \\
+\texttt{CPAN/HandleConfig} & \texttt{Net/Ping} \\
+\texttt{CPAN/Index} & \texttt{Opcode} \\
+\texttt{CPAN/InfoObj} & \texttt{POSIX} \\
+\texttt{CPAN/LWP/UserAgent} & \texttt{Safe} \\
+\texttt{CPAN/Mirrors} & \texttt{Scalar/Util} \\
+\texttt{CPAN/Module} & \texttt{SelectSaver} \\
+\texttt{CPAN/Prompt} & \texttt{Symbol} \\
+\texttt{CPAN/Queue} & \texttt{Sys/Hostname} \\
+\texttt{CPAN/Shell} & \texttt{Term/ReadLine} \\
+\texttt{CPAN/Tarzip} & \texttt{Text/ParseWords} \\
+\texttt{CPAN/URL} & \texttt{Text/Tabs} \\
+\texttt{CPAN/Version} & \texttt{Text/Wrap} \\
+\texttt{CPAN} & \texttt{Tie/Hash} \\
+\texttt{Config\_git} & \texttt{Time/HiRes} \\
+\texttt{Config\_heavy} & \texttt{autouse} \\
+\texttt{Cwd} & \texttt{builtin} \\
+\texttt{DirHandle} & \texttt{constant} \\
+\texttt{Errno} & \texttt{if} \\
+\texttt{Exporter/Heavy} & \texttt{lib} \\
+\texttt{ExtUtils/Liblist/Kid} & \texttt{overloading} \\
+\texttt{ExtUtils/Liblist} & \texttt{overload} \\
+\texttt{ExtUtils/MM\_Any} & \texttt{re} \\
+\texttt{ExtUtils/MM\_Unix} & \texttt{subs} \\
+\texttt{ExtUtils/MM} & \texttt{utf8} \\
+\texttt{ExtUtils/MY} & \texttt{version} \\
+\end{longtable}
+
+\begin{longtable}{l l l}
+\caption{Loadable objects used in Cpan reverse shell}\label{tab:cpan-dpd-so} \\
+\texttt{auto/B/B.so} & \texttt{auto/Opcode/Opcode.so} \\
+\texttt{auto/Cwd/Cwd.so} & \texttt{auto/POSIX/POSIX.so} \\
+\texttt{auto/Fcntl/Fcntl.so} & \texttt{auto/Sys/Hostname/Hostname.so} \\
+\texttt{auto/IO/IO.so} & \texttt{auto/re/re.so} \\
+\end{longtable}
+
+
+\subsection*{IRB}
+
+\references{lst:irb1,lst:irb2}
+
+Lists of Ruby modules (\texttt{.rb} files)\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}}, loadable objects for some modules, and special gemspec files \footnote{usually located in \texttt{/usr/lib/ruby/gems/<version>/}}:
+
+\begin{longtable}{l l}
+\caption{Ruby modules in IRB reverse shell}\label{tab:irb-dpd-mod} \\
+\texttt{delegate} & \texttt{reline/unicode/east\_asian\_width} \\
+\texttt{fileutils} & \texttt{reline/unicode} \\
+\texttt{forwardable/impl} & \texttt{reline/version} \\
+\texttt{forwardable} & \texttt{reline} \\
+\texttt{irb/color\_printer} & \texttt{ripper/core} \\
+\texttt{irb/color} & \texttt{ripper/filter} \\
+\texttt{irb/completion} & \texttt{ripper/lexer} \\
+\texttt{irb/context} & \texttt{ripper/sexp} \\
+\texttt{irb/easter-egg} & \texttt{ripper} \\
+\texttt{irb/ext/save-history} & \texttt{rubygems/basic\_specification} \\
+\texttt{irb/extend-command} & \texttt{rubygems/compatibility} \\
+\texttt{irb/init} & \texttt{rubygems/core\_ext/kernel\_gem} \\
+\texttt{irb/input-method} & \texttt{rubygems/core\_ext/kernel\_require} \\
+\texttt{irb/inspector} & \texttt{rubygems/defaults} \\
+\texttt{irb/lc/error} & \texttt{rubygems/dependency} \\
+\texttt{irb/locale} & \texttt{rubygems/deprecate} \\
+\texttt{irb/magic-file} & \texttt{rubygems/errors} \\
+\texttt{irb/output-method} & \texttt{rubygems/exceptions} \\
+\texttt{irb/ruby-lex} & \texttt{rubygems/path\_support} \\
+\texttt{irb/src\_encoding} & \texttt{rubygems/platform} \\
+\texttt{irb/version} & \texttt{rubygems/request\_set} \\
+\texttt{irb/workspace} & \texttt{rubygems/requirement} \\
+\texttt{irb} & \texttt{rubygems/resolver} \\
+\texttt{pp} & \texttt{rubygems/source} \\
+\texttt{prettyprint} & \texttt{rubygems/specification} \\
+\texttt{rbconfig} & \texttt{rubygems/stub\_specification} \\
+\texttt{reline/ansi} & \texttt{rubygems/text} \\
+\texttt{reline/config} & \texttt{rubygems/tsort/lib/tsort} \\
+\texttt{reline/general\_io} & \texttt{rubygems/tsort} \\
+\texttt{reline/history} & \texttt{rubygems/unknown\_command\_spell\_checker} \\
+\texttt{reline/key\_actor/base} & \texttt{rubygems/util/list} \\
+\texttt{reline/key\_actor/emacs} & \texttt{rubygems/util} \\
+\texttt{reline/key\_actor/vi\_command} & \texttt{rubygems/version} \\
+\texttt{reline/key\_actor/vi\_insert} & \texttt{rubygems} \\
+\texttt{reline/key\_actor} & \texttt{set} \\
+\texttt{reline/key\_stroke} & \texttt{tempfile} \\
+\texttt{reline/kill\_ring} & \texttt{timeout} \\
+\texttt{reline/line\_editor} & \texttt{tmpdir} \\
+\texttt{reline/terminfo} &  \\
+\end{longtable}
+
+\begin{longtable}{l l l}
+\caption{Loadable objects used in IRB reverse shell}\label{tab:irb-dpd-so} \\
+\texttt{enc/encdb.so} & \texttt{io/wait.so} & \texttt{ripper.so} \\
+\texttt{io/console.so} & \texttt{monitor.so} & \texttt{socket.so} \\
+\end{longtable}
+
+\begin{longtable}{l}
+\caption{Gemspec files used in IRB reverse shell}\label{tab:irb-dpd-gemspec} \\
+\texttt{gems/irb-1.6.2} \\
+\texttt{specifications/default/irb-1.6.2.gemspec} \\
+\texttt{specifications/default/io-console-0.6.0.gemspec} \\ \texttt{specifications/default/reline-0.3.2.gemspec} \\
+\end{longtable}
+
+
+\subsection*{Node.js}
+
+\references{lst:node}
+
+Lists of JavaScript modules (\texttt{.js} files)\footnote{usually located in \texttt{/usr/share/nodejs/}}:
+
+\begin{longtable}{l l}
+\caption{JavaScript modules used in Node.js reverse shell}\label{tab:node-dpd} \\
+\texttt{/acorn-walk/dist/walk.js} & \texttt{/cjs-module-lexer/lexer.js} \\
+\texttt{/acorn/dist/acorn.js} & \texttt{/undici/undici-fetch.js} \\
+\texttt{/cjs-module-lexer/dist/lexer.js} & \\
+\end{longtable}
+
+
+\subsection*{Julia}
+
+\references{lst:julia}
+
+Additional dynamic libraries (apart from those listed with \texttt{ldd})\footnote{should be located in \texttt{/lib/} or \texttt{/lib/julia/}}:
+
+\begin{longtable}{l l l}
+\caption{Dynamic libraries used in Julia reverse shell}\label{tab:julia-dpd} \\
+\texttt{libLLVM-16jl.so} & \texttt{libjulia-internal.so.1.11} & \texttt{libquadmath.so.0} \\
+\texttt{libatomic.so.1} & \texttt{libjulia.so.1.11} & \texttt{librt.so.1} \\
+\texttt{libblastrampoline.so.5} & \texttt{libm.so.6} & \texttt{libstdc++.so.6} \\
+\texttt{libgcc\_s.so.1} & \texttt{libmpfr.so.6} & \texttt{libunwind.so.8} \\
+\texttt{libgfortran.so.5} & \texttt{libopenblas64\_.so} & \texttt{libz.so.1} \\
+\texttt{libgmp.so.10} & \texttt{libopenlibm.so} & \texttt{sys.so} \\
+\texttt{libjulia-codegen.so.1.11} & \texttt{libpcre2-8.so} & \\
+\end{longtable}

