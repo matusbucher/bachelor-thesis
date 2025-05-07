@@ -1,8 +1,5 @@
 \chapter{Framework for analysis}
-\label{Testing framework}
-
 \label{chap:framework}
-
 
 
 \section{Testing environment}
@@ -13,15 +10,14 @@ The host system distribution (from which the \texttt{chroot} command is executed
 
 The specifications for the attacker machine do not matter; some methods require a slightly more complex listening setup than just opening a port, which we will discuss later.
 
+
 \section{Commands syntax and glossary}
 
 For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input and output to the connected socket.
 
-The attacker must have an open port (can be any available) and listen for any connection on that port. In most cases, a simple netcat command should be sufficient for that:
+The attacker must have an open port (can be any available) and listen for any connection on that port. In most cases, a simple NetCat listener should be sufficient for that.
 
-\begin{cmdline}{bash}{*}{nc}{}
-nc -lp *\port*
-\end{cmdline}
+\getcmdline{chapters/chapter2/listener.txt}{bash}{*}{nc}{}{NetCat listener for catching reverse shell}{listener}
 
 The non-obligatory option \texttt{-v} can be added for more verbose output. If the given method requires a more complex setup on the attacker's side, we will provide the necessary commands for the setup with an explanation.
 

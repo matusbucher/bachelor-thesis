@@ -18,5 +18,4 @@ class ShellHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", port), ShellHandler)
-    print(f"[*] Listening on port {port}...")
     server.serve_forever()

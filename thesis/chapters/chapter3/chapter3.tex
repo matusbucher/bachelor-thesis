@@ -195,7 +195,7 @@ Reverse shell via PowerShell is more complicated than previous shells. To work w
 
 To run the script saved as \scriptfile , execute the \texttt{pwsh} command with the option \texttt{-f} (or \texttt{-File}):
 
-\getcmdline{\commandpath{pwsh-runscript.txt}}{bash}{*}{pwsh}{}{Running a PowerShell reverse shell script}{pwsh-runscript}
+\getcmdline{\commandpath{pwsh-runscript.txt}}{bash}{*}{pwsh}{}{Running the PowerShell reverse shell script}{pwsh-runscript}
 
 As mentioned, here is how it could be executed as a one-line command:
 
@@ -246,7 +246,7 @@ Python is one of the most popular programming languages, known for its simple, r
 
 \dpd{Python modules (see \cref{tab:python-dpd} in the appendix)}
 
-\getcmdline{\commandpath{python-runscript.txt}}{bash}{*}{python}{}{Running a Python reverse shell script}{python-runscript}
+\getcmdline{\commandpath{python-runscript.txt}}{bash}{*}{python}{}{Running the Python reverse shell script}{python-runscript}
 
 Now, the script can be turned into a one-liner using Python's \texttt{-c} option and separating lines with semicolons \cite{python-man}. The for loop, however, must be compressed to a list comprehension as \inlinecmdline{[os.dup2(sock.fileno(),fd) for fd in (0,1,2)]} or expanded into three separate lines (one for each file descriptor).
 
@@ -277,7 +277,7 @@ Perl is a high-level language designed as a general-purpose Unix scripting langu
 
 \dpd{\texttt{/dev/null}, Perl modules (see \cref{tab:perl-dpd} in the appendix), loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket})}
 
-\getcmdline{\commandpath{perl-runscript.txt}}{bash}{*}{perl}{}{Running a Perl reverse shell script}{perl-runscript}
+\getcmdline{\commandpath{perl-runscript.txt}}{bash}{*}{perl}{}{Running the Perl reverse shell script}{perl-runscript}
 
 To make it into a one-line command, use the \texttt{-e} (or \texttt{-E}) option with the compressed script. \cite{perl-man}
 
@@ -313,7 +313,7 @@ Our minimal example of a PHP reverse shell consists of only two function calls. 
 
 We can use the option \texttt{-f} (or \texttt{--file}) to execute the script (but it also works without the option, when we pass the filename as the only argument):
 
-\getcmdline{\commandpath{php-runscript.txt}}{bash}{*}{php}{}{Running a PHP reverse shell script}{php-runscript}
+\getcmdline{\commandpath{php-runscript.txt}}{bash}{*}{php}{}{Running the PHP reverse shell script}{php-runscript}
 
 The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows us to run the code as one command \cite{php-man}. However, we must omit the PHP opening and closing tags (\texttt{<?php} and \texttt{?>}) in the compressed script.
 
@@ -327,7 +327,7 @@ Also, be aware that the \texttt{\$sock} variable (to which the return value of \
 
 \item \inlinecmdline{exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
 \item \inlinecmdline{system("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
-\item \inlinecmdline{shell\_exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd\")} or \inlinecmdline{`\shell\ <\&\fd\ >\&\fd\ 2>\&\fd `} (with the backtick symbols) -- these are semantically equivalent
+\item \inlinecmdline{shell\_exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")} or \inlinecmdline{`\shell\ <\&\fd\ >\&\fd\ 2>\&\fd `} (with the backtick symbols) -- these are semantically equivalent
 \item \inlinecmdline{passthru("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
 \item \inlinecmdline{popen("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ", "r")}
 
@@ -338,11 +338,23 @@ Also, be aware that the \texttt{\$sock} variable (to which the return value of \
 
 \version{5.3.6}
 
+Lua is a lightweight, embeddable scripting language designed primarily for integration into other applications. It is widely used in game development, embedded systems, and configuration scripting. The LuaRocks package manager (\texttt{luarocks}) allows users to extend the language's minimal core by installing additional packages.
+
+We need the \texttt{socket} library for a reverse shell from the \texttt{luasocket} package. To install it, we issue:
+
+\begin{cmdline}{bash}{*}{luarocks}{}
+luarocks install luasocket
+\end{cmdline}
+
+However, the following script depends on only two files from the package (see \textbf{Dependencies}).
+
 \getcmdline{\commandpath{lua-script.txt}}{[5.0]Lua}{*}{}{}{Lua reverse shell script}{lua-script}
 
 \dpd{\texttt{sh} shell (\texttt{os.execute()} uses it to execute the command), Lua \texttt{socket} module\footnote{\texttt{.lua} file, usually located in \texttt{/usr/share/lua/<version>/}} and loadable object \texttt{socket/core.so}\footnote{usually located somewhere in \texttt{/usr/lib/} under \texttt{lua/<version>} directory}}
 
-\getcmdline{\commandpath{lua-runscript.txt}}{bash}{*}{lua}{}{Running a Lua reverse shell script}{lua-runscript}
+\getcmdline{\commandpath{lua-runscript.txt}}{bash}{*}{lua}{}{Running the Lua reverse shell script}{lua-runscript}
+
+Another option, though kind of redundant, is compiling the Lua code with \texttt{luac} compiler and then running the compiled code with \texttt{lua} interpreter. We can also run the script directly from the command line using Lua's \texttt{-e} option.
 
 \getcmdline{\commandpath{lua-oneline.txt}}{bash}{*}{lua}{}{Lua one-line reverse shell}{lua-oneline}
 
@@ -362,6 +374,8 @@ The simplicity of the Ruby language makes the reverse shell script again pretty 
 \getcmdline{\commandpath{ruby-script2.txt}}{ruby}{*}{}{}{Ruby reverse shell script (version 2)}{ruby-script2}
 
 \dpd{same dependencies from \cref{lst:ruby-script1}, \texttt{sh} shell (\texttt{popen()} function uses it to execute the command)}
+
+\getcmdline{\commandpath{ruby-runscript.txt}}{bash}{*}{ruby}{}{Running the Ruby reverse shell script}{ruby-runscript}
 
 The \texttt{ruby} tool supports option \texttt{-e}, which can turn the scripts into one-line commands \cite{ruby-man}.
 
@@ -388,6 +402,8 @@ Ruby also comes with an interactive shell called IRB (Interactive Ruby), which a
 \getcmdline{\commandpath{node-script.txt}}{java}{*}{}{}{Node.js reverse shell script (JavaScript)}{node-script}
 
 \dpd{JavaScript modules (see \cref{tab:node-dpd} in the appendix)}
+
+\getcmdline{\commandpath{node-runscript.txt}}{bash}{*}{node}{}{Running the Node.js reverse shell script}{node-runscript}
 
 \getcmdline{\commandpath{node-oneline.txt}}{bash}{*}{node}{}{Node.js one-line reverse shell}{node-oneline}
 
@@ -417,7 +433,9 @@ Naturally, Julia provides socket programming functionality, making it capable of
 
 \dpd{dynamic libraries (see \cref{tab:julia-dpd} in the appendix), Julia module \texttt{Sockets} (files \texttt{Sockets.jl} and \texttt{Sockets/Project.toml}\footnote{usually located in \texttt{/usr/local/share/stdlib/<version>}})}
 
-Jullia command-line interface comes with the option \texttt{-e} (or \texttt{-{}-eval}), which evaluates the followed code, including the compressed reverse shell script \footnote{To compress the script, we just separate lines with semicolons, including the opening and closing lines of the while loop and the if conditional.} \cite{julia-doc}.
+\getcmdline{\commandpath{julia-runscript.txt}}{bash}{*}{julia}{}{Running the Julia reverse shell script}{julia-runscript}
+
+Jullia command-line interface comes with the option \texttt{-e} (or \texttt{-{}-eval}), which can evaluates the compressed reverse shell script.
 
 \getcmdline{\commandpath{julia-oneline.txt}}{bash}{*}{julia}{}{Julia one-line reverse shell}{julia-oneline}
 
@@ -425,7 +443,7 @@ Jullia command-line interface comes with the option \texttt{-e} (or \texttt{-{}-
 
 So far, we have mentioned reverse shell methods that utilize one or more software tools with CLI to establish a connection back to the attacker. Another approach could be running an executable, e.g., from compiled code. In this subsection, we list methods that require compilation (not necessarily into a machine code, see \cref{java}) before running and, therefore, cannot be executed directly from the command line.
 
-\subsection{C (\texttt{gcc})}
+\subsection{C/C++ (\texttt{gcc})}
 
 \version{13.3.0}
 
@@ -454,11 +472,29 @@ So far, we have mentioned reverse shell methods that utilize one or more softwar
 
 \section{Other tools}
 
-\subsection{AWK (\texttt{awk/gawk})}
+\subsection{Gawk (\texttt{gawk})}
 
 \version{GNU Awk 5.2.1}
 
-\getcmdline{\commandpath{awk-script.txt}}{awk}{^}{}{}{AWK reverse shell script}{awk-script}
+AWK is a text-processing and pattern-scanning language commonly used in Unix-like systems for data manipulation tasks. Initially developed to work with textual data stored in files, it was never meant for networking purposes \cite{gawk-doc}.
+
+Its GNU implementation, gawk, extends the standard AWK features with more powerful capabilities, including built-in support for network communication. Specifically, gawk allows the use of special file names in the form of
+
+\qquad \texttt{/net-type/protocol/localport/hostname/remoteport}
+
+together with the \texttt{|\&} coprocess operator for creating TCP/IP network connections \cite{gawk-man}. We will provide the example in the form of an AWK script, as we did in the previous sections, but it can be executed directly from the command line.
+
+\getcmdline{\commandpath{gawk-script.txt}}{awk}{*}{}{}{Gawk reverse shell script}{gawk-script}
+
+Since the gawk's coprocess feature (the \texttt{|\&} operator) captures only the standard output of the command, while the coprocess's standard error goes to the same place as gawk's standard error \cite{gawk-io}. So we need to explicitly redirect it to standard output within the command string itself. This was done by appending \texttt{2>\&1} to the command \texttt{c}.
+
+It is also vital to close the command's streams after execution because each shell command that the attacker runs through the reverse shell is associated with a separate process (or opened file). If you attempt to execute the same command again without closing the previous instance, gawk will reuse the existing process, which could lead to unexpected results \cite{gawk-close}. Closing the coprocess also saves system resources.
+
+Next, we show how to run the script file (option \texttt{-f} or \texttt{--file}) or execute the script from the command line.
+
+\getcmdline{\commandpath{gawk-runscript.txt}}{bash}{*}{gawk}{}{Running the Gawk reverse shell script}{gawk-runscript}
+
+\getcmdline{\commandpath{gawk-oneline.txt}}{bash}{*}{gawk}{}{Gawk one-line reverse}{gawk-oneline}
 
 \subsection{Tools compiled with python support}
 

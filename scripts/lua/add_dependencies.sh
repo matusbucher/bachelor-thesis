@@ -3,33 +3,12 @@
 ROOT_DIR="/home/matus/testroot"
 NOT_FOUND=0
 
-MOD_DIR="/usr/lib/python3.12/"
-
-declare -a MODULES=(
-	"encodings"
-	"socket.py"
-	"selectors.py"
-	"collections"
- 	"keyword.py"
- 	"operator.py"
- 	"reprlib.py"
- 	"enum.py"
- 	"types.py"
- 	"functools.py"
- 	"subprocess.py"
- 	"locale.py"
- 	"re"
- 	"copyreg.py"
- 	"signal.py"
- 	"threading.py"
- 	"_weakrefset.py"
-	"warnings.py"
-	"contextlib.py"
+declare -a DEPS=(
+	"/usr/share/lua/5.3/socket.lua"
+	"/usr/lib/x86_64-linux-gnu/lua/5.3/socket/core.so"
 )
 
-for MOD in ${MODULES[@]}; do
-	DEP="$MOD_DIR$MOD"
-
+for DEP in ${MODULES[@]}; do
 	if [ ! -e "$DEP" ]; then
 		echo "Dependency $DEP not found. Skipping..."
 		NOT_FOUND=$((NOT_FOUND + 1))
@@ -44,7 +23,7 @@ for MOD in ${MODULES[@]}; do
 		if [ ! -d "$DEP_DEST" ]; then
 			mkdir "$DEP_DEST"
 		fi
-		cp -rL"$DEP/"* "$DEP_DEST/"
+		cp -rL "$DEP/"* "$DEP_DEST/"
 	else
 		cp "$DEP" "$DEP_DEST"
 	fi

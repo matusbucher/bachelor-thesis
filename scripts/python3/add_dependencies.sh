@@ -3,18 +3,23 @@
 ROOT_DIR="/home/matus/testroot"
 NOT_FOUND=0
 
-NODE_DIR="/usr/share/nodejs"
+MOD_DIR="/usr/lib/python3.12/"
 
-declare -a LIBS=(
-	"/cjs-module-lexer/lexer.js"
-	"/cjs-module-lexer/dist/lexer.js"
-	"/undici/undici-fetch.js"
-	"/acorn/dist/acorn.js"
-	"/acorn-walk/dist/walk.js"
+declare -a MODULES=(
+	"encodings"
+	"socket.py"
+	"selectors.py"
+	"collections"
+ 	"keyword.py"
+ 	"operator.py"
+ 	"reprlib.py"
+ 	"enum.py"
+ 	"types.py"
+ 	"functools.py"
 )
 
-for LIB in ${LIBS[@]}; do
-	DEP="$NODE_DIR$LIB"
+for MOD in ${MODULES[@]}; do
+	DEP="$MOD_DIR$MOD"
 
 	if [ ! -e "$DEP" ]; then
 		echo "Dependency $DEP not found. Skipping..."
@@ -35,7 +40,7 @@ for LIB in ${LIBS[@]}; do
 		cp "$DEP" "$DEP_DEST"
 	fi
 
-	echo "Copied dependency $LIB."
+	echo "Copied dependency $MOD."
 done
 
 

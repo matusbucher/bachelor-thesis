@@ -19,8 +19,9 @@ mkdir "$ROOT_DIR"
 $SCRIPT_DIR/add_shell.sh bash
 $SCRIPT_DIR/copy_command.sh make
 
-echo "Copying Makefile and configuration file to testroot..."
+echo "Copying Makefile, configuration and source files to testroot..."
 cp $REVERSESHELL_DIR/Makefile $ROOT_DIR/
 cp $REVERSESHELL_DIR/configure $ROOT_DIR/
+cp -rL $REVERSESHELL_DIR/src $ROOT_DIR/
 
 echo "Done cleaning."

