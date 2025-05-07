@@ -54,6 +54,28 @@ Two Telnet instances were needed because anonymous Unix pipes are unidirectional
 \dpd{\texttt{mkfifo}, \texttt{rm}}
 
 
+\subsection{Socat (\texttt{socat})}
+
+\version{1.8.0}
+
+Socat (short for SOcket CAT) is a versatile networking tool that acts as a bidirectional data relay between two data streams, such as TCP connections, UNIX sockets, or files. It is a more complex variant of NetCat with more flexibility and a vast number of options. Thus, running a reverse shell with Socat is really simple and convenient.
+
+Socat uses many different ``address types'' (composed of an address type keyword and an optional argument) which give instructions and the necessary information for establishing the byte streams \cite{socat-man}. We will use the \texttt{tcp:<host>:<port>} type for connecting to the remote attacker and the \texttt{exec:<command-line>}, which runs the command as a forked subprocess and connects the standard input and output to the created socket. We can add \texttt{stderr} option to the \texttt{exec} address type, so it also redirects the standard error output. \cite{socat-man}
+
+\getcmdline{\commandpath{socat.txt}}{bash}{*}{socat}{tcp,exec}{Socat reverse shell}{socat}
+
+Both \texttt{tcp} and \texttt{exec} address types have multiple additional options, which can be helpful in some scenarios. They can be appended right after the address types, separated with commas and no spaces. We list only a few options for \texttt{exec} address type (apart from the used \texttt{stderr} option) \cite{socat-man}:
+
+\setlength{\leftmargini}{5em}
+\begin{itemize}
+\item[\texttt{nofork}] Does not fork a subprocess for executing the program, instead calls \texttt{execvp()} or \texttt{system()} directly from the actual socat instance.
+\item[\texttt{pty}] Establishes communication with the sub-process using a pseudo-terminal instead of a socket pair. For this to function, \texttt{openpty} or \texttt{ptmx} device is necessary.
+\item[\texttt{sigint}] Has \texttt{socat} pass the SIGINT signal to the sub process. Otherwise, sending this signal terminates the \texttt{socat} process.
+\item[\texttt{sigquit}] The same as the \texttt{sigint} option, but with the SIGQUIT signal.
+\end{itemize}
+\setlength{\leftmargini}{2.5em}
+
+
 \subsection{Socket (\texttt{socket})}
 
 \version{1.1}
@@ -143,7 +165,7 @@ Additionally, there are two other clones of \texttt{ksh93} which also support th
 
 Z shell is a feature-rich Unix shell offering advanced scripting capabilities and customization options. It is the default login shell on macOS and Kali Linux. Unlike Bash or Korn shell, Z shell does not support the \texttt{/dev/tcp/} or \texttt{/dev/udp/} pseudo-filesystems. Instead, additional features of the Z shell, including networking, are in modules, separate from the shell's core. Each module may be linked into the shell at build time or dynamically linked while the shell is running. \cite{zshmodules-man}
 
-The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can be loaded with the \texttt{zmodload} keyword. With the module loaded, we can run the \texttt{ztcp} command, which opens a new TCP connection to the specified host and port. The argument of option \textbf{-d} will be taken as the target file descriptor for the connection \cite{zsh-net-tcp-doc}. We can then redirect the standard input and output of the new shell session to this file descriptor.
+The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can be loaded with the \texttt{zmodload} keyword. With the module loaded, we can run the \texttt{ztcp} command, which opens a new TCP connection to the specified host and port. The argument of option \texttt{-d} will be taken as the target file descriptor for the connection \cite{zsh-net-tcp-doc}. We can then redirect the standard input and output of the new shell session to this file descriptor.
 
 \getcmdline{\commandpath{zsh.txt}}{bash}{*}{zsh}{}{Z shell reverse shell}{zsh}
 
@@ -154,6 +176,10 @@ The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can
 
 \TODO{maybe remove this method}
 
+\subsection{Tcl shell (\texttt{tclsh})}
+
+\TODO{}
+
 
 \subsection{PowerShell (\texttt{pwsh}/\texttt{powershell})}
 
@@ -161,11 +187,15 @@ The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can
 
 PowerShell is a powerful shell and scripting language developed by Microsoft. Unlike traditional shells, it is object-oriented. PowerShell comes preinstalled on modern Windows systems, but additionally, an open-source, cross-platform version -- \texttt{pwsh} -- is available for Linux and macOS. The following method is compatible on all platforms.
 
-Reverse shell via PowerShell is more complicated than previous shells. To work with network connections, it requires using .NET classes and managing multiple objects such as sockets, streams, and others. Hence, we will need a PowerShell script rather than a simple command with redirections (this makes this method closer to the ``programming language interpreters'' category -- \cref{program-interpreters}). Nevertheless, it can still be made into a one-liner using \texttt{-c} option and separating lines from the script with a semicolon.
+Reverse shell via PowerShell is more complicated than previous shells. To work with network connections, it requires using .NET classes and managing multiple objects such as sockets, streams, and others. Hence, we will need a PowerShell script rather than a simple command with redirections (this makes this method closer to the ``programming language interpreters'' category -- \cref{program-interpreters}). Nevertheless, it can still be made into a one-liner using the \texttt{-c} (or \texttt{-Command}) option and separating lines from the script with a semicolon (\cref{pwsh-oneline}).
 
 \getcmdline{\commandpath{pwsh-script.txt}}{bash}{*}{}{}{PowerShell reverse shell script}{pwsh-script}
 
 \dpd{\texttt{pwsh.dll} \footnote{usually located in \texttt{/opt/microsoft/powershell/}}, .NET}
+
+To run the script saved as \scriptfile , execute the \texttt{pwsh} command with the option \texttt{-f} (or \texttt{-File}):
+
+\getcmdline{\commandpath{pwsh-runscript.txt}}{bash}{*}{pwsh}{}{Running a PowerShell reverse shell script}{pwsh-runscript}
 
 As mentioned, here is how it could be executed as a one-line command:
 
@@ -216,11 +246,25 @@ Python is one of the most popular programming languages, known for its simple, r
 
 \dpd{Python modules (see \cref{tab:python-dpd} in the appendix)}
 
-\notte{We tested and analyzed dependent modules for the Python 3 version, but the script is also compatible with the older Python 2.x versions (but perhaps with different dependencies).}
+\getcmdline{\commandpath{python-runscript.txt}}{bash}{*}{python}{}{Running a Python reverse shell script}{python-runscript}
 
-Now, the script can be turned into a one-liner using Python's \texttt{-c} option \cite{python-man} and separating lines with semicolons. The for loop, however, must be compressed to a list comprehension as \inlinecmdline{[os.dup2(sock.fileno(),fd) for fd in (0,1,2)]} or expanded into three separate lines (one for each file descriptor).
+Now, the script can be turned into a one-liner using Python's \texttt{-c} option and separating lines with semicolons \cite{python-man}. The for loop, however, must be compressed to a list comprehension as \inlinecmdline{[os.dup2(sock.fileno(),fd) for fd in (0,1,2)]} or expanded into three separate lines (one for each file descriptor).
 
 \getcmdline{\commandpath{python-oneline.txt}}{bash}{*}{python}{}{Python one-line reverse shell}{python-oneline}
+
+\subsubsection{Pip (\texttt{pip})}
+
+\version{24.0 (python 3.12)}
+
+Pip is the default package manager for Python, used to install and manage third-party libraries from the Python Package Index (PyPI). Most distributions of Python come with the \texttt{pip} tool preinstalled. While primarily intended for managing dependencies in software projects, Pip can be misused to execute arbitrary Python code during package installation via a specially crafted \texttt{setup.py} script. This file should contain the package's metadata and installation instructions, and Pip automatically searches for it and executes it to build and install the package \cite{pip-install-doc}.
+
+So, we can use the Python script for reverse shell (see \cref{lst:python-script}) as the \texttt{setup.py} file, and then give the directory in which this file is as the argument to the \texttt{pip install} command. For clarity and a general case, we use a temporary directory \tmp\ to place the custom \texttt{setup.py} file.
+
+\getcmdline{\commandpath{pip.txt}}{bash}{*}{mkdir,echo,pip,rm}{}{Pip reverse shell}{pip}
+
+\TODO{dependencies}
+
+We need to use the \texttt{-{}-break-system-packages} option in case of the externally managed environment \cite{pip-install-doc}. That is when the Python installation is marked as ``externally managed'' by the OS package manager (like \texttt{apt}) and the \texttt{pip} tool is about to install packages ``system-wide'', which could overwrite system-managed Python packages (and thus break some functionality that depends on those packages). We are not overwriting any system packages in our case, but it is an additional security permission that the \texttt{pip} tool requires.
 
 
 \subsection{Perl (\texttt{perl})}
@@ -233,11 +277,14 @@ Perl is a high-level language designed as a general-purpose Unix scripting langu
 
 \dpd{\texttt{/dev/null}, Perl modules (see \cref{tab:perl-dpd} in the appendix), loadable object \texttt{auto/Socket/Socket.so} (for module \texttt{Socket})}
 
+\getcmdline{\commandpath{perl-runscript.txt}}{bash}{*}{perl}{}{Running a Perl reverse shell script}{perl-runscript}
+
 To make it into a one-line command, use the \texttt{-e} (or \texttt{-E}) option with the compressed script. \cite{perl-man}
 
 \getcmdline{\commandpath{perl-oneline.txt}}{bash}{*}{perl}{}{Perl one-line reverse shell}{perl-oneline}
 
 \subsubsection{Comprehensive Perl Archive Network (\texttt{cpan})}
+\label{cpan}
 
 \version{Perl 5.38.2}
 
@@ -258,38 +305,65 @@ PHP is a widely used server-side scripting language. It is primarily designed fo
 
 Our minimal example of a PHP reverse shell consists of only two function calls. Since these functions are part of PHP's core, loading additional modules is not required (which makes the dependency list minimalistic).
 
-\getcmdline{\commandpath{php-script.txt}}{php}{*}{}{}{PHP reverse shell script)}{php-script}
+\getcmdline{\commandpath{php-script.txt}}{php}{*}{}{}{PHP reverse shell script}{php-script}
 
 \dpd{\texttt{UTC} file\footnote{usually located in \texttt{/usr/share/zoneinfo/}; without it, the \texttt{php} tool does not work at all}, \texttt{sh} shell (\texttt{php} uses it to execute commands)}
 
-Additionally, the \inlinecmdline{exec("\shell\ <\&3 >\&3 2>\&3")} call can be substituted with other function calls with the exact dependencies:
+\notte{This will fork the shell session without the need to use \texttt{\&} in the command passed to the \texttt{proc\_open()} function.}
+
+We can use the option \texttt{-f} (or \texttt{--file}) to execute the script (but it also works without the option, when we pass the filename as the only argument):
+
+\getcmdline{\commandpath{php-runscript.txt}}{bash}{*}{php}{}{Running a PHP reverse shell script}{php-runscript}
+
+The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows us to run the code as one command \cite{php-man}. However, we must omit the PHP opening and closing tags (\texttt{<?php} and \texttt{?>}) in the compressed script.
+
+\getcmdline{\commandpath{php-oneline.txt}}{bash}{*}{php}{}{PHP one-line reverse shell}{php-oneline}
+
+Additionally, the \texttt{proc\_open()} call can be substituted with other functions that accept only the command argument without the descriptor specification. This can be fixed using standard shell redirections as part of the command passed to the function. The \texttt{fsockopen()} call assigns the first available file descriptor number to the opened socket, which we can use for the shell redirections. However, this number differs when executing the script from a file or with the \texttt{-r} option from the command line. In the first case (\cref{lst:php-runscript}), the assigned file descriptor should be number 4, while in the second case (\cref{lst:php-oneline}) it should be number 3\footnote{We have not investigated further why this is so; we have identified the numbers just from testing}. We will refer to this number as \fd.
+
+Also, be aware that the \texttt{\$sock} variable (to which the return value of \texttt{fsockopen()} call is assigned) is still needed even with the substituted functions, which do not directly use this variable, because otherwise the socket would be closed immediately by PHP garbage collection. Finally, these are the functions that can be used instead of \texttt{proc\_open()} one:
 
 \begin{itemize}
 
-\item \inlinecmdline{shell\_exec("\shell\ <\&3 >\&3 2>\&3")} or \inlinecmdline{`\shell\ <\&3 >\&3 2>\&3`} (with the backtick symbols) -- These are semantically equivalent.
-\item \inlinecmdline{system("\shell\ <\&3 >\&3 2>\&3")}
-\item \inlinecmdline{passthru("\shell\ <\&3 >\&3 2>\&3")}
-\item \inlinecmdline{popen("\shell\ <\&3 >\&3 2>\&3", "r")}
-\item \inlinecmdline{proc\_open("\shell\", array(0=>\$sock, 1=>\$sock, 2=>\$sock), \$pipes)} -- This will fork the shell session without the need to use \texttt{\&}. The \texttt{\$sock} variable is the socket returned from the \inlinecmdline{fsockopen("\host",\port)} call (see the comment in the script).
+\item \inlinecmdline{exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
+\item \inlinecmdline{system("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
+\item \inlinecmdline{shell\_exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd\")} or \inlinecmdline{`\shell\ <\&\fd\ >\&\fd\ 2>\&\fd `} (with the backtick symbols) -- these are semantically equivalent
+\item \inlinecmdline{passthru("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
+\item \inlinecmdline{popen("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ", "r")}
 
 \end{itemize}
 
-The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows us to run the code as one command \cite{php-man}.
 
-\getcmdline{\commandpath{php-oneline.txt}}{bash}{*}{php}{}{PHP one-line reverse shell}{php-oneline}
+\subsection{Lua (\texttt{lua})}
+
+\version{5.3.6}
+
+\getcmdline{\commandpath{lua-script.txt}}{[5.0]Lua}{*}{}{}{Lua reverse shell script}{lua-script}
+
+\dpd{\texttt{sh} shell (\texttt{os.execute()} uses it to execute the command), Lua \texttt{socket} module\footnote{\texttt{.lua} file, usually located in \texttt{/usr/share/lua/<version>/}} and loadable object \texttt{socket/core.so}\footnote{usually located somewhere in \texttt{/usr/lib/} under \texttt{lua/<version>} directory}}
+
+\getcmdline{\commandpath{lua-runscript.txt}}{bash}{*}{lua}{}{Running a Lua reverse shell script}{lua-runscript}
+
+\getcmdline{\commandpath{lua-oneline.txt}}{bash}{*}{lua}{}{Lua one-line reverse shell}{lua-oneline}
 
 
 \subsection{Ruby (\texttt{ruby})}
 
 \version{3.2.3}
 
+Ruby is a dynamic, object-oriented programming language known for its clean syntax and focus on developer productivity. It is widely used in web development (notably with Ruby on Rails, a server-side web application framework) but functions well as a general-purpose scripting language.
+
+The simplicity of the Ruby language makes the reverse shell script again pretty straightforward. We present two fundamentally different versions -- the first redirects standard file descriptors and replaces the process with the given shell; the second reads commands from the socket, executes them with the \texttt{sh} shell, and sends the output back to the socket in a loop. Both scripts require only one module.
+
 \getcmdline{\commandpath{ruby-script1.txt}}{ruby}{*}{}{}{Ruby reverse shell script (version 1)}{ruby-script1}
 
-\dpd{Ruby module \texttt{socket}\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}} and loadable object \texttt{socket.so}\footnote{usually located somewhere in \texttt{/usr/lib/}}}
+\dpd{Ruby module \texttt{socket}\footnote{\texttt{.rb} file, usually located in \texttt{/usr/lib/ruby/<version>/}} and loadable object \texttt{socket.so}\footnote{usually located somewhere in \texttt{/usr/lib/} under \texttt{ruby/<version>} directory}}
 
 \getcmdline{\commandpath{ruby-script2.txt}}{ruby}{*}{}{}{Ruby reverse shell script (version 2)}{ruby-script2}
 
-\dpd{same dependencies from \cref{lst:ruby-script1}, \texttt{sh} shell (\texttt{popen} function uses it to execute the command)}
+\dpd{same dependencies from \cref{lst:ruby-script1}, \texttt{sh} shell (\texttt{popen()} function uses it to execute the command)}
+
+The \texttt{ruby} tool supports option \texttt{-e}, which can turn the scripts into one-line commands \cite{ruby-man}.
 
 \getcmdline{\commandpath{ruby-oneline.txt}}{bash}{*}{ruby}{}{Ruby one-line reverse shell}{ruby-oneline}
 
@@ -298,9 +372,11 @@ The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows
 
 \version{1.6.2}
 
+Ruby also comes with an interactive shell called IRB (Interactive Ruby), which allows users to execute Ruby code line by line directly from the terminal. Similarly to the \texttt{cpan} (\cref{cpan}) tool, we can pass the compressed script (either \cref{lst:ruby-script1} or \cref{lst:ruby-script2}) to the \texttt{irb} through a pipeline.
+
 \getcmdline{\commandpath{irb-oneline.txt}}{bash}{*}{echo,irb}{}{IRB one-line reverse shell}{irb-oneline}
 
-\dpd{\texttt{ruby} \footnote{or \texttt{ruby<version>}, since some modules explicitly call this binary}, dependencies from either \cref{lst:ruby-script1}\ or \cref{lst:ruby-script2}, \texttt{/dev/null}, Ruby modules, loadable objects, special gemspec files (see \cref{tab:irb-dpd-mod,tab:irb-dpd-so,tab:irb-dpd-gemspec} in the appendix)}
+\dpd{\texttt{ruby} \footnote{or \texttt{ruby<version>}, since some modules explicitly call this binary}, dependencies from either \cref{lst:ruby-script1}\ or \cref{lst:ruby-script2}, \texttt{/dev/null}, additional Ruby modules, loadable objects and special gemspec files (see \cref{tab:irb-dpd-mod,tab:irb-dpd-so,tab:irb-dpd-gemspec} in the appendix)}
 
 
 \subsection{JavaScript runtime environments}
@@ -333,56 +409,56 @@ The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows
 
 \version{1.11.4}
 
+Julia is a high-level, high-performance programming language designed primarily for numerical and scientific computing \cite{julia-intro}. It combines the flexibility of dynamic languages with the speed of compiled languages through just-in-time (JIT) compilation. Julia typically runs like a scripting language through its interactive runtime, but it also supports packaging code into standalone binaries \cite{julia-compiler}. Additionally, Julia excels in interoperability -- it can call libraries written in languages like C or Rust, and Julia packages themselves can be accessed from languages like Python or R \cite{julia-calling-c}.
+
+Naturally, Julia provides socket programming functionality, making it capable of creating a reverse shell.
+
 \getcmdline{\commandpath{julia-script.txt}}{perl}{^}{}{}{Julia reverse shell script}{julia-script}
 
 \dpd{dynamic libraries (see \cref{tab:julia-dpd} in the appendix), Julia module \texttt{Sockets} (files \texttt{Sockets.jl} and \texttt{Sockets/Project.toml}\footnote{usually located in \texttt{/usr/local/share/stdlib/<version>}})}
 
-\getcmdline{\commandpath{julia-oneline.txt}}{bash}{*}{julia}{}{Julia one-line reverse shell}{julia-oneline}
+Jullia command-line interface comes with the option \texttt{-e} (or \texttt{-{}-eval}), which evaluates the followed code, including the compressed reverse shell script \footnote{To compress the script, we just separate lines with semicolons, including the opening and closing lines of the while loop and the if conditional.} \cite{julia-doc}.
 
+\getcmdline{\commandpath{julia-oneline.txt}}{bash}{*}{julia}{}{Julia one-line reverse shell}{julia-oneline}
 
 \section{Compiled programs}
 
-So far, we have mentioned reverse shell methods that utilize one or more software tools with CLI to establish a connection back to the attacker. Another approach could be running an executable, e.g., from compiled code. In this subsection, we list methods that require compilation (not necessarily into a binary that runs the OS) before running and, therefore, cannot be executed directly from the command line.
+So far, we have mentioned reverse shell methods that utilize one or more software tools with CLI to establish a connection back to the attacker. Another approach could be running an executable, e.g., from compiled code. In this subsection, we list methods that require compilation (not necessarily into a machine code, see \cref{java}) before running and, therefore, cannot be executed directly from the command line.
 
 \subsection{C (\texttt{gcc})}
 
 \version{13.3.0}
 
-\getcmdline{\commandpath{gcc.txt}}{C}{|}{}{main,socket,exit,htons,inet_pton,connect,close,dup2,execl}{GCC reverse shell}{gcc}
+\getcmdline{\commandpath{gcc-code.txt}}{C}{|}{}{main,socket,exit,htons,inet_pton,connect,close,dup2,execl}{GCC reverse shell code}{gcc-code}
+
+\TODO{dependencies}
 
 \subsection{Java (\texttt{javac})}
+\label{java}
 
 \version{21.0.6}
 
-\getcmdline{\commandpath{javac.txt}}{Java}{*}{}{}{Java reverse shell}{javac}
+\getcmdline{\commandpath{javac-code.txt}}{Java}{*}{}{}{Java reverse shell code}{javac-code}
+
+\TODO{dependencies}
+
+
+\subsection{Golang (\texttt{go})}
+
+\version{1.22.2}
+
+\getcmdline{\commandpath{go-code.txt}}{Golang}{*}{}{}{Go reverse shell code}{go-code}
+
+\TODO{dependencies}
 
 
 \section{Other tools}
 
-\subsection{Socat (\texttt{socat})}
+\subsection{AWK (\texttt{awk/gawk})}
 
-\getcmdline{\commandpath{socat.txt}}{bash}{*}{socat}{}{Socat reverse shell}{socat}
+\version{GNU Awk 5.2.1}
 
-\texttt{stderr} option redirects standard error output to the socket. Additional options can be added at the end of the command (separated by a single comma) \cite{socat-man}:
-
-\setlength{\leftmargini}{5em}
-\begin{itemize}
-\item[\texttt{pty} --] Establishes communication with the sub-process using a pseudo-terminal instead of a socket pair. For this to function, \texttt{openpty} or \texttt{ptmx} device is necessary.
-\item[\texttt{setsid} --] Runs the command (shell) in the new session, preventing it from being affected by controlling terminal issues. Effectively, the shell stays alive even if the parent process dies.
-\item[\texttt{sigint} --] Forwards \texttt{SIGINT} from the remote connection to the shell. Otherwise, sending \texttt{SIGINT} on the remote device can kill the shell session.
-\item[\texttt{sane} --] With the \texttt{pty} option, it applies ``sane'' terminal settings to the \texttt{pty}.
-\end{itemize}
-\setlength{\leftmargini}{2.5em}
-
-
-\subsection{PIP (\texttt{pip})}
-
-\version{24.0 (python 3.12)}
-
-\getcmdline{\commandpath{pip.txt}}{bash}{*}{mkdir,echo,pip,rm}{}{PIP reverse shell}{pip}
-
-\TODO{dependencies}
-
+\getcmdline{\commandpath{awk-script.txt}}{awk}{^}{}{}{AWK reverse shell script}{awk-script}
 
 \subsection{Tools compiled with python support}
 

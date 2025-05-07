@@ -30,7 +30,7 @@ for LIB in ${LIBS[@]}; do
 		if [ ! -d "$DEP_DEST" ]; then
 			mkdir "$DEP_DEST"
 		fi
-		cp -r "$DEP/"* "$DEP_DEST/"
+		cp -rL"$DEP/"* "$DEP_DEST/"
 	else
 		cp "$DEP" "$DEP_DEST"
 	fi

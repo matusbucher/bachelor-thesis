@@ -10,6 +10,10 @@
 % setting line spacing according to the directive
 \linespread{1.25} % a value of 1.25 should correspond to 1.5 line spacing
 
+\setcounter{tocdepth}{3}    % Controls depth of entries in Table of Contents
+\setcounter{secnumdepth}{3} % Controls depth of numbering for section titles
+
+
 % package for better display of references
 \usepackage[backend=biber]{biblatex}
 \addbibresource{references.bib}
@@ -48,6 +52,7 @@
 
 % package for importing source code
 \usepackage{listings}
+\usepackage{listings-golang}
 
 \usepackage{caption}
 
@@ -65,6 +70,8 @@
 \newcommand{\portt}{\textcolor{placeholder}{\texttt{$\langle$PORT2$\rangle$}}}
 \newcommand{\tmp}{\textcolor{placeholder}{\texttt{$\langle$TMP$\rangle$}}}
 \newcommand{\script}{\textcolor{placeholder}{\texttt{$\langle$compressed-script$\rangle$}}}
+\newcommand{\scriptfile}{\textcolor{placeholder}{\texttt{$\langle$script-filename$\rangle$}}}
+\newcommand{\fd}{\textcolor{placeholder}{\texttt{$\langle$fd$\rangle$}}}
 
 \newcommand{\inlinecmdline}[1]{\colorbox{background}{\texttt{#1}}}
 

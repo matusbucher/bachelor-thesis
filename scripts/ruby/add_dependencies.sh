@@ -26,7 +26,7 @@ for MOD in ${MODULES1[@]}; do
 		if [ ! -d "$DEP_DEST" ]; then
 			mkdir "$DEP_DEST"
 		fi
-		cp -r "$DEP/"* "$DEP_DEST/"
+		cp -rL"$DEP/"* "$DEP_DEST/"
 	else
 		cp "$DEP" "$DEP_DEST"
 	fi
@@ -58,7 +58,7 @@ for MOD in ${MODULES2[@]}; do
 		if [ ! -d "$DEP_DEST" ]; then
 			mkdir "$DEP_DEST"
 		fi
-		cp -r "$DEP/"* "$DEP_DEST/"
+		cp -rL"$DEP/"* "$DEP_DEST/"
 	else
 		cp "$DEP" "$DEP_DEST"
 	fi
