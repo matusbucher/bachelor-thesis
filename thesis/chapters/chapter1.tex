@@ -1,5 +1,3 @@
-\newcommand{\imagepathone}[1]{chapters/chapter1/images/#1}
-
 \chapter{Background and related work}
 
 \label{chap:background}
@@ -43,7 +41,7 @@ Clicking on the PDF file triggered the execution of a BAT script (due to the vul
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{\imagepathone{russia_powershell.png}}
+\includegraphics[width=\textwidth]{\imagepath{russia-powershell.png}}
 \caption{Code snippet of BAT script used for a reverse shell}
 \end{figure}
 
@@ -61,10 +59,3 @@ Machine learning detection is especially promising since all reverse shells poss
 Due to a lack of sufficient real-world datasets, they generated one by injecting attack templates known to be employed in the wild, further enriched by malleable patterns of legitimate activities to replicate the behavior of evasive threat actors. Then, they conducted extensive experiments, including ablation studies, to evaluate the performance of various models, demonstrating that their approach significantly improves detection accuracy while maintaining low false favorable rates.
 
 \TODO{add information}
-
-
-\section{Thesis objectives}
-
-In this thesis, we provide a comprehensive list of all currently known methods for creating a reverse shell. Numerous reverse shell cheat sheets published online (see \cite{cheatsheet1, cheatsheet2, cheatsheet3}) cover known techniques fairly well. So, in addition to listing all of them, we examine the minimal system requirements for each considered method. This can help apply a trivial countermeasure against the concrete method by removing one of the tool's dependencies, such as a module or library. Of course, we do not recommend relying solely on this countermeasure, as it may prevent the tool or other tools from running altogether. However, it can also be easily bypassed in misconfigured systems (for instance, through library hijacking) and is applied only to specific reverse shell techniques. Still, the list of dependencies can be helpful, e.g., for advanced detection mechanisms.
-
-While the thesis primarily focuses on a thorough analysis of reverse shell techniques, we will also discuss the patterns and characteristics of reverse shell traffic that result from this analysis. We will attempt to fabricate commands and scripts that can evade improper detection mechanisms or propose a data poisoning attack on the ML models mentioned earlier. For now, this part of the thesis lacks a clear objective; it would be reasonable to focus on a specific type of detection or countermeasure.

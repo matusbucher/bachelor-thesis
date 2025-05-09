@@ -1,4 +1,3 @@
-\newcommand{\commandpath}[1]{chapters/chapter3/commands/#1}
 \newcommand{\dpd}[1]{\begin{adjustwidth}{10pt}{0pt}\small \textbf{Dependencies:} #1 \end{adjustwidth}}
 \newcommand{\notte}[1]{\begin{adjustwidth}{10pt}{0pt} \small \textbf{Note:} #1 \end{adjustwidth}}
 \newcommand{\version}[1]{\textbf{Version:} #1}
@@ -32,7 +31,7 @@ However, when dealing with NetCat without the \texttt{-e} or \texttt{-c} option,
 
 \getcmdline{\commandpath{ncat2.txt}}{bash}{*}{mkfifo,ncat,rm}{}{NetCat reverse shell (version 2, with a named pipe)}{ncat2}
 
-\dpd{\texttt{mkfifo}, \texttt{rm} (not really needed)}
+\dpd{\texttt{mkfifo}}
 
 
 \subsection{Telnet (\texttt{telnet})} \label{telnet}
@@ -51,7 +50,7 @@ Two Telnet instances were needed because anonymous Unix pipes are unidirectional
 
 \getcmdline{\commandpath{telnet2.txt}}{bash}{*}{mkfifo,telnet,rm}{}{Telnet reverse shell (version 2, with a named pipe)}{telnet2}
 
-\dpd{\texttt{mkfifo}, \texttt{rm}}
+\dpd{\texttt{mkfifo}}
 
 
 \subsection{Socat (\texttt{socat})}
@@ -105,7 +104,7 @@ With the running SSL/TLS server, we can launch the client on the victim's machin
 
 \getcmdline{\commandpath{openssl.txt}}{bash}{*}{mkfifo,openssl,rm}{}{OpenSSL reverse shell}{openssl}
 
-\dpd{\texttt{mkfifo}, \texttt{rm}}
+\dpd{\texttt{mkfifo}}
 
 We use the same technique with named pipe as we did with NetCat or Telnet methods. Here, the \texttt{-quiet} option is neccessary. It suppresses all non-essential output (session details, certificate verification info, and other debug output), which would not be valid input for the shell interpreter and probably cause it to exit or fail unpredictably. In our tests, the connection was closed immediately when we used the command without the \texttt{-quiet} option.
 
@@ -187,7 +186,7 @@ The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can
 
 PowerShell is a powerful shell and scripting language developed by Microsoft. Unlike traditional shells, it is object-oriented. PowerShell comes preinstalled on modern Windows systems, but additionally, an open-source, cross-platform version -- \texttt{pwsh} -- is available for Linux and macOS. The following method is compatible on all platforms.
 
-Reverse shell via PowerShell is more complicated than previous shells. To work with network connections, it requires using .NET classes and managing multiple objects such as sockets, streams, and others. Hence, we will need a PowerShell script rather than a simple command with redirections (this makes this method closer to the ``programming language interpreters'' category -- \cref{program-interpreters}). Nevertheless, it can still be made into a one-liner using the \texttt{-c} (or \texttt{-Command}) option and separating lines from the script with a semicolon (\cref{pwsh-oneline}).
+Reverse shell via PowerShell is more complicated than previous shells. To work with network connections, it requires using .NET classes and managing multiple objects such as sockets, streams, and others. Hence, we will need a PowerShell script rather than a simple command with redirections (this makes this method closer to the ``programming language interpreters'' category -- \cref{program-interpreters}). Nevertheless, it can still be made into a one-liner using the \texttt{-c} (or \texttt{-Command}) option and separating lines from the script with a semicolon (\cref{lst:pwsh-oneline}).
 
 \getcmdline{\commandpath{pwsh-script.txt}}{bash}{*}{}{}{PowerShell reverse shell script}{pwsh-script}
 
@@ -441,15 +440,34 @@ Jullia command-line interface comes with the option \texttt{-e} (or \texttt{-{}-
 
 \section{Compiled programs}
 
-So far, we have mentioned reverse shell methods that utilize one or more software tools with CLI to establish a connection back to the attacker. Another approach could be running an executable, e.g., from compiled code. In this subsection, we list methods that require compilation (not necessarily into a machine code, see \cref{java}) before running and, therefore, cannot be executed directly from the command line.
+So far, we have mentioned reverse shell methods that utilize one or more software tools with a CLI to establish a connection back to the attacker. Another approach is running an executable from compiled code. In this subsection, we list methods that require compilation (not necessarily into machine code, see \cref{java}) before running and, therefore, cannot be executed directly from the command line. We will focus on one specific compiler for each considered language, since analyzing dependencies for each available compiler would be complicated and is beyond the scope of this thesis.
 
 \subsection{C/C++ (\texttt{gcc})}
 
 \version{13.3.0}
 
-\getcmdline{\commandpath{gcc-code.txt}}{C}{|}{}{main,socket,exit,htons,inet_pton,connect,close,dup2,execl}{GCC reverse shell code}{gcc-code}
+First on the list are the classic C and C++ (since all C code is valid C++ code) and the \texttt{gcc} (GNU Compiler Collection) compiler. Although any C compiler can be used to compile the example code, dependencies have been analysed only for the \texttt{gcc} compiler (version 13).
 
-\dpd{}
+C is a low-level, system-oriented language that provides direct access to memory and system calls. Many tools mentioned in this thesis are themselves implemented in C. However, the low-level nature of the language means that the code is not as clean as with other high-level languages. The basic explanation of the code can be found in the comments.
+
+\getcmdline{\commandpath{c-code.txt}}{C}{|}{}{}{C/C++ reverse shell code}{c-code}
+
+\dpd{\texttt{gcc}\footnote{or other standard \texttt{C} compiler, but it would probably required different dependencies}, \texttt{as} (GNU assembler), \texttt{ld} (GNU linker), \texttt{cc1}\footnote{component of \texttt{gcc} that compiles source code to assembly, usually located in \texttt{/usr/libexec/gcc/<architecture>/<gcc-version>}}, static and dynamic libraries and header files (see \cref{tab:c-dpd-lib} and \cref{tab:c-dpd-include} in the appendix)}
+
+\getcmdline{\commandpath{c-runcode.txt}}{bash}{*}{gcc}{}{Compiling and running the C/C++ reverse shell code}{c-runcode}
+
+\notte{The \texttt{-o} option can be omitted -- in that case, the created binary will have the default \texttt{a.out} file name. \cite{gcc-man}}
+
+The GCC compiler offers plentiful options. Perhaps the most interesting ones are these \cite{gcc-man}:
+
+\setlength{\leftmargini}{5em}
+\begin{itemize}
+\item[\texttt{-static}] Links the libraries statically, producing a self-contained binary that does not depend on shared libraries at runtime, but takes more space.
+\item[\texttt{-Os}] Optimize for smaller size.
+\item[\texttt{-s}] Strips the symbol table and relocation information from the executable, making the final binary smaller.
+\end{itemize}
+\setlength{\leftmargini}{2.5em}
+
 
 \subsection{Java (\texttt{javac})}
 \label{java}
