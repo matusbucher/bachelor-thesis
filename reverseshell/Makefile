@@ -1,6 +1,6 @@
-SHELL	:= /bin/bash
 HOST	:= 127.0.0.1
 PORT	:= 4444
+SHELL	:= /bin/bash
 PORT2	:= 4445
 TMP	:= /tmp/f
 

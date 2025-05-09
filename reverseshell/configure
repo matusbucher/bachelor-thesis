@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # Default values
-DEFAULT_SHELL="/bin/bash"
 DEFAULT_HOST="127.0.0.1"
 DEFAULT_PORT="4444"
+DEFAULT_SHELL="/bin/bash"
 DEFAULT_PORT2="4445"
 DEFAULT_TMP="/tmp/f"
 
 # Use user-provided values or fall back to defaults
-SHELL_PATH=${1:-$DEFAULT_SHELL}
-HOST_ADDR=${2:-$DEFAULT_HOST}
-PORT_NUM=${3:-$DEFAULT_PORT}
+HOST_ADDR=${1:-$DEFAULT_HOST}
+PORT_NUM=${2:-$DEFAULT_PORT}
+SHELL_PATH=${3:-$DEFAULT_SHELL}
 PORT2_NUM=${4:-$DEFAULT_PORT2}
 TMP_PATH=${5:-$DEFAULT_TMP}
 
 # Update Makefile safely, preserving tabs
-awk -v shell="$SHELL_PATH" -v host="$HOST_ADDR" -v port="$PORT_NUM" -v port2="$PORT2_NUM" -v tmp="$TMP_PATH" '
-    /^SHELL[[:space:]]*:=/ { print "SHELL\t:= " shell; next }
+awk -v host="$HOST_ADDR" -v port="$PORT_NUM" -v shell="$SHELL_PATH" -v port2="$PORT2_NUM" -v tmp="$TMP_PATH" '
     /^HOST[[:space:]]*:=/  { print "HOST\t:= " host; next }
     /^PORT[[:space:]]*:=/  { print "PORT\t:= " port; next }
+    /^SHELL[[:space:]]*:=/ { print "SHELL\t:= " shell; next }
     /^PORT2[[:space:]]*:=/  { print "PORT2\t:= " port2; next }
     /^TMP[[:space:]]*:=/  { print "TMP\t:= " tmp; next }
     { print }
@@ -26,8 +26,8 @@ awk -v shell="$SHELL_PATH" -v host="$HOST_ADDR" -v port="$PORT_NUM" -v port2="$P
 
 # Confirmation message
 echo "Makefile updated with:"
-echo "  SHELL = $SHELL_PATH"
 echo "  HOST  = $HOST_ADDR"
 echo "  PORT  = $PORT_NUM"
+echo "  SHELL = $SHELL_PATH"
 echo "  PORT2 = $PORT2_NUM"
 echo "  TMP   = $TMP_PATH"
