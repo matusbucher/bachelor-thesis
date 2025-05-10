@@ -56,7 +56,7 @@ JULIA_MOD_DIR="$JULIA_DIR$MOD_DIR"
 
 declare -a MODS=(
 	"/Sockets/src/Sockets.jl"
-        "/Sockets/Project.toml"
+    "/Sockets/Project.toml"
 )
 
 for MOD in ${MODS[@]}; do

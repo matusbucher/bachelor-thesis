@@ -20,7 +20,10 @@ while (!sock.isClosed()) {
     // Flush data to ensure it's sent and received immediately
     so.flush();
     po.flush();
+
+    // Optional: short sleep to reduce CPU usage
+    java.lang.Thread.sleep(100);
 }
 
-p.destroy();
+proc.destroy();
 sock.close();

