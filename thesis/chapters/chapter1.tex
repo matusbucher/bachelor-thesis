@@ -19,23 +19,23 @@ Numerous software tools that establish a reverse shell are commonly available in
 Reverse shell is a widespread practice in cyberattacks, enabling attackers to gain interactive control over a system through a single vulnerability, and it remains relevant today. To illustrate this point, we mention some real-world examples of attacks that utilized a reverse shell. 
 
 
-\subsection*{npm reverse shell vulnerability \cite{npm-vulnerability}}
+\subsection*{npm reverse shell vulnerability}
 
-In October 2023, a significant security issue was identified involving 48 malicious npm packages designed to deploy reverse shells on compromised systems. These packages were deceptively named to appear legitimate and contained obfuscated JavaScript code that initiated a reverse shell upon installation. The attack was triggered via an install hook in the package.json file, establishing a connection to rsh.51pwn[.]com.
+In October 2023, a significant security issue was identified involving 48 malicious npm packages designed to deploy reverse shells on compromised systems \cite{npm-vulnerability}. These packages were deceptively named to appear legitimate and contained obfuscated JavaScript code that initiated a reverse shell upon installation. The attack was triggered via an install hook in the package.json file, establishing a connection to rsh.51pwn.com.
 
 
-\subsection*{\#BrokenSesame vulnerability in Alibaba PostgreSQL databases \cite{BrokenSesame}}
+\subsection*{\#BrokenSesame vulnerability in Alibaba PostgreSQL databases}
 
-The Wiz Research team discovered a vulnerability, dubbed \#BrokenSesame, in Alibaba Cloud's ApsaraDB RDS for PostgreSQL and AnalyticDB for PostgreSQL databases. It was a backdoor caused by inadequate container isolation and an accidental ``write'' permission to a private registry. The attack involved privilege escalation within the database container and then utilizing the shared process ID namespace to escape the container environment and gain direct access to the Kubernetes (K8s) node's API server.
+The Wiz Research team discovered a vulnerability, dubbed \#BrokenSesame, in Alibaba Cloud's ApsaraDB RDS for PostgreSQL and AnalyticDB for PostgreSQL databases \cite{BrokenSesame}. It was a backdoor caused by inadequate container isolation and an accidental ``write'' permission to a private registry. The attack involved privilege escalation within the database container and then utilizing the shared process ID namespace to escape the container environment and gain direct access to the Kubernetes (K8s) node's API server.
 
 With ApsaraDB RDS for PostgreSQL, attackers exploited command-line injection with root permissions to achieve remote code execution (RCE). This vulnerability was exploited to spawn a reverse shell, enabling the attacker to escape the container.
 
 With access to the K8s API server, attackers could then retrieve credentials and other sensitive data. Furthermore, misconfigured permissions allowed attackers to push malicious images to Alibaba's private container registry, enabling potential supply chain attacks. That means executing write operations on customers' registries and releasing reverse shell packages disguised as software updates. Fortunately, Wiz Research responsibly disclosed this vulnerability to Alibaba Cloud, and the issues have been fully mitigated without any customer data being compromised.
 
 
-\subsection*{CVE-2023-38831 exploited by pro-Russia hacking groups \cite{cluster25}}
+\subsection*{CVE-2023-38831 exploited by pro-Russia hacking groups}
 
-The recent use of reverse shell has been observed in cyber operations related to the Russia-Ukraine conflict since October 2023. This phishing-based attack exploited a vulnerability in the WinRAR software identified as CVE-2023-38831. The lure file was a PDF document masquerading itself as a file to share Indicators of Compromise.
+The recent use of reverse shell has been observed in cyber operations related to the Russia-Ukraine conflict since October 2023 \cite{cluster25}. This phishing-based attack exploited a vulnerability in the WinRAR software identified as CVE-2023-38831 \cite{cve2023-38831}. The lure file was a PDF document masquerading itself as a file to share Indicators of Compromise.
 
 Clicking on the PDF file triggered the execution of a BAT script (due to the vulnerability), which, in turn, launched PowerShell commands to open a reverse shell, giving the attackers access to the targeted machine. Aside from that, the script attempted to steal data, such as login credentials from browsers, and then exfiltrate the data through a legit webhook site.
 

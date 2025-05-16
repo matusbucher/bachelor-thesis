@@ -1,1 +1,0 @@
-./configure *\host* *\port* *\shell* *\portt* *\tmp*

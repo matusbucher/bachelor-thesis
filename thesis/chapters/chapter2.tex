@@ -6,20 +6,22 @@ The number of tools and techniques for creating a reverse shell is relatively hi
 \section{Testing environment}
 \label{testing-env}
 
-In our analysis, the victim machine (on which techniques for establishing a reverse shell are tested) is simulated with a \texttt{chroot} environment for simplicity. The \texttt{chroot} command allows running a command or interactive shell with a specified directory as the apparent root directory \cite{chroot-man}. Therefore, the system simulated in the \texttt{chroot} environment has only access to files in the new 'root directory', which is convenient for determining requirements for a given method. If the method does not work, the environment lacks a dependent library, system tool, device, etc. The exact file, which was missing in the \texttt{chroot} directory, is either mentioned in the error message, or we can trace the actual system call for attempting to open the file (either \texttt{open()} or \texttt{openat()}) with the  \texttt{strace} tool. These techniques have been utilized to detect almost all requirements during the analysis.
+In our analysis, the victim machine was simulated with a \texttt{chroot} environment. The \texttt{chroot} command allows running a command or interactive shell with a specified directory as the apparent root directory \cite{chroot-man}. Therefore, the system simulated in the \texttt{chroot} environment has only access to files in the new 'root directory', which was convenient for determining requirements for each method. If the method did not work, the environment lacked a dependent library, system tool, device, etc. The exact file, which had been missing in the \texttt{chroot} directory, was either mentioned in the error message, or we could trace the actual system call for attempting to open the file (either \texttt{open()} or \texttt{openat()}) with the \texttt{strace} tool. We utilized these techniques to detect almost all the requirements during the analysis.
 
-The host system distribution (from which the \texttt{chroot} command is executed) is Ubuntu 24.04 LTS with a Linux 5.15 kernel and 64-bit x86 architecture. However, the commands and tools tested in this thesis should work on most GNU/Linux-based systems (if all dependencies are present).
+The host system distribution (on which the \texttt{chroot} environment was running) was Ubuntu 24.04 LTS with a Linux 5.15 kernel and 64-bit x86 architecture. However, the commands and tools tested in this thesis should work on most GNU/Linux-based systems.
 
-The specifications for the attacker machine do not matter since the only requirement is an open port for catching the reverse shell connection. However, some methods require a slightly more complex listening setup than just opening a port. In that case, the process of setting up the listener will be explained in detail, together with an example command/script.
+The more relevant problem could be the version of the tested tools. Since testing on multiple versions would be much more complicated, we have analysed each method using one specific version of the tool. The versions are specified at the beginning of sections in the \cref{chap:methods}. When dealing with different versions, the syntax of example commands should not pose a problem. However, the dependencies we detected for each tool could be different, especially the module files of programming languages. We described each dependency in the most general way, but it is actually guaranteed only for the tested version. Still, we suppose that in the vast majority of cases, different versions are not an issue as well.
+
+The specifications for the attacker machine do not matter since the only requirement is an open port for catching the reverse shell connection. Some methods require a more complex listening setup than just opening a port. In that case, the process of setting up the listener will be explained in detail, together with an example command/script.
 
 
 \section{Commands syntax and glossary}
 
-For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input and output to the connected socket. Alternatively, some methods do not redirect the standard file descriptors of the shell to the socket; instead, they read commands from the socket, execute them via the shell, and send output back to the socket. This ``indirect redirection'' is more common among scripting tools.
+For each system tool, we list one or more commands that, when run on the victim's machine, should try to connect to the attacker's machine (mainly using TCP), spawn a new shell session, and redirect its standard input, output, and error output to the connected socket. Alternatively, some methods do not redirect the standard file descriptors of the shell to the socket; instead, they read commands from the socket, execute them via the shell, and send output back to the socket. This ``indirect redirection'' is more common among scripting tools.
 
-The attacker must have an open port ready to catch the reverse shell. It can be any available port, but standard ports for services like 80 for HTTP and 443 for HTTPS can disguise the reverse shell as an ordinary web traffic (\TODO{reference to the countermeasures section}). In most cases, a simple NetCat listener should be sufficient to catch the reverse shell.
+The attacker must have an open port ready to catch the reverse shell. It can be any available port, but standard ports for services like 80 for HTTP and 443 for HTTPS can disguise the reverse shell as an ordinary web traffic (see \cref{chap:countermeasures} for more). In most cases, a simple NetCat listener should be sufficient to catch the reverse shell (\cref{cmd:listener}).
 
-\getcmdline{\commandpath{nc-listener.txt}}{bash}{*}{nc}{}{NetCat listener for catching reverse shell}{listener}
+\getcmdline{\commandpath{nc-listener.txt}}{*}{nc}{}{NetCat listener for catching reverse shell}{listener}{}
 
 The non-obligatory option \texttt{-v} can be added for more verbose output. If the given method requires a more complex setup on the attacker's side, we will provide the necessary commands for the setup with an explanation.
 
@@ -29,19 +31,19 @@ The commands in this thesis use placeholders instead of specific values for gene
 \begin{itemize}
 \item[\host] The attacker's IP address or domain.
 \item[\port] The port number on which the attacker is listening.
-\item[\shell] The shell to be spawned (e.g. \texttt{/bin/sh}, \texttt{/bin/bash}).
+\item[\shell] The shell that will be executing commands sent from the attacker.
 \item[\portt] The second port number on which the attacker is listening; must be different from \port.
-\item[\tmp] A temporary file or directory used in specific methods (e.g., pipeline creation).
+\item[\tmp] The filename for a temporary file or directory used by some methods (e.g., creation of a named pipeline).
 \end{itemize}
 \setlength{\leftmargini}{2.5em}
 
 \host\ and \port\ are naturally required in every method. \shell\ is also usually required and can be substituted with any available shell interpreter on the target system, even with a self-made interactive script. Still, some methods do not allow the use of an arbitrary shell, and the commands sent through the socket are executed by the default shell (\texttt{/bin/sh} in most cases).
 
-Theoretically, \shell\ could be defined together with shell options, since it is passed as a shell command in most methods. An interesting option, which is supported on almost every standard shell interpreter, is the \texttt{-i} option, which makes the shell session ``interactive''. That means we get a nice shell on the attacker's side rather than a raw output of executed commands. Nevertheless, it was not tested for all methods and thus may not work everywhere (it could be a problem for some function calls in reverse shell scripts that expect specific arguments).
+If the method spawns \shell\ via command (executed by the underlying shell), shell options can be appended. An interesting option, which is supported on almost every standard shell interpreter, is the \texttt{-i} option, which makes the shell session ``interactive''. That means we get a nice shell on the attacker's side rather than a raw output of executed commands. Nevertheless, it was not tested for all methods and thus may not work everywhere (it could be a problem for some function calls in reverse shell scripts that expect specific arguments).
 
-\portt\ and \tmp\ are used only in several methods. \portt\ is, for instance, needed in telnet reverse shell (see \cref{lst:telnet1}), where the socket on port number \port\ serves as input for the shell and the socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline (see \cref{lst:ncat2}) or a temporary directory for generated files (see \cref{lst:pip}).
+\portt\ and \tmp\ are used only in few methods. \portt\ is, for instance, needed in telnet reverse shell (see \cref{cmd:telnet1}), where the socket on port number \port\ serves as input for the shell and the socket on port number \portt\ serves as output. \tmp\ is used when the method requires a named pipeline (see \cref{cmd:ncat2}) or a temporary directory for generated files (see \cref{cmd:pip}).
 
-Some methods use a scripting language or compiler to establish a reverse shell, especially the methods in \cref{program-interpreters} and \cref{program-compilers}. In such cases, a script/code with multiple lines and comments will be provided for better understanding and clarity. Together with the script, we will show how to run the script (or compile and run the code) as well as how to change it into a ``one-liner'' command without creating a script file (which might not always be possible). In order not to repeat the whole script for each variant or to refer to the files, we use more placeholders:
+Some methods use a scripting language or compiler to establish a reverse shell, especially the methods in \cref{program-interpreters} and \cref{program-compilers}. In such cases, a script/code with multiple lines and comments will be provided for better understanding and clarity. Together with the script, we will show how to run the script (or compile and run the code) as well as how to change it into a ``one-liner'' command without creating a file, which might not always be possible. In order not to repeat the whole script for each variant or to refer to the files, we use another placeholders:
 
 \setlength{\leftmargini}{10em}
 \begin{itemize}
@@ -51,14 +53,14 @@ Some methods use a scripting language or compiler to establish a reverse shell, 
 \end{itemize}
 \setlength{\leftmargini}{2.5em}
 
-In some scenarios, running the reverse shell in the background asynchronously can be useful for more difficult detection. This can be done by appending an ampersand (\texttt{\&}) at the end of the command \cite{bash-gnu-man} in most POSIX-compliant shell interpreters. However, some reverse shell methods are composed of multiple commands, or even loops (see \cref{lst:curl}). In that case, we need to group those commands with curly brackets and append \texttt{\&} to the whole group:
+In some scenarios, running the reverse shell in the background asynchronously can be useful (e.g., for harder detection). This can be done by appending an ampersand (\texttt{\&}) at the end of the command \cite{bash-gnu-man} in most POSIX-compliant shell interpreters. Some reverse shell methods are composed of multiple commands or loops (see \cref{cmd:curl}). In that case, we need to group those commands with curly brackets and append \texttt{\&} to the whole group:
 
-\begin{cmdline}{bash}{*}{}{}
+\begin{cmdline}{*}{}{}
 { *\textcolor{placeholder}{\texttt{$\langle$command1$\rangle$}}*; *\textcolor{placeholder}{\texttt{$\langle$command2$\rangle$}}*; ...; } &
 \end{cmdline}
 
-After each example command or script for a given method, it may follow a list of dependencies and an occasional note (if additional information is appropriate). The implicit dependency for each command is that all shared objects (dynamic libraries) required by the tools used in the command are in the system. To print shared object dependencies of the tool's binary, use the \texttt{ldd} command together with the \texttt{which} command that shows the full path of the commands:
-\begin{cmdline}{bash}{*}{ldd,which}{}
+After each example command (or script), a list of dependencies and an occasional note may follow. Implicit dependencies for each command are shared objects (dynamic libraries) required by the binaries of the tools used in the command. These are not listed in the dependency list and are expected to be present in the system, since otherwise the binary will not run. To print these shared object files, use the \texttt{ldd} command \cite{ldd-man} together with the \texttt{which} \cite{which-man} command:
+\begin{cmdline}{*}{ldd,which}{}
 ldd $(which *\textcolor{placeholder}{\texttt{$\langle$command$\rangle$}}*)
 \end{cmdline}
 %$
@@ -68,23 +70,9 @@ Of course, this is not an issue when using a statically linked binary.
 
 \section{Testing framework}
 
-For effective testing and as an applicable result of gathering reverse shell methods, we constructed a Makefile with the exact implementations listed in the thesis, including both the reverse shell commands and the required listeners. Following the idea of placeholders for a general case, the host, port, and other variables used in Makefile can be easily configured with the attached \texttt{configure} script (which is a \texttt{bash} script). Both files are available on a public GitHub repository \TODO{provide repository link}.
+For effective testing and as an applicable result of gathering reverse shell methods, we constructed a Makefile with the same implementations listed in the thesis, including both the reverse shell commands and the required listeners.
 
-To configure the Makefile, issue:
-
-\getcmdline{\commandpath{configure.txt}}{bash}{*}{}{}{Configuration of the Makefile}{configure}
-
-The values correspond to placeholders described earlierand will be used from now on in the Makefile targets. To list all available methods in the Makefile, issue:
-
-\getcmdline{\commandpath{make-show.txt}}{bash}{*}{make}{}{Listing available methods from the Makefile}{make-show}
-
-The listed methods are also Makefile targets, which run the corresponding reverse shell method or open a listener. To see a method command(s) without actual execution, issue:
-
-\getcmdline{\commandpath{make-method-show.txt}}{bash}{*}{make}{}{Printing a command for the particular method from the Makefile}{make-method-show}
-
-We used this Makefile for running reverse shell commands from the \texttt{chroot} process inside a dedicated directory with a \texttt{bash} session, which, as mentioned in the \cref{testing-env}, represents the victim system. The minimal requirements for the \texttt{chroot} environment to be able to test any method are therefore \texttt{bash} and \texttt{make} binaries together with dependent dynamic libraries and the Makefile. This was a ``starting'' state for testing each method to identify the method's dependencies correctly.
-
-We tested each reverse shell connecting to localhost for simplicity and security reasons. We caught reverse shells in a separate terminal session (not within \texttt{chroot} environment, but on the host system). This also ensured that no possible firewall settings or security tools would block the reverse shell attempts during testing. Although irrelevant, these are all the values we used in testing:
+For testing, we used the same reverse shell implementations from the Makefile. They were executed from the \texttt{chroot} process inside a dedicated directory with a \texttt{bash} session -- as mentioned in the \cref{testing-env}, this represented the victim system. We tested each reverse shell method connecting to localhost for simplicity and security reasons. This ensured that no possible firewall settings\footnote{by default, loopback connections are always enabled} or security tools would block the reverse shell attempts during testing. Reverse shells were caught in a separate terminal session -- not within \texttt{chroot} environment, but on the host system. These are all the values we used in testing (identical with the Makefile configuration):
 
 \setlength{\leftmargini}{5em}
 \begin{itemize}
@@ -95,3 +83,5 @@ We tested each reverse shell connecting to localhost for simplicity and security
 \item[\tmp\ :] \texttt{/tmp/f}
 \end{itemize}
 \setlength{\leftmargini}{2.5em}
+
+Each method was tested at first with a minimal \texttt{chroot} directory -- that is, only with \texttt{bash} binary, the method's tool binary, and required dynamic libraries. Only after failed attempts did we search for missing dependencies. When we did receive the reverse shell -- even with errors/warnings on the victim's side (since we wanted minimal dependencies) -- we tested getting both output and error output from the commands sent to the reverse shell.

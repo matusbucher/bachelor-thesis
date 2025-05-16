@@ -10,6 +10,9 @@
 % setting line spacing according to the directive
 \linespread{1.25} % a value of 1.25 should correspond to 1.5 line spacing
 
+% tells LaTeX not to stretch vertical space to fill the page
+\raggedbottom
+
 \setcounter{tocdepth}{3}    % Controls depth of entries in Table of Contents
 \setcounter{secnumdepth}{3} % Controls depth of numbering for section titles
 
@@ -38,8 +41,11 @@
 % package for hyperlinks within the document (we will remove the colored frames around the lines so that the pdf looks the same as the printed version)
 \usepackage[hidelinks,breaklinks]{hyperref}
 
+% package for importing source code
+\usepackage{listings}
+\usepackage{listings-golang}
+
 \usepackage{cleveref}
-\crefname{lstlisting}{command}{commands}
 \crefname{table}{list}{lists}
 
 \usepackage{tikz}
@@ -50,10 +56,6 @@
 % idk
 \usepackage{fancyvrb}
 
-% package for importing source code
-\usepackage{listings}
-\usepackage{listings-golang}
-
 \usepackage{caption}
 
 % package for proper functioning of the figure [H] environment
@@ -61,6 +63,12 @@
 
 % package for large tables
 \usepackage{longtable}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ---------- CUSTOM COMMAND DEFINITIONS ----------
 
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO -- #1}}
 
@@ -77,9 +85,13 @@
 \newcommand{\commandpath}[1]{commands/#1}
 \newcommand{\imagepath}[1]{images/#1}
 
+\newcommand{\dpd}[1]{\begin{adjustwidth}{10pt}{0pt}\small \textbf{Dependencies:} #1 \end{adjustwidth}}
+\newcommand{\notte}[1]{\begin{adjustwidth}{10pt}{0pt} \small \textbf{Note:} #1 \end{adjustwidth}}
+\newcommand{\version}[1]{\textbf{Version:} #1}
+
 \newcommand{\inlinecmdline}[1]{\colorbox{background}{\texttt{#1}}}
 
-\newcommand{\cmdlstsettings}[4]
+\newcommand{\lstsettings}[4]
 {\lstset{
 	language={#1},
 	otherkeywords={#3},
@@ -102,24 +114,51 @@
 	framerule=0.8pt
 }}
 
-\newenvironment{cmdline}[4]
+\newenvironment{cmdline}[3]
 {\begingroup
-\cmdlstsettings{#1}{#2}{#3}{#4}
+\lstsettings{bash}{#1}{#2}{#3}
 \VerbatimOut{tmp.txt}}
 {\endVerbatimOut
 \lstinputlisting{tmp.txt}
 \endgroup}
 
-\newcommand{\getcmdline}[7]{\begingroup
-\cmdlstsettings{#2}{#3}{#4}{#5}
-\lstinputlisting[label={lst:#7},caption={#6}]{#1}
-\endgroup}
 
-\renewcommand{\lstlistingname}{Command}
+\newcounter{cmdctr}[section]
+\renewcommand{\thecmdctr}{\thesection.\arabic{cmdctr}}
+\crefname{cmdctr}{command}{commands}
 
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
+\newcommand{\getcmdline}[7]{
+\refstepcounter{cmdctr}
+\begin{figure}[H]
+\begingroup
+\caption*{Command \thecmdctr: #5}
+\label{cmd:#6}
+\vspace{-0.7em}
+\lstsettings{bash}{#2}{#3}{#4}
+\lstinputlisting{#1}
+\endgroup
+#7
+\end{figure}}
 
+
+\newcounter{codectr}[section]
+\renewcommand{\thecodectr}{\thesection.\arabic{codectr}}
+\crefname{codectr}{code}{codes}
+
+\newcommand{\getcode}[8]{
+\refstepcounter{codectr}
+\begin{figure}[H]
+\begingroup
+\caption*{Code \thecodectr: #6}
+\label{code:#7}
+\vspace{-0.7em}
+\lstsettings{#2}{#3}{#4}{#5}
+\lstinputlisting{#1}
+\endgroup
+#8
+\end{figure}}
+
+% ------------------------------------------------
 
 \def\mfrok{2025}
 \def\mfnazov{Analysis of reverse shell techniques and possible countermeasures}
@@ -139,7 +178,7 @@
 \pagestyle{empty}
 
 % -------------------
-% --- Obalka ------
+% ----- Obalka ------
 % -------------------
 
 \begin{center}
@@ -332,6 +371,8 @@ Supervisor: & \mfskolitel \\
 %--- Prilohy---
 % -------------------
 
-\input appendix.tex
+\input appendix-A.tex
+
+\input appendix-B.tex
 
 \end{document}

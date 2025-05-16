@@ -1,0 +1,48 @@
+\newcommand{\target}{\textcolor{placeholder}{\texttt{$\langle$target$\rangle$}}}
+
+\chapter*{Appendix B: User manual for Makefile}
+\addcontentsline{toc}{chapter}{Appendix B: User manual for Makefile}
+
+We designed the Makefile to be as simple to use as possible. First, it needs to be configured with the desired values for each of the following variables:
+
+\setlength{\leftmargini}{5em}
+\begin{itemize}
+\item[\host] The IP address or domain name to which a reverse shell attempts to connect. (default: \texttt{127.0.0.1})
+\item[\port] The port number to which a reverse shell attempts to connect. (default: \texttt{4444})
+\item[\shell] The shell used for executing received commands (not available for some methods). (default: \texttt{/bin/bash})
+\item[\portt] The second port number, which some methods attempt to connect to. Must be different from \port. (default: \texttt{4445})
+\item[\tmp] The filename for a temporary file or directory used by some methods (e.g., creating a named pipeline). It is better if a file with this filename does not exist, since relevant methods always try to create it. (default: \texttt{/tmp/f})
+\end{itemize}
+\setlength{\leftmargini}{2.5em}
+
+To configure the Makefile, issue:
+
+\begin{cmdline}{*}{}{}
+./configure *\host* *\port* *\shell* *\portt* *\tmp*
+\end{cmdline}
+
+Makefile contains targets for each reverse shell method or listener setup. To list all these targets as well as the currently used configuration values, issue:
+
+\begin{cmdline}{*}{make}{}
+make show
+\end{cmdline}
+
+The listed targets can be used as usual to run related command(s):
+
+\begin{cmdline}{*}{make}{}
+make *\target*
+\end{cmdline}
+
+To see the target command(s) without actual execution, issue:
+
+\begin{cmdline}{*}{make}{}
+make *\target*-show
+\end{cmdline}
+
+As mentioned, the Makefile also offers commands for listeners that catch reverse shells. Those only need the \port\ value (should be the same as in the configured Makefile on the victim's side). For most cases, the simple NetCat listener is enough. You can start it by issuing:
+
+\begin{cmdline}{*}{make}{}
+make listener
+\end{cmdline}
+
+See \cref{chap:methods} for cases requiring a different listener. All special listeners are available in the Makefile, too.
