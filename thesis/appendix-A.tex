@@ -6,6 +6,7 @@
 
 \chapter*{Appendix A: Lists of dependencies for reverse shell methods}
 \addcontentsline{toc}{chapter}{Appendix A: Lists of dependencies for reverse shell methods}
+\markboth{APPENDIX A}{APPENDIX A}
 
 \section*{Programming languages interpreters}
 
@@ -19,6 +20,18 @@ List of python modules (\texttt{.py} files or whole directories)\footnote{usuall
 \caption{Python modules used in the Python reverse shell}\label{tab:python-dpd} \\
 \texttt{collections} & \texttt{enum} & \texttt{keyword} & \texttt{reprlib} & \texttt{socket} \\
 \texttt{encodings} & \texttt{functools} & \texttt{operator} & \texttt{selectors} & \texttt{types} \\
+\end{longtable}
+
+
+\subsection*{PIP}
+
+\references{cmd:pip}
+
+List of python modules (\texttt{.py} files or whole directories)\footnote{usually located in \texttt{/usr/lib/python<version>/}} and loadable objects for some modules\footnote{usually located in \texttt{/usr/lib/python<version>/lib-dynload/}}:
+
+\begin{longtable}{l l}
+\caption{Python modules used in the PIP reverse shell}\label{tab:pip-mod} \\
+
 \end{longtable}
 
 
@@ -196,7 +209,6 @@ Additional dynamic libraries (apart from those listed with \texttt{ldd})\footnot
 \end{longtable}
 
 
-
 \subsection*{C/C++}
 
 \references{code:c-code}
@@ -252,4 +264,54 @@ Additional dynamic libraries (apart from those listed with \texttt{ldd} for \tex
 \texttt{bits/stdlib-float.h} & \texttt{sys/socket.h} \\
 \texttt{bits/struct\_mutex.h} & \texttt{sys/types.h} \\
 \texttt{bits/struct\_rwlock.h} & \texttt{unistd.h} \\
+\end{longtable}
+
+
+\subsection*{Java}
+
+Additional dynamic libraries \footnote{should be located in \texttt{\$JAVA\_HOME/lib/}}:
+
+\begin{longtable}{l l l}
+\caption{Loadable objects used in the Java reverse shell}\label{tab:java-dpd} \\
+\texttt{enc/encdb.so} & \texttt{io/wait.so} & \texttt{ripper.so} \\
+\texttt{io/console.so} & \texttt{monitor.so} & \texttt{socket.so} \\
+\end{longtable}
+
+
+\subsection*{Golang}
+
+\references{code:go-code}
+
+Lists of Golang modules (directories containing \texttt{.go} files and also \texttt{.s} and \texttt{.h} files)\footnote{should be located in \texttt{\$GOROOT/src/}}:
+
+\begin{longtable}{l l l }
+\caption{Golang modules used to compile and run the Golang reverse shell code}\label{tab:go-dpd} \\
+\texttt{bytes} & \texttt{io/fs} \\
+\texttt{cmp} & \texttt{io} \\
+\texttt{context} & \texttt{math/bits} \\
+\texttt{errors} & \texttt{math} \\
+\texttt{internal/abi} & \texttt{net/netip} \\
+\texttt{internal/bisect} & \texttt{net} \\
+\texttt{internal/bytealg} & \texttt{os/exec} \\
+\texttt{internal/chacha8rand} & \texttt{os} \\
+\texttt{internal/coverage/rtcov} & \texttt{path/filepath} \\
+\texttt{internal/cpu} & \texttt{path} \\
+\texttt{internal/goarch} & \texttt{runtime/internal/atomic} \\
+\texttt{internal/godebugs} & \texttt{runtime/internal/math} \\
+\texttt{internal/godebug} & \texttt{runtime/internal/syscall} \\
+\texttt{internal/goexperiment} & \texttt{runtime/internal/sys} \\
+\texttt{internal/goos} & \texttt{runtime} \\
+\texttt{internal/intern} & \texttt{slices} \\
+\texttt{internal/itoa} & \texttt{sort} \\
+\texttt{internal/nettrace} & \texttt{strconv} \\
+\texttt{internal/oserror} & \texttt{strings} \\
+\texttt{internal/poll} & \texttt{sync/atomic} \\
+\texttt{internal/race} & \texttt{sync} \\
+\texttt{internal/reflectlite} & \texttt{syscall} \\
+\texttt{internal/safefilepath} & \texttt{time} \\
+\texttt{internal/singleflight} & \texttt{unicode/utf8} \\
+\texttt{internal/syscall/execenv} & \texttt{unicode} \\
+\texttt{internal/syscall/unix} & \texttt{unsafe} \\
+\texttt{internal/testlog} & \texttt{vendor} \\
+\texttt{internal/unsafeheader} & \\
 \end{longtable}

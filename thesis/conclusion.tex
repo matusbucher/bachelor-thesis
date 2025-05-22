@@ -1,5 +1,9 @@
-\chapter*{Conclusion} % necislovana kapitola
-\addcontentsline{toc}{chapter}{Conclusion} % rucne pridanie do obsahu
-\markboth{Conclusion}{Conclusion} % vyriesenie hlaviciek
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+\markboth{CONCLUSION}{CONCLUSION}
 
-\TODO{}
+In this thesis, we gathered broad range of reverse shell techniques. We covered mostly methods utilizing standard system tools and language interpreters, but also mentioned methods of executing reverse shell with own binaries. Our goal was to implement one or more realistic examples for every method while evaluating minimal dependencies and other properties. Every command, script, and code sample presented throughout the thesis was successfully executed on a controlled test system described in \cref{chap:framework}. While different operating systems and versions or implementations of command utilities may affect the applicability of specific methods, analyzing each combination of scenarious was far beyond the scope of this thesis.
+
+In addition to the list of methods with technical analysis, we included a brief discussion of suggested countermeasures and best practices for mitigating or detecting reverse shell vector attacks in \cref{chap:countermeasures}. While several detection tools and security mechanisms already exist, they are not full solution to the problem. Reverse shells can be crafted in many subtle ways to evade detection, making this an active and evolving field of research.
+
+To support this research by further testing and experimentation in other environments, we have constructed a Makefile that includes all the demonstrated techniques. This setup allows for automation and convenient testing for extended research into how these reverse shell methods behave under different system configurations.

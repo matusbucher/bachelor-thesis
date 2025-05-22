@@ -2,6 +2,7 @@
 
 \chapter*{Appendix B: User manual for Makefile}
 \addcontentsline{toc}{chapter}{Appendix B: User manual for Makefile}
+\markboth{APPENDIX B}{APPENDIX B}
 
 We designed the Makefile to be as simple to use as possible. First, it needs to be configured with the desired values for each of the following variables:
 
@@ -46,3 +47,5 @@ make listener
 \end{cmdline}
 
 See \cref{chap:methods} for cases requiring a different listener. All special listeners are available in the Makefile, too.
+
+Some methods may require additional variables, like a PID of the process GDB attaches to (see \cref{cmd:gdb-oneline}). Running and showing the method command will print warnings that those variables were not set. Therefore, we suggest always showing the command before the execution to avoid undesired (and perhaps damaging) results.

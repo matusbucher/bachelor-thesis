@@ -2,4 +2,71 @@
 
 \label{chap:countermeasures}
 
-In this chapter, we evaluate the findings from previous chapters and propose practical countermeasures and security measures against reverse shell attacks. These include strategies to either prevent such attacks or, at least, detect suspicious internet traffic indicating malicious activity.
+The previous chapter showcased plenty of options for initializing a reverse shell. It is almost impossible not to forget any tool or service that could be exploited for a reverse shell, even in less complex systems. Hence, eliminating the threat of each method separately (by removing dependencies or trying to limit its usage) is not a good prevention solution, and more solid and general countermeasures should be taken instead.
+
+Comprehensive detection and prevention models for reverse shells are the subject of separate, more specialized research. The primary focus of the thesis was the enumeration and demonstration of possible methods. Still, in this chapter, we want to briefly discuss practical security measures against reverse shell attacks without going into much detail.
+
+\section{Passive prevention measures}
+
+First, we will talk about passive/static prevention measures, which focus on reducing the system’s attack surface and minimizing the chances of a reverse shell attack in the first place. These measures include system configuration, maintenance policies, and networking policies.
+
+
+\subsection{Removing vulnerabilities}
+
+A reverse shell cannot be established without exploiting a vulnerability in a system in the first place. However, the reality is that there is no such thing as flawless software. In complex environments, eliminating all potential vulnerabilities is an almost impossible task. It is thus crucial to reduce risk as much as possible through proactive system maintenance, which includes:
+
+\begin{itemize}
+\item using reliable (automated) vulnerability scanners,
+\item keeping all underlying components up to date,
+\item regularly applying the latest security patches.
+\end{itemize}
+
+Following these practices significantly improves the system's overall security posture. These countermeasures are not specific to reverse shell exploitations but are foundational to general cybersecurity hygiene. When focusing on reverse shell scenarios specifically, we can look for vulnerabilities such as command injection, remote code execution (RCE), remote file inclusion (RFI), local file inclusion (LFI), or SQL injections with command execution.
+
+
+\subsection{Required tools and dependency management}
+
+While we claimed that limiting the usage of tools capable of a reverse shell is insufficient, it should not be overlooked. Reducing the number of available tools to only those that are really necessary should be a common practice, though it rarely is. The more tools (modules, libraries, etc.) present on the system, the more vulnerabilities we introduce and the more options attackers have. This strategy is more feasible and primarily meant for hardened or specialized systems, like production servers with well-defined roles.
+
+In addition to system tools, third-party libraries and software packages can also introduce significant risk. Poorly maintained or malicious dependencies may contain vulnerabilities or backdoors that attackers can exploit. We can try to mitigate such risks by proper dependency management:
+installing only trusted dependencies from verified, actively maintained sources,
+regularly auditing and updating dependencies to patch known vulnerabilities,
+scanning dependencies using automated tools, such as software composition analysis (SCA) solutions \cite{sca-wiki}.
+
+
+\subsection{Stringent access control and privilege separation}
+
+A core principle in secure systems is least-privilege access control -- allowing users/processes to do only what they are meant to do and nothing more. This means ensuring that they operate only with the minimum permissions and capabilities necessary to fulfill their function. Over-privileged accounts or processes enable privilege escalation, which may give attackers options for reverse shell execution. Therefore, services should always run under dedicated, non-privileged users instead of system-wide or administrative accounts. Modern operating systems dispose of various mechanisms for decent access control (ACLs, capabilities, etc.), but are often not fully utilized.
+
+Beyond traditional access control, containerization adds an extra layer of isolation. By running services in containers with well-defined boundaries, we can prevent a compromised application from affecting the host or other containers. Proper container security practices -- such as avoiding root containers, limiting resource access (via seccomp, AppArmor, or SELinux), and using signed images -- further reduce the attack surface.
+
+
+\subsection{Network and firewall configuration}
+
+Previous measures attempted to prevent compromise, but we are never guaranteed complete security. Therefore, it is equally important to apply network-level restrictions. Although every system has protection against unsolicited inbound connections, the outbound connection is usually not limited, which is precisely the case with reverse shells and the reason they are so popular.
+
+A recommended baseline is to lock down all outbound network connectivity and allow only explicitly necessary destinations and protocols. However, this can be difficult in some situations, especially if traffic outside the local network is required. Restrictions such as allowing only traffic on standard ports or using only selected protocols are not appropriate measures since an attacker can easily adapt to these.
+
+Hard filtering of unauthorized destination IP addresses could solve this problem, but it is often unfeasible and can still be bypassed with techniques such as DNS tunneling. Stateful firewalls may allow more strict policies depending on the network model. Firewalls with eBPF (Extended Berkeley Packet Filter) \cite{ebpf-wiki} capabilities are also a great option since they inspect and control network traffic directly in the kernel space. That means they can apply logic based on contextual information (e.g., process ID, user ID, socket, command-line arguments), which gives them the capability of blocking not just IPs and ports but also application-layer behavior.
+
+A good practice is sandboxing services or running them in minimal containers with no external network access unless required. When required, it is advised to route communication through a proxy server. A proxy can serve multiple purposes, mainly separating routing policies and logging traffic for audit or later analysis, in case a reverse shell attack eventually happens.
+
+
+\section{Active detection}
+\label{sec:active-detection}
+
+While passive prevention focuses on reducing the attack surface, active detection plays a role in identifying reverse shell attempts in real time. These mechanisms typically rely on intrusion detection systems (IDS) that continuously inspect system activity. From a high-level perspective, reverse shell detection can be based on:
+
+\begin{itemize}
+
+\item network monitoring -- identifying unusual outbound connections (uncommon IPs or ports),
+
+\item system call tracing -- detecting common reverse shell patterns like a shell being executed shortly after a socket connection is established, and redirection of the shell's input and output to the socket,
+
+\item process behavior analysis -- spotting privilege escalation or execution of interpreters by services that typically do not require them.
+
+\end{itemize}
+
+Modern IDS tools often incorporate signature-based and anomaly-based detection models. Signature-based systems compare traffic or system behavior against a database of known attack patterns. Anomaly-based systems use baselines of ``normal'' behavior to flag deviations. We can further enhance these tools by integrating security information and event management (SIEM) systems to aggregate alerts, correlate events, and initiate incident response workflows.
+
+We do not intend to go into detail about detection algorithms focused on reverse shell attacks. However, other works are dedicated to this field, especially in the context of fileless attacks and living-off-the-land techniques, as we mentioned in \cref{sec:lotl}. With the rapid advancement of artificial intelligence, machine learning models could be designed and trained to recognize patterns associated with reverse shells, enabling more adaptive and real-time detection capabilities, and are an interesting subject for future work.

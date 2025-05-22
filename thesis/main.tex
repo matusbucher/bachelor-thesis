@@ -13,6 +13,12 @@
 % tells LaTeX not to stretch vertical space to fill the page
 \raggedbottom
 
+\usepackage{footnote}
+
+\usepackage{setspace}
+
+\usepackage{tocloft}
+
 \setcounter{tocdepth}{3}    % Controls depth of entries in Table of Contents
 \setcounter{secnumdepth}{3} % Controls depth of numbering for section titles
 
@@ -70,6 +76,34 @@
 
 % ---------- CUSTOM COMMAND DEFINITIONS ----------
 
+\makeatletter
+
+% Define new lists with safer file extensions
+\newcommand{\listofcommands}{
+  {\normalfont\Huge\bfseries List of Commands\par}
+  \vspace{2em}
+  \@starttoc{cmdlist}
+}
+\newcommand{\l@cmdlist}{\@dottedtocline{1}{1.5em}{3.5em}}
+
+\newcommand{\listofcodes}{
+  {\normalfont\Huge\bfseries List of Codes\par}
+  \vspace{2em}
+  \@starttoc{codelist}
+}
+\newcommand{\l@codelist}{\@dottedtocline{1}{1.5em}{3.5em}}
+
+% Add entries to custom lists
+\newcommand{\addcommandtolist}[2]{%
+  \addcontentsline{cmdlist}{section}{\protect\numberline{#1}#2}
+}
+\newcommand{\addcodetolist}[2]{%
+  \addcontentsline{codelist}{section}{\protect\numberline{#1}#2}
+}
+
+\makeatother
+
+
 \newcommand{\TODO}[1]{\textcolor{blue}{TODO -- #1}}
 
 \newcommand{\shell}{\textcolor{placeholder}{\texttt{$\langle$SHELL$\rangle$}}}
@@ -81,6 +115,7 @@
 \newcommand{\scriptfile}{\textcolor{placeholder}{\texttt{$\langle$script-filename$\rangle$}}}
 \newcommand{\codefile}{\textcolor{placeholder}{\texttt{$\langle$code-filename$\rangle$}}}
 \newcommand{\fd}{\textcolor{placeholder}{\texttt{$\langle$fd$\rangle$}}}
+\newcommand{\pid}{\textcolor{placeholder}{\texttt{$\langle$pid$\rangle$}}}
 
 \newcommand{\commandpath}[1]{commands/#1}
 \newcommand{\imagepath}[1]{images/#1}
@@ -97,7 +132,7 @@
 	otherkeywords={#3},
 	morekeywords=[1]{#3},
 	morekeywords=[2]{#4},
-	basicstyle={\ttfamily\footnotesize},
+	basicstyle={\linespread{0.8}\footnotesize\ttfamily},
 	backgroundcolor={\color{background}},
 	commentstyle={\color{comment}},
 	stringstyle={\color{string}},
@@ -129,16 +164,12 @@
 
 \newcommand{\getcmdline}[7]{
 \refstepcounter{cmdctr}
-\begin{figure}[H]
-\begingroup
-\caption*{Command \thecmdctr: #5}
-\label{cmd:#6}
-\vspace{-0.7em}
+\addcommandtolist{\thecmdctr}{#5}
+\begin{minipage}{\linewidth}
 \lstsettings{bash}{#2}{#3}{#4}
-\lstinputlisting{#1}
-\endgroup
-#7
-\end{figure}}
+\lstinputlisting[title={Command \thecmdctr: #5}, label={cmd:#6}]{#1}
+\end{minipage}
+#7}
 
 
 \newcounter{codectr}[section]
@@ -147,16 +178,12 @@
 
 \newcommand{\getcode}[8]{
 \refstepcounter{codectr}
-\begin{figure}[H]
-\begingroup
-\caption*{Code \thecodectr: #6}
-\label{code:#7}
-\vspace{-0.7em}
+\addcodetolist{\thecodectr}{#6}
+\begin{minipage}{\linewidth}
 \lstsettings{#2}{#3}{#4}{#5}
-\lstinputlisting{#1}
-\endgroup
-#8
-\end{figure}}
+\lstinputlisting[title={Code \thecodectr: #6}, label={code:#7}]{#1}
+\end{minipage}
+#8}
 
 % ------------------------------------------------
 
@@ -327,8 +354,15 @@ Supervisor: & \mfskolitel \\
 
 \newpage 
 
-\listoffigures
 \listoftables
+
+\newpage 
+
+\listofcommands
+
+\newpage 
+
+\listofcodes
 
 % ---  Koniec Zoznamov
 

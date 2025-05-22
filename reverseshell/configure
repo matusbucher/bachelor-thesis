@@ -18,9 +18,9 @@ TMP_PATH=${5:-$DEFAULT_TMP}
 awk -v host="$HOST_ADDR" -v port="$PORT_NUM" -v shell="$SHELL_PATH" -v port2="$PORT2_NUM" -v tmp="$TMP_PATH" '
     /^HOST[[:space:]]*:=/  { print "HOST\t:= " host; next }
     /^PORT[[:space:]]*:=/  { print "PORT\t:= " port; next }
-    /^SHELL[[:space:]]*:=/ { print "SHELL\t:= " shell; next }
+    /^RSHELL[[:space:]]*:=/ { print "RSHELL\t:= " shell; next }
     /^PORT2[[:space:]]*:=/  { print "PORT2\t:= " port2; next }
-    /^TMP[[:space:]]*:=/  { print "TMP\t:= " tmp; next }
+    /^TMP[[:space:]]*:=/  { print "TMP\t\t:= " tmp; next }
     { print }
 ' Makefile > Makefile.tmp && mv Makefile.tmp Makefile
 
