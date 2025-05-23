@@ -3,12 +3,16 @@
 ROOT_DIR="/home/matus/testroot"
 NOT_FOUND=0
 
-declare -a DEPS=(
-	"/usr/share/lua/5.3/socket.lua"
-	"/usr/lib/x86_64-linux-gnu/lua/5.3/socket/core.so"
+TCL_DIR="/usr/share/tcltk/tcl8.6/"
+echo "export TCL_LIBRARY=$TCL_DIR" >> "$ROOT_DIR/root/.bashrc"
+
+declare -a MODULES=(
+	"init.tcl"
 )
 
-for DEP in ${DEPS[@]}; do
+for MOD in ${MODULES[@]}; do
+	DEP="$TCL_DIR$MOD"
+
 	if [ ! -e "$DEP" ]; then
 		echo "Dependency $DEP not found. Skipping..."
 		NOT_FOUND=$((NOT_FOUND + 1))
@@ -28,7 +32,7 @@ for DEP in ${DEPS[@]}; do
 		cp "$DEP" "$DEP_DEST"
 	fi
 
-	echo "Copied dependency $DEP."
+	echo "Copied dependency $MOD."
 done
 
 

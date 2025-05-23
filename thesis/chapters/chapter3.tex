@@ -266,7 +266,7 @@ Pip is the default package manager for Python, used to install and manage third-
 So, we can use the Python script for reverse shell (see \cref{code:python-script}) as the \texttt{setup.py} file, and then give the directory in which this file is as the argument to the \texttt{pip install} command. For clarity and a general case, we use a temporary directory \tmp\ to place the custom \texttt{setup.py} file.
 
 \getcmdline{\commandpath{pip.txt}}{*}{mkdir,echo,pip,rm}{}{Pip reverse shell}{pip}{
-\dpd{dependencies from \cref{code:python-script}, additional Python modules and loadable objects (see \cref{tab:pip-mod} and \cref{tab:pip-lib} in the appendix A)}
+\dpd{dependencies from \cref{code:python-script}, additional Python modules and loadable objects (see \cref{tab:pip-dpd-mod} and \cref{tab:pip-dpd-so} in the appendix A)}
 }
 
 We need to use the \texttt{-{}-break-system-packages} option in case of the externally managed environment \cite{pip-install-doc}. That is when the Python installation is marked as ``externally managed'' by the OS package manager (like \texttt{apt}) and the \texttt{pip} tool is about to install packages ``system-wide'', which could overwrite system-managed Python packages (and thus break some functionality that depends on those packages). We are not overwriting any system packages in our case, but it is an additional security permission that the \texttt{pip} tool requires.
@@ -399,9 +399,13 @@ Ruby also comes with an interactive shell called IRB (Interactive Ruby), which a
 
 \subsection{JavaScript runtime environments}
 
+JavaScript is one of the most popular scripting languages. It is traditionally associated with web browsers as a client-side scripting language, but it can also be executed outside of browsers using various runtime environments. At the core of these environments are JavaScript engines --- programs that parse and execute JavaScript code \cite{js-engines-wiki}. Our analysis focuses on two JavaScript runtime environments: Node.js and Nashorn. For each one of the two, we mention what command line tool is used for the execution of code in these environments (either from a script file or as a one-liner).
+
 \subsubsection{Node.js (\texttt{node})}
 
 \version{18.19.1}
+
+Node.js is a popular standalone server-side runtime built on the V8 engine and can be invoked with the \texttt{node} command \cite{nodejs-doc}. It has built-in modules, such as \texttt{net} and \texttt{child\_process} for networking and process management. The implementation is, therefore, relatively simple (at least more simple than with the Nashorn).
 
 \getcode{\commandpath{node-script.txt}}{java}{*}{}{}{Node.js reverse shell script (JavaScript)}{node-script}{
 \dpd{JavaScript modules (see \cref{tab:node-dpd} in the appendix A)}
@@ -409,20 +413,28 @@ Ruby also comes with an interactive shell called IRB (Interactive Ruby), which a
 
 \getcmdline{\commandpath{node-runscript.txt}}{*}{node}{}{Running the Node.js reverse shell script}{node-runscript}{}
 
+The option \texttt{-e} (or \texttt{-{}-eval}) serves for execution of code directly from the command line.
+
 \getcmdline{\commandpath{node-oneline.txt}}{*}{node}{}{Node.js one-line reverse shell}{node-oneline}{}
 
 
-\subsubsection{Nashorn engine (\texttt{jjs} and \texttt{jrunscript})}
+\subsubsection{Nashorn engine (\texttt{jjs})}
 
-\version{1.8.0\_442}
+\version{1.8.0\_452}
+
+Nashorn is a Java-based JavaScript runtime included with Java 8 up to the JDK 14 and is now marked as depreciated \cite{nashorn-dep}. It runs on the Java Virtual Machine (JVM) and provides Java interoperability. Nashorn scripts can be executed using the \texttt{jjs} command line tool \cite{nashorn-doc}.
+
+Nashorn relies on Java classes like \texttt{java.net.Socket} and \texttt{ProcessBuilder}, which makes the code similar to Java code discussed later (\cref{code:java-code}).
 
 \getcode{\commandpath{nashorn-script.txt}}{java}{*}{}{}{Nashorn engine reverse shell script (JavaScript)}{nashorn-script}{
-\dpd{\TODO{}}
+\dpd{environment variable \texttt{JAVA\_HOME} set to Java installation directory\footnote{usually \texttt{/usr/lib/jvm/java-<JDK-version>-openjdk-<architecture>/}}, system's dynamic libraries and Java's special dynamic libraries (see \cref{tab:nashorn-dpd} in the appendix A), JVM configuration file \texttt{jvm.cfg}\footnote{located in \texttt{\$JAVA\_HOME/lib/}}, \texttt{rt.jar} and \texttt{ext/nashorn.jar} Java archive files\footnote{packages that bundle multiple Java class files, located in \texttt{\$JAVA\_HOME/lib/}} and data file \texttt{tzdb.dat}\footnote{time zone database, located in \texttt{\$JAVA\_HOME/lib/}}}
 }
 
-\getcmdline{\commandpath{jjs-oneline.txt}}{*}{echo,jjs}{}{jjs one-line reverse shell}{jjs-oneline}{}
+\getcmdline{\commandpath{jjs-runscript.txt}}{*}{jjs}{}{Running the Nashorn reverse shell script using jjs}{jjs-runscript}{}
 
-\getcmdline{\commandpath{jrunscript-oneline.txt}}{*}{jrunscript}{}{jrunscript one-line reverse shell}{jrunscript-oneline}{}
+The \texttt{jjs} tool does not offer the option to pass the script as a string, but we can achieve the goal by piping the compressed script to \texttt{jjs} interactive mode.
+
+\getcmdline{\commandpath{jjs-oneline.txt}}{*}{echo,jjs}{}{jjs one-line reverse shell}{jjs-oneline}{}
 
 
 \subsection{Julia (\texttt{julia})}
@@ -553,7 +565,7 @@ Next, we show how to run the script file (option \texttt{-f} or \texttt{--file})
 
 \subsection{GNU Debugger (\texttt{gdb})}
 
-\version{15.0.50}
+\version{14.2}
 
 GNU Debugger (GDB) is a powerful debugging tool primarily designed to analyze and control the execution of programs written in C/C++ and other languages. It allows users to inspect memory, set breakpoints, step through code, and interact with running processes \cite{gdb-doc}.
 
@@ -570,7 +582,8 @@ The simplest use case involves invoking a shell command via the \texttt{system()
 This function can be executed within a GDB session using the \texttt{call} command \cite{gdb-man}. Moreover, GDB allows passing commands from the command line through the \texttt{-ex} option. When used with the \texttt{--batch} option, GDB operates in batch mode, running the specified commands and exiting automatically afterwards. This enables the creation of a one-liner reverse shell.
 
 \getcmdline{\commandpath{gdb-oneline.txt}}{*}{gdb}{}{GDB one-line reverse shell}{gdb-oneline}{
-\dpd{\TODO{}}
+\dpd{a process with access to \texttt{system()} function form \texttt{libc} (or other function with similar effect)}
+\notte{We used a \texttt{gdb} compiled without Python support (using the \texttt{--with-python=no} configuration option). For techniques involving \texttt{gdb} with Python support, see \cref{sec:compiled-with-python}.}
 }
 
 A key requirement for this technique is that the target process must include the desired function in its symbol table. However, any process with access to the function -- and running under the same user invoking GDB -- is equally usable. One can use the \inlinecmdline{ps aux} command to identify running processes.
@@ -579,6 +592,7 @@ Importantly, this method is not limited to standard functions. Any callable code
 
 
 \subsection{Tools compiled with python support}
+\label{sec:compiled-with-python}
 
 \TODO{gdb, gimp, vim, vimdiff, rvim, view, rview}
 

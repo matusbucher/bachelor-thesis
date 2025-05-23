@@ -3,23 +3,34 @@
 ROOT_DIR="/home/matus/testroot"
 NOT_FOUND=0
 
-JAVA_LIB_DIR="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib"
-echo "export LD_LIBRARY_PATH=${JAVA_LIB_DIR}/amd64:${JAVA_LIB_DIR}/amd64/jli" >> "$ROOT_DIR/root/.bashrc"
-JAVA_LIB_DIR="${JAVA_LIB_DIR}/"
+JAVA_DIR="/usr/lib/jvm/java-21-openjdk-amd64/"
+
+SEC="${JAVA_DIR}conf/security/java.security"
+if [ ! -e "$SEC" ]; then
+	echo "Dependency $SEC not found. Skipping..."
+	NOT_FOUND=$((NOT_FOUND + 1))
+	continue
+fi
+
+SEC_DEST="$ROOT_DIR$SEC"
+mkdir -p "$(dirname "$SEC_DEST")"
+cp "$SEC" "$SEC_DEST"
+echo "Copied dependency $SEC."
+
+JAVA_LIB_DIR="${JAVA_DIR}lib/"
+echo "export LD_LIBRARY_PATH=$JAVA_LIB_DIR" >> "$ROOT_DIR/root/.bashrc"
 
 declare -a JAVA_FILES=(
-	"amd64/jli/libjli.so"
-	"amd64/libjava.so"
-	"amd64/jvm.cfg"
-	"amd64/server/libjvm.so"
-	"amd64/libverify.so"
-	"amd64/libzip.so"
-	"rt.jar"
-	"tzdb.dat"
-	"ext/nashorn.jar"
-	"amd64/libnio.so"
-	"amd64/libnet.so"
-	"amd64/libextnet.so"
+	"libextnet.so"
+	"libjava.so"
+	"libjimage.so"
+	"libjli.so"
+	"libnet.so"
+	"libnio.so"
+	"server/libjvm.so"
+	"jvm.cfg"
+	"jspawnhelper"
+	"modules"
 )
 
 for LIB in ${JAVA_FILES[@]}; do
@@ -30,9 +41,9 @@ for LIB in ${JAVA_FILES[@]}; do
 		NOT_FOUND=$((NOT_FOUND + 1))
 		continue
 	fi
-
-	DEP_DEST="$ROOT_DIR$DEP"
 	
+	DEP_DEST="$ROOT_DIR$DEP"
+
 	mkdir -p "$(dirname "$DEP_DEST")"
 
 	if [ -d "$DEP" ]; then
@@ -44,19 +55,19 @@ for LIB in ${JAVA_FILES[@]}; do
 		cp "$DEP" "$DEP_DEST"
 	fi
 
-	echo "Copied dependency $LIB."
+	echo "Copied dependency $DEP."
 done
 
 
 LIB_DIR="/usr/lib/x86_64-linux-gnu/"
 
-declare -a LIBS2=(
+declare -a LIBS=(
 	"libstdc++.so.6"
 	"libm.so.6"
 	"libgcc_s.so.1"
 )
 
-for LIB in ${LIBS2[@]}; do
+for LIB in ${LIBS[@]}; do
 	DEP="$LIB_DIR$LIB"
 
 	if [ ! -e "$DEP" ]; then

@@ -30,8 +30,58 @@ List of python modules (\texttt{.py} files or whole directories)\footnote{usuall
 List of python modules (\texttt{.py} files or whole directories)\footnote{usually located in \texttt{/usr/lib/python<version>/}} and loadable objects for some modules\footnote{usually located in \texttt{/usr/lib/python<version>/lib-dynload/}}:
 
 \begin{longtable}{l l}
-\caption{Python modules used in the PIP reverse shell}\label{tab:pip-mod} \\
+\caption{Python modules used in the PIP reverse shell}\label{tab:pip-dpd-mod} \\
+\texttt{\_\_future\_\_} & \texttt{mimetypes} \\
+\texttt{\_compat\_pickle} & \texttt{numbers} \\
+\texttt{\_distutils\_hack} & \texttt{opcode} \\
+\texttt{\_markupbase} & \texttt{optparse} \\
+\texttt{\_sysconfigdata\_\_x86\_64-linux-gnu} & \texttt{pathlib} \\
+\texttt{\_weakrefset} & \texttt{pickle} \\
+\texttt{argparse} & \texttt{pip} \\
+\texttt{ast} & \texttt{pkgutil} \\
+\texttt{asyncio} & \texttt{platform} \\
+\texttt{base64} & \texttt{plistlib} \\
+\texttt{bisect} & \texttt{pprint} \\
+\texttt{calendar} & \texttt{py\_compile} \\
+\texttt{colorsys} & \texttt{queue} \\
+\texttt{compileall} & \texttt{quopri} \\
+\texttt{concurrent} & \texttt{random} \\
+\texttt{configparser} & \texttt{re} \\
+\texttt{contextlib} & \texttt{setuptools} \\
+\texttt{contextvars} & \texttt{shlex} \\
+\texttt{copyreg} & \texttt{shutil} \\
+\texttt{copy} & \texttt{signal} \\
+\texttt{csv} & \texttt{socketserver} \\
+\texttt{dataclasses} & \texttt{ssl} \\
+\texttt{datetime} & \texttt{stringprep} \\
+\texttt{decimal} & \texttt{string} \\
+\texttt{dis} & \texttt{struct} \\
+\texttt{email} & \texttt{subprocess} \\
+\texttt{filecmp} & \texttt{sysconfig} \\
+\texttt{fnmatch} & \texttt{tarfile} \\
+\texttt{fractions} & \texttt{tempfile} \\
+\texttt{getopt} & \texttt{textwrap} \\
+\texttt{getpass} & \texttt{threading} \\
+\texttt{glob} & \texttt{tokenize} \\
+\texttt{hashlib} & \texttt{token} \\
+\texttt{heapq} & \texttt{traceback} \\
+\texttt{hmac} & \texttt{typing} \\
+\texttt{html} & \texttt{urllib} \\
+\texttt{http} & \texttt{uuid} \\
+\texttt{importlib} & \texttt{warnings} \\
+\texttt{inspect} & \texttt{weakref} \\
+\texttt{ipaddress} & \texttt{wheel} \\
+\texttt{json} & \texttt{xmlrpc} \\
+\texttt{linecache} & \texttt{xml} \\
+\texttt{locale} & \texttt{zipfile} \\
+\texttt{logging} & \\
+\end{longtable}
 
+\begin{longtable}{l l}
+\caption{Loadable objects used in the PIP reverse shell}\label{tab:pip-dpd-so} \\
+\texttt{\_contextvars.cpython-312-x86\_64-linux-gnu.so} \\
+\texttt{\_decimal.cpython-312-x86\_64-linux-gnu.so} \\
+\texttt{mmap.cpython-312-x86\_64-linux-gnu.so} \\
 \end{longtable}
 
 
@@ -188,6 +238,22 @@ Lists of JavaScript modules (\texttt{.js} files)\footnote{usually located in \te
 \end{longtable}
 
 
+\section*{Nashorn}
+
+\references{code:nashorn-script}
+
+Additional dynamic libraries \footnote{should be located in \texttt{\$JAVA\_HOME/lib/)} or \texttt{/usr/lib/<architecture>/}}:
+
+\begin{longtable}{l l l}
+\caption{Loadable objects used in the Nashorn reverse shell}\label{tab:nashorn-dpd} \\
+\texttt{libextnet.so} & \texttt{libm.so.6} \\
+\texttt{libgcc\_s.so.1} & \texttt{libnet.so} \\
+\texttt{libjava.so} & \texttt{libnio.so} \\
+\texttt{libjimage.so} & \texttt{libstdc++.so.6} \\
+\texttt{libjli.so} & \texttt{server/libjvm.so} \\
+\end{longtable}
+
+
 \subsection*{Julia}
 
 \references{code:julia-script}
@@ -269,12 +335,15 @@ Additional dynamic libraries (apart from those listed with \texttt{ldd} for \tex
 
 \subsection*{Java}
 
-Additional dynamic libraries \footnote{should be located in \texttt{\$JAVA\_HOME/lib/}}:
+Additional dynamic libraries \footnote{should be located in \texttt{\$JAVA\_HOME/lib/} or \texttt{/usr/lib/<architecture>/}}:
 
 \begin{longtable}{l l l}
 \caption{Loadable objects used in the Java reverse shell}\label{tab:java-dpd} \\
-\texttt{enc/encdb.so} & \texttt{io/wait.so} & \texttt{ripper.so} \\
-\texttt{io/console.so} & \texttt{monitor.so} & \texttt{socket.so} \\
+\texttt{libextnet.so} & \texttt{libm.so.6} \\
+\texttt{libgcc\_s.so.1} & \texttt{libnet.so} \\
+\texttt{libjava.so} & \texttt{libnio.so} \\
+\texttt{libjimage.so} & \texttt{libstdc++.so.6} \\
+\texttt{libjli.so} & \texttt{server/libjvm.so} \\
 \end{longtable}
 
 

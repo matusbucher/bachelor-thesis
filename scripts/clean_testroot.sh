@@ -16,8 +16,10 @@ rm -r "$ROOT_DIR"
 echo "Creating new testroot..."
 mkdir "$ROOT_DIR"
 
-mkdir "$ROOT_DIR"/tmp
-chmod 1777 "$ROOT_DIR"/tmp
+mkdir "$ROOT_DIR/tmp"
+chmod 1777 "$ROOT_DIR/tmp"
+
+mkdir "$ROOT_DIR/root"
 
 $SCRIPT_DIR/add_shell.sh bash
 $SCRIPT_DIR/copy_command.sh make

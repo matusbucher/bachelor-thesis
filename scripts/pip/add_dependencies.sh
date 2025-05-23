@@ -3,10 +3,9 @@
 ROOT_DIR="/home/matus/testroot"
 NOT_FOUND=0
 
-MOD_DIR="/usr/lib/python3.12/"
+MOD_DIR1="/usr/lib/python3.12/"
 
-declare -a MODULES=(
-	"lib-dynload"	# choose only neccessary files
+declare -a MODULES1=(
 	"typing.py"
 	"logging"
 	"traceback.py"
@@ -80,10 +79,20 @@ declare -a MODULES=(
 	"argparse.py"
 	"plistlib.py"
 	"ssl.py"
+	"warnings.py"
+	"threading.py"
+	"subprocess.py"
+	"signal.py"
+	"re"
+	"copyreg.py"
+	"contextlib.py"
+	"_weakrefset.py"
+	"locale.py"
+	"getopt.py"
 )
 
-for MOD in ${MODULES[@]}; do
-	DEP="$MOD_DIR$MOD"
+for MOD in ${MODULES1[@]}; do
+	DEP="$MOD_DIR1$MOD"
 
 	if [ ! -e "$DEP" ]; then
 		echo "Dependency $DEP not found. Skipping..."
@@ -104,15 +113,56 @@ for MOD in ${MODULES[@]}; do
 		cp "$DEP" "$DEP_DEST"
 	fi
 
-	echo "Copied dependency $MOD."
+	echo "Copied dependency $DEP."
 done
 
 
-declare -a DEPS=(
-	"/etc/ssl/certs/ca-certificates.crt"
+LIB_DIR="/usr/lib/python3.12/lib-dynload/"
+
+declare -a LIBS=(
+	"mmap.cpython-312-x86_64-linux-gnu.so"
+	"_decimal.cpython-312-x86_64-linux-gnu.so"
+	"_contextvars.cpython-312-x86_64-linux-gnu.so"
 )
 
-for DEP in ${DEPS[@]}; do
+for LIB in ${LIBS[@]}; do
+	DEP="$LIB_DIR$LIB"
+
+	if [ ! -e "$DEP" ]; then
+		echo "Dependency $DEP not found. Skipping..."
+		NOT_FOUND=$((NOT_FOUND + 1))
+		continue
+	fi
+
+	DEP_DEST="$ROOT_DIR$DEP"
+
+	mkdir -p "$(dirname "$DEP_DEST")"
+
+	if [ -d "$DEP" ]; then
+		if [ ! -d "$DEP_DEST" ]; then
+			mkdir "$DEP_DEST"
+		fi
+		cp -rL "$DEP/"* "$DEP_DEST/"
+	else
+		cp "$DEP" "$DEP_DEST"
+	fi
+
+	echo "Copied dependency $DEP."
+done
+
+
+MOD_DIR2="/usr/lib/python3/dist-packages/"
+
+declare -a MODULES2=(
+	"_distutils_hack"
+	"pip"
+	"setuptools"
+	"wheel"
+)
+
+for MOD in ${MODULES2[@]}; do
+	DEP="$MOD_DIR2$MOD"
+
 	if [ ! -e "$DEP" ]; then
 		echo "Dependency $DEP not found. Skipping..."
 		NOT_FOUND=$((NOT_FOUND + 1))
