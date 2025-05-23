@@ -1,6 +1,0 @@
-#!/bin/bash
-
-PORT=4444
-
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -noenc
-openssl s_server -quiet -key key.pem -cert cert.pem -port $PORT

@@ -24,8 +24,10 @@
 
 
 % package for better display of references
-\usepackage[backend=biber]{biblatex}
+\usepackage[backend=biber,url=true]{biblatex}
 \addbibresource{references.bib}
+
+\DeclareFieldFormat{url}{\newline\url{#1}}
 
 % package for advanced color usage
 \usepackage{xcolor}
@@ -78,27 +80,33 @@
 
 \makeatletter
 
-% Define new lists with safer file extensions
 \newcommand{\listofcommands}{
   {\normalfont\Huge\bfseries List of Commands\par}
-  \vspace{2em}
+  \begingroup
+  \setlength{\parskip}{0pt}
+  \vspace{1.5em}
   \@starttoc{cmdlist}
+  \endgroup
 }
-\newcommand{\l@cmdlist}{\@dottedtocline{1}{1.5em}{3.5em}}
 
 \newcommand{\listofcodes}{
   {\normalfont\Huge\bfseries List of Codes\par}
-  \vspace{2em}
+  \begingroup
+  \setlength{\parskip}{0pt}
+  \vspace{1.5em}
   \@starttoc{codelist}
+  \endgroup
 }
-\newcommand{\l@codelist}{\@dottedtocline{1}{1.5em}{3.5em}}
+
+\newcommand{\l@cmdlist}{\@dottedtocline{1}{2.5em}{4em}}
+\newcommand{\l@codelist}{\@dottedtocline{1}{2.5em}{4em}}
 
 % Add entries to custom lists
 \newcommand{\addcommandtolist}[2]{%
-  \addcontentsline{cmdlist}{section}{\protect\numberline{#1}#2}
+  \addcontentsline{cmdlist}{section}{\protect\numberline{#1}\hspace{0.8em}#2}
 }
 \newcommand{\addcodetolist}[2]{%
-  \addcontentsline{codelist}{section}{\protect\numberline{#1}#2}
+  \addcontentsline{codelist}{section}{\protect\numberline{#1}\hspace{0.2em}#2}
 }
 
 \makeatother

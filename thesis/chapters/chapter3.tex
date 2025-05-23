@@ -38,6 +38,8 @@ Telnet is another popular client-server network protocol that establishes bidire
 
 In the first example (\cref{cmd:telnet1}), we use two Telnet instances. One is for receiving commands that the chosen shell will execute, and then their output will be sent through the second telnet connected to a different port (it can also be connected to a different host). The attacker needs to set up two distinct listeners accordingly.
 
+\newpage
+
 \getcmdline{\commandpath{telnet1.txt}}{*}{telnet}{}{Telnet reverse shell (version 1, with anonymous pipes)}{telnet1}{
 \notte{The socket with port number \port\ serves as standard input for the shell while the socket with port number \portt\ serves as standard output and standard error output.}
 }
@@ -235,7 +237,7 @@ In contrast to command-line interpreters that can independently establish networ
 \section{Programming language interpreters}
 \label{sec:program-interpreters}
 
-In this section, we cover common interpreted programming or scripting languages. Every proper programming language should be capable of opening a TCP socket for network communication (perhaps with some standard module), running a command from the operating system, redirecting standard file descriptors to the socket — and, therefore, creating a reverse shell. The interesting part is which dynamic libraries and modules are requisite for each method.
+In this section, we cover common interpreted programming or scripting languages. Every proper programming language should be capable of opening a TCP socket for network communication (perhaps with some standard module), running a command from the operating system, redirecting standard file descriptors to the socket -- and, therefore, creating a reverse shell. The interesting part is which dynamic libraries and modules are requisite for each method.
 
 Almost all examples in this section are written as script files, but, as with the PowerShell example (\cref{code:pwsh-script}), they can easily be turned into one-liners with specific options or pipelines. We will specify how to do this for each method. The example scripts also include comments with decent explanations of what the script does.
 
@@ -325,7 +327,7 @@ The option \texttt{-r} (or \texttt{-{}-run}) of the PHP command line tool allows
 
 \getcmdline{\commandpath{php-oneline.txt}}{*}{php}{}{PHP one-line reverse shell}{php-oneline}{}
 
-Additionally, the \texttt{proc\_open()} call can be substituted with other functions that accept only the command argument without the descriptor specification. This can be fixed using standard shell redirections as part of the command passed to the function. The \texttt{fsockopen()} call assigns the first available file descriptor number to the opened socket, which we can use for the shell redirections. However, this number differs when executing the script from a file or with the \texttt{-r} option from the command line. In the first case (\cref{cmd:php-runscript}), the assigned file descriptor should be number 4, while in the second case (\cref{cmd:php-oneline}) it should be number 3\footnote{We have not investigated further why this is so; we have identified the numbers just from testing}. We will refer to this number as \fd.
+Additionally, the \texttt{proc\_open()} call can be substituted with other functions that accept only the command argument without the descriptor specification. This can be fixed using standard shell redirections as part of the command passed to the function. The \texttt{fsockopen()} call assigns the first available file descriptor number to the opened socket, which we can use for the shell redirections. However, this number differs when executing the script from a file or with the \texttt{-r} option from the command line. In the first case (\cref{cmd:php-runscript}), the assigned file descriptor should be number 4, while in the second case (\cref{cmd:php-oneline}) it should be number 3\footnote{we have not investigated further why this is so, we have identified the numbers just from testing}. We will refer to this number as \fd.
 
 Also, be aware that the \texttt{\$sock} variable (to which the return value of \texttt{fsockopen()} call is assigned) is still needed even with the substituted functions, which do not directly use this variable, because otherwise the socket would be closed immediately by PHP garbage collection. Finally, these are the functions that can be used instead of \texttt{proc\_open()} one:
 
@@ -333,7 +335,7 @@ Also, be aware that the \texttt{\$sock} variable (to which the return value of \
 
 \item \inlinecmdline{exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
 \item \inlinecmdline{system("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
-\item \inlinecmdline{shell\_exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")} or \inlinecmdline{`\shell\ <\&\fd\ >\&\fd\ 2>\&\fd `} (with the backtick symbols) -- these are semantically equivalent
+\item \inlinecmdline{shell\_exec("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")} or \\ \inlinecmdline{`\shell\ <\&\fd\ >\&\fd\ 2>\&\fd `} (with the backtick symbols) -- these are semantically equivalent
 \item \inlinecmdline{passthru("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ")}
 \item \inlinecmdline{popen("\shell\ <\&\fd\ >\&\fd\ 2>\&\fd ", "r")}
 
@@ -637,7 +639,7 @@ Newer versions of GIMP also support other scripting languages like Javascript, L
 
 In this thesis, we focused on reverse shell techniques that depend on tools available on the target system. These methods assume that the required tool(s) are either already present and functional on the compromised machine or can be supplementary installed by the attacker. They are practical and widely adopted, as they avoid introducing new malware to the system, thereby leaving fewer traces.
 
-However, if we want to achieve a reverse shell without relying on any preinstalled tools—or even dynamic libraries—we need a statically linked binary in the form of malware. This malware could be any statically compiled code from \cref{sec:program-compilers}. In this section, we demonstrate an alternative approach to crafting such malware without using a compiler on the target system. The only requirement is a statically built tool or binary capable of executing a reverse shell\footnote{To be clear, it is required for the build of malware, not as an installed binary on the target's system.}. As an example, we use Netcat from the Nmap project, which supports static builds using the flags \texttt{LDFLAGS="-static"} and \texttt{CFLAGS="-static"}. We omit the full tutorial on how to build Nmap's Netcat and assume that the binary was built correctly -- we will refer to it as \texttt{./ncat-static}.
+However, if we want to achieve a reverse shell without relying on any preinstalled tools -- or even dynamic libraries -- we need a statically linked binary in the form of malware. This malware could be any statically compiled code from \cref{sec:program-compilers}. In this section, we demonstrate an alternative approach to crafting such malware without using a compiler on the target system. The only requirement is a statically built tool or binary capable of executing a reverse shell\footnote{To be clear, it is required for the build of malware, not as an installed binary on the target's system.}. As an example, we use Netcat from the Nmap project, which supports static builds using the flags \texttt{LDFLAGS="-static"} and \texttt{CFLAGS="-static"}. We omit the full tutorial on how to build Nmap's Netcat and assume that the binary was built correctly -- we will refer to it as \texttt{./ncat-static}.
 
 The key idea is to encode this binary using Base64, Hex, or any other binary-to-text encoding. The encoded binary can then be embedded into a simple script that, at runtime on the victim's machine, decodes the binary, writes it to a file with execute permissions, and runs it to establish the reverse connection. Since the embedded binary is statically compiled, it does not require any shared libraries or external dependencies.
 The following example demonstrates exactly this approach.
