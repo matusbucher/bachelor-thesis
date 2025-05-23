@@ -16,11 +16,19 @@ We designed the Makefile to be as simple to use as possible. First, it needs to 
 \end{itemize}
 \setlength{\leftmargini}{2.5em}
 
-To configure the Makefile, issue:
+To set preferred values for each variable, issue:
 
 \begin{cmdline}{*}{}{}
-./configure *\host* *\port* *\shell* *\portt* *\tmp*
+./configure [HOST=...] [PORT=...] [SHELL=...] [PORT2=...] [TMP=...]
 \end{cmdline}
+
+Fo example:
+
+\begin{cmdline}{*}{}{}
+./configure HOST=127.0.0.1 PORT=4444 TMP=/tmp/f
+\end{cmdline}
+
+Only passed arguments will update (those not passed to \texttt{configure} script will not change). So in the previous example, only \host, \port, and \tmp\ would be updated to set values, while \shell\ and \portt\ would remain as they were (default).
 
 Makefile contains targets for each reverse shell method or listener setup. To list all these targets as well as the currently used configuration values, issue:
 

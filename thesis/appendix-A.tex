@@ -167,47 +167,86 @@ Lists of Perl modules (\texttt{.pm} and \texttt{.pl} files) and loadable objects
 
 Lists of Ruby modules (\texttt{.rb} files)\footnote{usually located in \texttt{/usr/lib/ruby/<version>/}}, loadable objects for some modules, and special gemspec files \footnote{usually located in \texttt{/usr/lib/ruby/gems/<version>/}}:
 
-\begin{longtable}{l l}
+\begin{longtable}{l}
 \caption{Ruby modules in the IRB reverse shell}\label{tab:irb-dpd-mod} \\
-\texttt{delegate} & \texttt{reline/unicode/east\_asian\_width} \\
-\texttt{fileutils} & \texttt{reline/unicode} \\
-\texttt{forwardable/impl} & \texttt{reline/version} \\
-\texttt{forwardable} & \texttt{reline} \\
-\texttt{irb/color\_printer} & \texttt{ripper/core} \\
-\texttt{irb/color} & \texttt{ripper/filter} \\
-\texttt{irb/completion} & \texttt{ripper/lexer} \\
-\texttt{irb/context} & \texttt{ripper/sexp} \\
-\texttt{irb/easter-egg} & \texttt{ripper} \\
-\texttt{irb/ext/save-history} & \texttt{rubygems/basic\_specification} \\
-\texttt{irb/extend-command} & \texttt{rubygems/compatibility} \\
-\texttt{irb/init} & \texttt{rubygems/core\_ext/kernel\_gem} \\
-\texttt{irb/input-method} & \texttt{rubygems/core\_ext/kernel\_require} \\
-\texttt{irb/inspector} & \texttt{rubygems/defaults} \\
-\texttt{irb/lc/error} & \texttt{rubygems/dependency} \\
-\texttt{irb/locale} & \texttt{rubygems/deprecate} \\
-\texttt{irb/magic-file} & \texttt{rubygems/errors} \\
-\texttt{irb/output-method} & \texttt{rubygems/exceptions} \\
-\texttt{irb/ruby-lex} & \texttt{rubygems/path\_support} \\
-\texttt{irb/src\_encoding} & \texttt{rubygems/platform} \\
-\texttt{irb/version} & \texttt{rubygems/request\_set} \\
-\texttt{irb/workspace} & \texttt{rubygems/requirement} \\
-\texttt{irb} & \texttt{rubygems/resolver} \\
-\texttt{pp} & \texttt{rubygems/source} \\
-\texttt{prettyprint} & \texttt{rubygems/specification} \\
-\texttt{rbconfig} & \texttt{rubygems/stub\_specification} \\
-\texttt{reline/ansi} & \texttt{rubygems/text} \\
-\texttt{reline/config} & \texttt{rubygems/tsort/lib/tsort} \\
-\texttt{reline/general\_io} & \texttt{rubygems/tsort} \\
-\texttt{reline/history} & \texttt{rubygems/unknown\_command\_spell\_checker} \\
-\texttt{reline/key\_actor/base} & \texttt{rubygems/util/list} \\
-\texttt{reline/key\_actor/emacs} & \texttt{rubygems/util} \\
-\texttt{reline/key\_actor/vi\_command} & \texttt{rubygems/version} \\
-\texttt{reline/key\_actor/vi\_insert} & \texttt{rubygems} \\
-\texttt{reline/key\_actor} & \texttt{set} \\
-\texttt{reline/key\_stroke} & \texttt{tempfile} \\
-\texttt{reline/kill\_ring} & \texttt{timeout} \\
-\texttt{reline/line\_editor} & \texttt{tmpdir} \\
-\texttt{reline/terminfo} &  \\
+\texttt{delegate} \\
+\texttt{fileutils} \\
+\texttt{forwardable/impl} \\
+\texttt{forwardable} \\
+\texttt{irb/color\_printer} \\
+\texttt{irb/color} \\
+\texttt{irb/completion} \\
+\texttt{irb/context} \\
+\texttt{irb/easter-egg} \\
+\texttt{irb/ext/save-history} \\
+\texttt{irb/extend-command} \\
+\texttt{irb/init} \\
+\texttt{irb/input-method} \\
+\texttt{irb/inspector} \\
+\texttt{irb/lc/error} \\
+\texttt{irb/locale} \\
+\texttt{irb/magic-file} \\
+\texttt{irb/output-method} \\
+\texttt{irb/ruby-lex} \\
+\texttt{irb/src\_encoding} \\
+\texttt{irb/version} \\
+\texttt{irb/workspace} \\
+\texttt{irb} \\
+\texttt{pp} \\
+\texttt{prettyprint} \\
+\texttt{reline/ansi} \\
+\texttt{reline/config} \\
+\texttt{reline/general\_io} \\
+\texttt{reline/history} \\
+\texttt{reline/key\_actor/base} \\
+\texttt{reline/key\_actor/emacs} \\
+\texttt{reline/key\_actor/vi\_command} \\
+\texttt{reline/key\_actor/vi\_insert} \\
+\texttt{reline/key\_actor} \\
+\texttt{reline/key\_stroke} \\
+\texttt{reline/kill\_ring} \\
+\texttt{reline/line\_editor} \\
+\texttt{reline/terminfo} \\
+\texttt{reline/unicode/east\_asian\_width} \\
+\texttt{reline/unicode} \\
+\texttt{reline/version} \\
+\texttt{reline} \\
+\texttt{ripper/core} \\
+\texttt{ripper/filter} \\
+\texttt{ripper/lexer} \\
+\texttt{ripper/sexp} \\
+\texttt{ripper} \\
+\texttt{rubygems/basic\_specification} \\
+\texttt{rubygems/compatibility} \\
+\texttt{rubygems/core\_ext/kernel\_gem} \\
+\texttt{rubygems/core\_ext/kernel\_require} \\
+\texttt{rubygems/defaults} \\
+\texttt{rubygems/dependency} \\
+\texttt{rubygems/deprecate} \\
+\texttt{rubygems/errors} \\
+\texttt{rubygems/exceptions} \\
+\texttt{rubygems/path\_support} \\
+\texttt{rubygems/platform} \\
+\texttt{rubygems/request\_set} \\
+\texttt{rubygems/request\_set} \\
+\texttt{rubygems/requirement} \\
+\texttt{rubygems/resolver} \\
+\texttt{rubygems/resolver} \\
+\texttt{rubygems/source} \\
+\texttt{rubygems/specification} \\
+\texttt{rubygems/stub\_specification} \\
+\texttt{rubygems/text} \\
+\texttt{rubygems/tsort/lib/tsort} \\
+\texttt{rubygems/tsort} \\
+\texttt{rubygems/unknown\_command\_spell\_checker} \\
+\texttt{rubygems/util/list} \\
+\texttt{rubygems/util} \\
+\texttt{rubygems/version} \\
+\texttt{rubygems} \\
+\texttt{set} \\
+\texttt{tempfile} \\
+\texttt{timeout} \\
+\texttt{tmpdir} \\
 \end{longtable}
 
 \begin{longtable}{l l l}
@@ -237,6 +276,7 @@ Lists of JavaScript modules (\texttt{.js} files)\footnote{usually located in \te
 \texttt{/cjs-module-lexer/dist/lexer.js} & \\
 \end{longtable}
 
+\newpage
 
 \section*{Nashorn}
 
@@ -274,6 +314,7 @@ Additional dynamic libraries (apart from those listed with \texttt{ldd})\footnot
 \texttt{libm.so.6} & \texttt{sys.so} \\
 \end{longtable}
 
+\newpage
 
 \subsection*{C/C++}
 

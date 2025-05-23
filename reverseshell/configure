@@ -1,33 +1,50 @@
 #!/bin/bash
 
-# Default values
-DEFAULT_HOST="127.0.0.1"
-DEFAULT_PORT="4444"
-DEFAULT_SHELL="/bin/bash"
-DEFAULT_PORT2="4445"
-DEFAULT_TMP="/tmp/f"
+should_update=false
 
-# Use user-provided values or fall back to defaults
-HOST_ADDR=${1:-$DEFAULT_HOST}
-PORT_NUM=${2:-$DEFAULT_PORT}
-SHELL_PATH=${3:-$DEFAULT_SHELL}
-PORT2_NUM=${4:-$DEFAULT_PORT2}
-TMP_PATH=${5:-$DEFAULT_TMP}
+for arg in "$@"; do
+    case $arg in
+        HOST=*)   HOST_ADDR="${arg#*=}"; should_update=true ;;
+        PORT=*)   PORT_NUM="${arg#*=}"; should_update=true ;;
+        SHELL=*)  SHELL_PATH="${arg#*=}"; should_update=true ;;
+        PORT2=*)  PORT2_NUM="${arg#*=}"; should_update=true ;;
+        TMP=*)    TMP_PATH="${arg#*=}"; should_update=true ;;
+        *) echo "Unknown parameter: $arg" >&2; exit 1 ;;
+    esac
+done
 
-# Update Makefile safely, preserving tabs
+if [ "$should_update" = false ]; then
+    echo "No parameters provided. Nothing to update."
+    echo "Usage: ./configure HOST=... PORT=... SHELL=... PORT2=... TMP=..."
+    exit 0
+fi
+
+# Helper to get current value from Makefile
+get_value() {
+    awk -F':=' -v key="$1" '$1 ~ "^[[:space:]]*"key"[[:space:]]*$" {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' Makefile
+}
+
+# Fall back to current Makefile values if not passed
+HOST_ADDR=${HOST_ADDR:-$(get_value HOST)}
+PORT_NUM=${PORT_NUM:-$(get_value PORT)}
+SHELL_PATH=${SHELL_PATH:-$(get_value RSHELL)}
+PORT2_NUM=${PORT2_NUM:-$(get_value PORT2)}
+TMP_PATH=${TMP_PATH:-$(get_value TMP)}
+
+# Update the Makefile
 awk -v host="$HOST_ADDR" -v port="$PORT_NUM" -v shell="$SHELL_PATH" -v port2="$PORT2_NUM" -v tmp="$TMP_PATH" '
-    /^HOST[[:space:]]*:=/  { print "HOST\t:= " host; next }
-    /^PORT[[:space:]]*:=/  { print "PORT\t:= " port; next }
-    /^RSHELL[[:space:]]*:=/ { print "RSHELL\t:= " shell; next }
-    /^PORT2[[:space:]]*:=/  { print "PORT2\t:= " port2; next }
-    /^TMP[[:space:]]*:=/  { print "TMP\t\t:= " tmp; next }
+    /^[[:space:]]*HOST[[:space:]]*:=/    { print "HOST\t:= " host; next }
+    /^[[:space:]]*PORT[[:space:]]*:=/    { print "PORT\t:= " port; next }
+    /^[[:space:]]*RSHELL[[:space:]]*:=/  { print "RSHELL\t:= " shell; next }
+    /^[[:space:]]*PORT2[[:space:]]*:=/   { print "PORT2\t:= " port2; next }
+    /^[[:space:]]*TMP[[:space:]]*:=/     { print "TMP\t\t:= " tmp; next }
     { print }
 ' Makefile > Makefile.tmp && mv Makefile.tmp Makefile
 
-# Confirmation message
+
 echo "Makefile updated with:"
-echo "  HOST  = $HOST_ADDR"
-echo "  PORT  = $PORT_NUM"
-echo "  SHELL = $SHELL_PATH"
-echo "  PORT2 = $PORT2_NUM"
-echo "  TMP   = $TMP_PATH"
+echo "  HOST   = $HOST_ADDR"
+echo "  PORT   = $PORT_NUM"
+echo "  SHELL  = $SHELL_PATH"
+echo "  PORT2  = $PORT2_NUM"
+echo "  TMP    = $TMP_PATH"

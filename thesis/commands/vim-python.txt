@@ -1,0 +1,1 @@
+vim -c ':python3 *\script*; vim.command(":q!")'

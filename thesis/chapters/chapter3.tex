@@ -250,6 +250,8 @@ Python is one of the most popular programming languages, known for its simple, r
 \dpd{Python modules (see \cref{tab:python-dpd} in the appendix A)}
 }
 
+The \texttt{os.execvp()} call can be replaced with any other function from the ``exec family''\footnote{\texttt{execv}, \texttt{execvp}, \texttt{execve}, \texttt{execvpe}}, or with other functions that spawn subprocesses, such as \texttt{os.system()}, functions from the \texttt{subprocess} module (\texttt{subprocess.run()}, \texttt{subprocess.call()}, etc.), or \texttt{pty.spawn()} from the \texttt{pty} module, which emulates a more stable interactive terminal. Naturally, using functions from additional modules introduces dependencies on external Python modules or other libraries.
+
 \getcmdline{\commandpath{python-runscript.txt}}{*}{python}{}{Running the Python reverse shell script}{python-runscript}{}
 
 Now, the script can be turned into a one-liner using Python's \texttt{-c} option and separating lines with semicolons \cite{python-man}. The for loop, however, must be compressed to a list comprehension as \inlinecmdline{[os.dup2(sock.fileno(),fd) for fd in (0,1,2)]} or expanded into three separate lines (one for each file descriptor).
@@ -564,6 +566,7 @@ Next, we show how to run the script file (option \texttt{-f} or \texttt{--file})
 
 
 \subsection{GNU Debugger (\texttt{gdb})}
+\label{sec:gdb}
 
 \version{14.2}
 
@@ -594,7 +597,40 @@ Importantly, this method is not limited to standard functions. Any callable code
 \subsection{Tools compiled with python support}
 \label{sec:compiled-with-python}
 
-\TODO{gdb, gimp, vim, vimdiff, rvim, view, rview}
+Some system tools offer built-in support for executing Python code, provided they are compiled with the appropriate configuration. When such support is enabled, these tools can execute an arbitrary Python reverse shell code, including one with a reverse shell. In this section, we display three examples of such tools. We have tested these tools with the compressed code from \cref{code:python-script} (we will reference it as \script). We do not list dependencies for these examples because we used custom build for all tools, and thus, dependencies would be too specific. However, one could expect basic dependencies of the tool together with Python dependencies listed with \cref{code:python-script}.
+
+
+\subsubsection{Vi IMproved (\texttt{vim})}
+
+\version{9.1, with Python 3.12 support}
+
+Vim is a text editor that is included by default in nearly all Linux distributions. It offers a wide variety of commands and can also have built-in scripting language interpreters if compiled that way -- not only for Python but also Ruby, Perl, Tcl, etc. This support is usually not enabled with default package installations and minimal builds and needs to be built manually -- \texttt{+python} (or \texttt{+python3} for Python3) build options \cite{vim-python-docs}. When compiled with this support, Python code can be executed directly within the editor using the \texttt{:pyx} command\footnote{or alternatively \texttt{:py2}/\texttt{:py3}/\texttt{:py} command, but \texttt{:pyx} choose Python version based on \texttt{pyxversion} setting \cite{vim-python-docs}}.
+
+\getcmdline{\commandpath{vim-python.txt}}{*}{vim}{}{Vim reverse shell with Python support}{vim-python}{}
+
+The \texttt{vim.command(":q!")} serves for quitting Vim after the end of the reverse shell. Also, equivalent usage could be used for \texttt{vim} variants -- \texttt{rvim} (remote-capable variant), \texttt{view} (read-only variant), \texttt{vimdiff} (launches Vim in diff mode), etc., which are essentially Vim invoked with different options.
+
+
+\subsubsection{GNU Debugger (\texttt{gdb})}
+
+\version{14.2}
+
+We have already mentioned the GDB tool in \cref{sec:gdb} to use it for attaching it to running a process with access to functions capable of establishing a reverse shell. Furthermore, GDB can have built-in support for Python scripting. This Python integration is enabled in most modern builds of GDB. With it, users can execute Python code directly from the \texttt{gdb} prompt \cite{gdb-python-docs} without the need to attach it to a process with suited properties. We trigger the execution of Python script via \texttt{python} keyword.
+
+\getcmdline{\commandpath{gdb-python.txt}}{*}{gdb}{}{GDB reverse shell with Python support}{gdb-python}{}
+
+
+\subsubsection{Gimp (\texttt{gimp})}
+
+\version{2.10.36, with Python-fu extension}
+
+GIMP (GNU Image Manipulation Program) is a feature-rich graphics editor commonly found on desktop Linux systems. It offers a variety of plugins that can perform image manipulations. In addition, GIMP has several scripting extensions which allow for advanced non-interactive processing and creation of images \cite{gimp-man}. The extension supporting Python 2 is known as Python-fu (or \texttt{gimp-python} plugin) and used as the option \texttt{-{}-batch-interpreter=python-fu-eval}. However, starting with GIMP 3.0, the legacy Python-fu interface has been replaced with standard Python 3 support, which is not backward-compatible \cite{gimp-3}. As a result, most modern builds no longer include support for the \texttt{gimp-python} plugin.
+
+We have tested the reverse shell with the older version of GIMP, but when using GIMP 3.0 with Python 3 support, use \texttt{python3} with the option \texttt{-{}-batch-interpreter}.
+
+\getcmdline{\commandpath{gimp-python.txt}}{*}{gimp}{}{Gimp reverse shell with Python support}{gimp-python}{}
+
+Newer versions of GIMP also support other scripting languages like Javascript, Lua and also C code \cite{gimp-3}.
 
 
 \section{Encoded static binary}
