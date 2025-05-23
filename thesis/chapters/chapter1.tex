@@ -2,7 +2,7 @@
 
 \label{chap:background}
 
-
+Reverse shell attacks remain a persistent threat in cybersecurity. This chapter provides context for how such attacks manifest in real-world scenarios and reviews prior research efforts focused on detecting reverse shells and LOTL-based intrusion methods. Later in this chapter, a detailed explanation of LOTL (Living Off the Land) methodology follows.
 
 \section{Real-world examples of reverse shell attacks}
 
@@ -48,5 +48,3 @@ Methods of establishing a reverse shell using trusted tools and applications, wh
 Machine learning detection is especially promising since all reverse shells possess shared characteristics, such as attacker-controlled remote handlers or standard file descriptors. Dmitrijs Trizna et al. proposed an augmentation framework \cite{LOTL} to enhance and diversify the presence of LOTL malicious activity inside legitimate logs.
 
 Due to a lack of sufficient real-world datasets, they generated one by injecting attack templates known to be employed in the wild, further enriched by malleable patterns of legitimate activities to replicate the behavior of evasive threat actors. Then, they conducted extensive experiments, including ablation studies, to evaluate the performance of various models, demonstrating that their approach significantly improves detection accuracy while maintaining low false favorable rates.
-
-\TODO{add information}

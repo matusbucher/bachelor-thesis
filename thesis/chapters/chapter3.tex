@@ -63,6 +63,8 @@ Socat uses many different ``address types'' (composed of an address type keyword
 
 Both \texttt{tcp} and \texttt{exec} address types have multiple additional options, which can be helpful in some scenarios. They can be appended right after the address types, separated with commas and no spaces. We list only a few options for \texttt{exec} address type (apart from the used \texttt{stderr} option) \cite{socat-man}:
 
+\newpage
+
 \setlength{\leftmargini}{5em}
 \begin{itemize}
 \item[\texttt{nofork}] Does not fork a subprocess for executing the program, instead calls \texttt{execvp()} or \texttt{system()} directly from the actual socat instance.
@@ -143,6 +145,7 @@ Bash treats these pseudo-file paths semantically like regular files, which allow
 
 \getcmdline{\commandpath{bash.txt}}{*}{bash}{}{Bash reverse shell}{bash}{}
 
+\newpage
 
 \subsection{Korn shell (\texttt{ksh}/\texttt{ksh93}/\texttt{rksh}/\texttt{rksh93})}
 
@@ -163,6 +166,8 @@ Additionally, there are two other clones of \texttt{ksh93} which also support th
 Z shell is a feature-rich Unix shell offering advanced scripting capabilities and customization options. It is the default login shell on macOS and Kali Linux. Unlike Bash or Korn shell, Z shell does not support the \texttt{/dev/tcp/} or \texttt{/dev/udp/} pseudo-filesystems. Instead, additional features of the Z shell, including networking, are in modules, separate from the shell's core. Each module may be linked into the shell at build time or dynamically linked while the shell is running. \cite{zshmodules-man}
 
 The module \texttt{zsh/net/tcp}, which provides manipulation of TCP sockets, can be loaded with the \texttt{zmodload} keyword. With the module loaded, we can run the \texttt{ztcp} command, which opens a new TCP connection to the specified host and port. The argument of option \texttt{-d} will be taken as the target file descriptor for the connection \cite{zsh-net-tcp-doc}. We can then redirect the standard input and output of the new shell session to this file descriptor.
+
+\newpage
 
 \getcmdline{\commandpath{zsh.txt}}{*}{zsh}{}{Z shell reverse shell}{zsh}{
 \dpd{\texttt{zsh/net/tcp.so} \footnote{usually located somewhere in \texttt{/usr/lib/}}}
@@ -291,6 +296,9 @@ Perl is a high-level language designed as a general-purpose Unix scripting langu
 To make it into a one-line command, use the \texttt{-e} (or \texttt{-E}) option with the compressed script \cite{perl-man}.
 
 \getcmdline{\commandpath{perl-oneline.txt}}{*}{perl}{}{Perl one-line reverse shell}{perl-oneline}{}
+
+\newpage
+
 
 \subsubsection{Comprehensive Perl Archive Network (\texttt{cpan})}
 \label{sec:cpan}
@@ -566,6 +574,7 @@ Next, we show how to run the script file (option \texttt{-f} or \texttt{--file})
 
 \getcmdline{\commandpath{gawk-oneline.txt}}{*}{gawk}{}{Gawk one-line reverse}{gawk-oneline}{}
 
+\newpage
 
 \subsection{GNU Debugger (\texttt{gdb})}
 \label{sec:gdb}
