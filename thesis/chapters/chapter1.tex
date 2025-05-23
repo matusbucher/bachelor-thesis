@@ -29,7 +29,7 @@ The recent use of reverse shell has been observed in cyber operations related to
 
 Clicking on the PDF file triggered the execution of a BAT script (due to the vulnerability), which, in turn, launched PowerShell commands to open a reverse shell, giving the attackers access to the targeted machine. Aside from that, the script attempted to steal data, such as login credentials from browsers, and then exfiltrate the data through a legit webhook site.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{\imagepath{russia-powershell.png}}
 \caption{Code snippet of BAT script used for a reverse shell}
@@ -45,6 +45,8 @@ Methods of establishing a reverse shell using trusted tools and applications, wh
 
 \subsection*{LOTL detection using machine learning}
 
-Machine learning detection is especially promising since all reverse shells possess shared characteristics, such as attacker-controlled remote handlers or standard file descriptors. Dmitrijs Trizna et al. proposed an augmentation framework \cite{LOTL} to enhance and diversify the presence of LOTL malicious activity inside legitimate logs.
+Machine learning detection is especially promising with the recent rapid advance in this area. However, existing ML-based detection systems face several limitations, including a lack of real-world deployability and data realism, resulting in training on static, small-scale datasets that do not reflect complex environments. They also struggle with achieving sufficiently low false positive rates required in high-throughput operational settings. Furthermore, past work often omits evaluations of adversarial robustness, which is crucial given that attackers actively try to bypass detection.
 
-Due to a lack of sufficient real-world datasets, they generated one by injecting attack templates known to be employed in the wild, further enriched by malleable patterns of legitimate activities to replicate the behavior of evasive threat actors. Then, they conducted extensive experiments, including ablation studies, to evaluate the performance of various models, demonstrating that their approach significantly improves detection accuracy while maintaining low false favorable rates.
+Dmitrijs Trizna et al. proposed an augmentation framework called QuasarNix \cite{LOTL} to address these limitations simultaneously. This system is designed to generate training datasets that closely resemble a blend of normal system activity and a wide range of LOTL-based attacks, with a particular focus on reverse shell techniques. They also define and develop defenses against black-box data-driven attacks to produce adversarially robust variants of ML models, showing that adversarial training can harden models against evasion attempts. The study emphasizes that building effective ML-based detection systems for cyberattacks requires robust datasets that reflect the true complexity and variability of real-world scenarios.
+
+In this thesis, we do not focus on machine learning or other detection approaches. Instead, our goal is to provide a comprehensive and structured catalog of system tools that could potentially be exploited for LOTL-style reverse shells. By documenting these techniques and the conditions under which they operate, we aim to support the research and understanding of the full landscape of LOTL-based reverse shell threats.
