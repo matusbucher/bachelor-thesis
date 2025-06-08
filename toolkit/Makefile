@@ -4,7 +4,7 @@ RSHELL	:= /bin/bash
 PORT2	:= 4445
 TMP		:= /tmp/f
 
-METHODS	:= listener ncat1 ncat2 telnet1 telnet2 socat socket openssl openssl-listener curl curl-listener bash ksh zsh tclsh pwsh python3 pip perl cpan phps lua ruby1 ruby2 irb1 irb2 node jjs julia gcc javac go gawk gdb vim-python gdb-python gimp-python encoded-ncat
+METHODS	:= listener ncat1 ncat2 telnet1 telnet2 socat socket openssl openssl-listener curl curl-listener bash ksh zsh tclsh pwsh python3 pip perl cpan php lua ruby1 ruby2 irb1 irb2 node jjs julia gcc javac go gawk gdb vim-python gdb-python gimp-python encoded-ncat
 
 BOLD		:= \033[1m
 UNDERLINE	:= \033[4m
